@@ -41,9 +41,14 @@ Route::get('/banks', function () {
 // Экспорт одного задания в PDF
 Route::get('/tasks/{task}/view', [TaskExportController::class, 'view'])->name('tasks.view');
 Route::get('/tasks/{task}/view_tasks', [TaskExportController::class, 'viewTasks'])->name('tasks.view_tasks');
+Route::get('/tasks/{task}/view_tasks_word', [TaskExportController::class, 'viewTasksWord'])->name('tasks.view_tasks_word');
 Route::get('/tasks/{task}/download', [TaskExportController::class, 'exportPdf'])->name('tasks.download');
 Route::post('/manual/tasks/download', [TaskExportController::class, 'exportPdfManual'])->name('tasks.download.manual');
 Route::get('/manual/tasks/status/{taskId}/{file}', [TaskExportController::class, 'checkReady'])->name('tasks.download.manual.status');
+
+
+Route::post('/auto/tasks/download', [TaskExportController::class, 'exportPdfAuto'])->name('tasks.download.auto');
+Route::get('/auto/tasks/status/{taskId}/{file}', [TaskExportController::class, 'checkReady'])->name('tasks.download.auto.status');
 
 require __DIR__.'/auth.php';
 require __DIR__.'/profile.php';

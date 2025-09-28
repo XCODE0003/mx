@@ -18,12 +18,17 @@ async function main() {
   let html = fs.readFileSync(path.resolve(inputHtmlPath), 'utf8');
   // Предобработка: удаляем скрипты/стили/MathJax и MS Office мусор, нормализуем теги
   const cleaned = sanitizeHtml(html, {
-    allowedTags: false,
-    allowedAttributes: false,
-    exclusiveFilter: (frame) => false,
-    transformTags: {
-      'span': 'span',
+    allowedTags: [
+      'html','head','meta','body','section','article','header','footer','div','span','p','b','strong','i','em','u','sup','sub','br','hr','ul','ol','li','table','thead','tbody','tfoot','tr','td','th','img','h1','h2','h3','h4','h5','h6'
+    ],
+    allowedAttributes: {
+      '*': ['style','class','align'],
+      'img': ['src','alt','width','height','style'],
+      'td': ['colspan','rowspan','style'],
+      'th': ['colspan','rowspan','style']
     },
+    allowVulnerableTags: true,
+    exclusiveFilter: () => false,
   })
   .replace(/<script[\s\S]*?<\/script>/gi, '')
   .replace(/<style[\s\S]*?<\/style>/gi, '')

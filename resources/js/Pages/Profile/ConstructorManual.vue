@@ -9,7 +9,14 @@ import MathRenderer from '../../Components/MathRenderer.vue';
 import { storeToRefs } from 'pinia';
 import { extractNumbersAndSymbols } from '../../utils/text';
 import { formatTaskText } from '../../utils/func';
+import { defineProps } from 'vue';
 
+const props = defineProps({
+    is_subscribe: {
+        type: Boolean,
+        default: false
+    }
+});
 const taskStore = useTaskStore();
 const toast = useToastStore();
 const { grades, subjects, selectedGrade, selectedSubject, groups } = storeToRefs(taskStore);
@@ -37,6 +44,10 @@ function goToPage(page) {
     if (page < 1) page = 1;
     if (page > totalPages.value) page = totalPages.value;
     currentPage.value = page;
+}
+const iframeLoading = ref({});
+function handleIframeLoad(taskId) {
+    iframeLoading.value = { ...iframeLoading.value, [taskId]: false };
 }
 const downloadMeta = ref({ taskId: null, file: null, url: null });
 function handleExportPdfManual() {
@@ -99,6 +110,12 @@ watch(() => selectedGroup.value, async () => {
     currentPage.value = 1;
 });
 
+watch(paginatedTasks, (list) => {
+    const map = {};
+    (list || []).forEach((t) => { map[t.id] = true; });
+    iframeLoading.value = map;
+}, { immediate: true });
+
 // Автонастройка высоты iframe по содержимому (postMessage)
 function handleIframeResizeMessage(event) {
     var data = event && event.data;
@@ -149,9 +166,9 @@ onBeforeUnmount(() => {
                             <Aside active="constructor" />
                         </div>
 
-                        <div class="profile_block">
-                            <div class="profile_block_rect">
-                                <div class="profile_block_rect_content">
+                        <div class="profile_block" style="position: relative;">
+                            <div class="profile_block_rect" >
+                                <div class="profile_block_rect_content ">
                                     <h3 class="profile_block_rect_tittle">Создание варианта</h3>
 
 
@@ -169,11 +186,11 @@ onBeforeUnmount(() => {
                                                     <p class="home_create_setting_tittle">Выберите предмет</p>
                                                     <AnimatedSelect v-model="selectedSubject" :options="subjects" placeholder="Выберите предмет"></AnimatedSelect>
                                                 </div>
-                                                <div class="home_create_setting">
+                                                <!-- <div class="home_create_setting">
                                                     <p class="home_create_setting_tittle">Кол-во вариантов</p>
                                                     <input type="text" placeholder="2" class="signin_main_rect_input">
 
-                                                </div>
+                                                </div> -->
 
                                             </div>
                                         </div>
@@ -262,16 +279,17 @@ onBeforeUnmount(() => {
 
                                             <div v-for="(task, index) in paginatedTasks" :key="task.id" class="banks_main_rect_bottom_task">
                                                 <div class="banks_main_rect_bottom_task_up">
-                                                    <p class="banks_main_rect_bottom_task_up_tittle">{{ task.article_id }} Задание {{ (currentPage - 1) * perPage + index + 1 }} </p>
+                                                    <p class="banks_main_rect_bottom_task_up_tittle">Задание {{ (currentPage - 1) * perPage + index + 1 }} </p>
                                                 </div>
                                                 <div class="banks_main_rect_bottom_text">
-                                                    <iframe :data-task-id="task.id" :src="`/tasks/${task.id}/view_tasks`" width="100%" style="width:100%;border:none;display:block;"></iframe>
+                                                    <div v-if="iframeLoading[task.id]" class="iframe_loader"><div class="iframe_spinner"></div></div>
+                                                    <iframe @load="handleIframeLoad(task.id)" :data-task-id="task.id" :src="`/tasks/${task.id}/view_tasks`" width="100%" style="width:100%;border:none;display:block;"></iframe>
                                                 </div>
 
                                                 <div class="home_create_setting">
-                                                    <p class="home_create_setting_tittle">Выберите вариант</p>
+                                                    <!-- <p class="home_create_setting_tittle">Выберите вариант</p> -->
                                                     <div class="home_create_setting_items">
-                                                        <div class="home_create_setting_select">
+                                                        <!-- <div class="home_create_setting_select">
                                                             <div class="home_create_setting_select_content">
                                                                 <p class="home_create_setting_selected">1 Вариант <svg xmlns="http://www.w3.org/2000/svg" width="15" height="9" viewBox="0 0 15 9" fill="none">
                                                                         <path fill-rule="evenodd" clip-rule="evenodd" d="M14.4351 1.70711L8.07117 8.07107C7.68065 8.46159 7.04748 8.46159 6.65696 8.07107L0.292998 1.70711C-0.0975266 1.31658 -0.0975266 0.683417 0.292998 0.292893C0.683523 -0.0976317 1.31669 -0.0976317 1.70721 0.292893L7.36407 5.94975L13.0209 0.292893C13.4114 -0.0976312 14.0446 -0.0976311 14.4351 0.292893C14.8257 0.683418 14.8257 1.31658 14.4351 1.70711Z" fill="#393C5B" />
@@ -308,7 +326,7 @@ onBeforeUnmount(() => {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        </div> -->
 
                                                         <button @click="toggleTaskSelection(task)" class="home_create_block_button">{{ isTaskSelected(task) ? 'Убрать' : 'Добавить' }}</button>
                                                     </div>
@@ -386,6 +404,12 @@ onBeforeUnmount(() => {
 
 
                                 </div>
+                                <div v-if="!is_subscribe" class="overlay_no_subscribe">
+                                    <div class="overlay_no_subscribe_content">
+                                        <h3 >Для создания вариантов в ручную, вам необходимо приобести платную подписку в которой будет доступен полный функционал</h3>
+                                        <button class="profile_account_middle_change_button">Приобрести подписку</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -400,5 +424,26 @@ iframe {
     width: 100%;
     height: 100%;
     border: none;
+}
+.banks_main_rect_bottom_text { position: relative; }
+.iframe_loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.6);
+    z-index: 1;
+}
+.iframe_spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #8f70ff;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 </style>

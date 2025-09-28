@@ -3,25 +3,18 @@ import MainLayout from '../Layouts/MainLayout.vue';
 import { ref } from 'vue';
 import AnimatedSelect from '../Components/UI/AnimatedSelect.vue';
 import Faq from '../Components/Faq.vue';
+import { router, usePage } from '@inertiajs/vue3';
+import axiosClient from '../api/axios';
 
 const grade = ref('');
 const subject = ref('');
-const grades = {
-    '5': '5 класс',
-    '6': '6 класс',
-    '7': '7 класс',
-    '8': '8 класс',
-    '9': '9 класс',
-    '10': '10 класс',
-    '11': '11 класс',
-};
-const subjects = {
-    math: 'Математика',
-    rus: 'Русский язык',
-    phy: 'Физика',
-    chem: 'Химия',
-    inf: 'Информатика',
-};
+const step = ref('start');
+const downloadMeta = ref({ taskId: null, file: null, url: null });
+const grades = [
+    { key: 'oge', value: 'ОГЭ' },
+    { key: 'ege', value: 'ЕГЭ' },
+];
+const subjects = ref([]);
 
 const faqItems = [
     {
@@ -45,6 +38,66 @@ const faqItems = [
         text: 'Сервис просто супер! Пользуюсь не первый раз и очень довольна. Советую вем кто хочет подготовить своих учеников к ОГЭ/ЕГЭ. Сервис просто супер! Пользуюсь не первый раз и очень довольна. Советую вем кто хочет подготовить своих учеников к ОГЭ/ЕГЭ.'
     },
 ];
+
+function handleCreateClick() {
+    const page = usePage();
+    const isAuth = !!(page && page.props && page.props.auth && page.props.auth.user);
+    if (!isAuth) {
+        router.visit('/login');
+        return;
+    }
+    if (!subject.value) {
+        return;
+    }
+    step.value = 'forming';
+    axiosClient.post('/auto/tasks/download', { subject_id: subject.value })
+        .then((response) => {
+            const data = response.data && response.data.data ? response.data.data : {};
+            downloadMeta.value = {
+                taskId: data.task_id,
+                file: data.file,
+                url: data.download_url,
+            };
+            const poll = () => {
+                axiosClient.get(`/auto/tasks/status/${downloadMeta.value.taskId}/${encodeURIComponent(downloadMeta.value.file)}`)
+                    .then((res) => {
+                        const ready = !!(res && res.data && res.data.data && res.data.data.ready);
+                        if (ready) {
+                            step.value = 'ready';
+                            return;
+                        }
+                        setTimeout(poll, 3000);
+                    })
+                    .catch(() => setTimeout(poll, 3000));
+            };
+            poll();
+        })
+        .catch(() => {
+            step.value = 'start';
+        });
+}
+
+function fetchSubjects() {
+    const examType = grade.value || 'oge';
+    axiosClient.get(`/profile/subjects/${examType}`)
+        .then((res) => {
+            const list = Array.isArray(res.data) ? res.data : [];
+            const opts = list.map((s) => ({ key: s.id, value: s.name }));
+            subjects.value = opts;
+            subject.value = (opts[0] && opts[0].key) || '';
+        })
+        .catch(() => {
+            subjects.value = [];
+            subject.value = '';
+        });
+}
+
+function init() {
+    grade.value = 'oge';
+    fetchSubjects();
+}
+
+init();
 </script>
 
 <template>
@@ -81,7 +134,7 @@ const faqItems = [
                                     <div class="home_create_settings">
                                         <div class="home_create_setting">
                                             <p class="home_create_setting_tittle">Выберите паралель</p>
-                                            <AnimatedSelect v-model="grade" :options="grades" placeholder="Выберите паралель" />
+                                            <AnimatedSelect v-model="grade" :options="grades" placeholder="Выберите паралель" @update:modelValue="fetchSubjects" />
                                         </div>
                                         <div class="home_create_setting">
                                             <p class="home_create_setting_tittle">Выберите предмет</p>
@@ -89,10 +142,10 @@ const faqItems = [
                                         </div>
                                     </div>
 
-                                    <button class="home_create_block_button" id="createVariant">Создать бесплатный вариант</button>
+                                    <button class="home_create_block_button" id="createVariant" @click="handleCreateClick">Создать бесплатный вариант</button>
                                 </div>
 
-                                <div class="home_create_forming">
+                                <div v-if="step === 'forming'" class="home_create_forming">
                                     <div class="home_create_forming_rect">
                                         <svg class="home_create_forming_icon" xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96" fill="none">
                                             <g clip-path="url(#paint0_angular_172_618_clip_path)" data-figma-skip-parse="true">
@@ -128,7 +181,7 @@ const faqItems = [
                                 </div>
 
 
-                                <div class="home_create_saved">
+                                <div v-if="step === 'ready'" class="home_create_saved">
                                     <div class="home_create_forming_rect">
                                         <svg class="home_create_saved" xmlns="http://www.w3.org/2000/svg" width="91" height="96" viewBox="0 0 91 96" fill="none">
                                             <path d="M34.3006 62.1951V56.1792H37.8708C39.8761 56.1792 41.0932 57.3151 41.0932 59.1813C41.0932 61.0939 39.9456 62.1951 37.9403 62.1951H34.3006Z" fill="#A8AABF" />
@@ -137,7 +190,7 @@ const faqItems = [
                                     </div>
                                     <div class="home_create_forming_texts">
                                         <p class="home_create_block_bottom_text">Для создания вариантов в ручную, вам необходимо приобести платную подписку в которой будет доступен полный функционал</p>
-                                        <button class="home_create_block_button" id="createDownload">Скачать бесплатный вариант</button>
+                                        <a :href="downloadMeta.url" class="home_create_block_button" id="createDownload">Скачать бесплатный вариант</a>
                                     </div>
                                 </div>
 

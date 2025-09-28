@@ -6,7 +6,9 @@ function truncate(text, maxLength) {
 }
 
 function extractNumbersAndSymbols(text) {
-    return text.replace(/[a-zA-Zа-яА-Я]/g, '');
+    let textReplace = text.replace(/[a-zA-Zа-яА-Я]/g, '');
+    textReplace = textReplace.replace('№', '');
+    return textReplace;
 }
 
 export { truncate, extractNumbersAndSymbols };

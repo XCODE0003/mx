@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 use Spatie\Browsershot\Browsershot;
+use Illuminate\Support\Facades\Log;
 use ZipArchive;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Shared\Html;
@@ -83,35 +84,40 @@ class GenerateTaskBundle implements ShouldQueue
         ])->render();
         $this->savePdf($htmlAns, $pdfAns);
 
-        // DOCX без ответов: Node html-to-docx → Pandoc → PDF->DOCX → LibreOffice HTML->DOCX → fallback
-        if (! $this->saveDocxViaNode($htmlNo, $docNoAns)) {
-            if (! $this->saveDocxViaPandoc($htmlNo, $docNoAns)) {
-            // if (! $this->saveDocxFromPdf($pdfNoAns, $docNoAns)) {
-            //     if (! $this->saveDocxFromHtml($htmlNo, $docNoAns)) {
-            //         $this->saveDocxFallback($tasks, $questionHtmlMap, false, $docNoAns);
-            //     }
-            // }
-            }
+        // DOCX без ответов: только Pandoc из отдельного Word-шаблона
+        // Word-HTML без ответов по отдельному шаблону
+        $wordHtmlNo = view('word.task', [
+            'task' => $baseTask,
+            'tasks' => $tasks,
+            'questionHtmlMap' => $questionHtmlMap,
+            'withAnswers' => false,
+        ])->render();
+        if ($this->saveDocxViaPandoc($wordHtmlNo, $docNoAns)) {
+            Log::info('DOCX (no answers) generated via pandoc', ['path' => $docNoAns]);
+        } else {
+            Log::error('Pandoc failed to generate DOCX (no answers)', ['target' => $docNoAns]);
         }
 
-        // DOCX с ответами
-        if (! $this->saveDocxViaNode($htmlAns, $docAns)) {
-            if (! $this->saveDocxViaPandoc($htmlAns, $docAns)) {
-            // if (! $this->saveDocxFromPdf($pdfAns, $docAns)) {
-            //     if (! $this->saveDocxFromHtml($htmlAns, $docAns)) {
-            //         $this->saveDocxFallback($tasks, $questionHtmlMap, true, $docAns);
-            //     }
-            // }
-            }
+        // DOCX с ответами: только Pandoc из отдельного Word-шаблона
+        $wordHtmlAns = view('word.task', [
+            'task' => $baseTask,
+            'tasks' => $tasks,
+            'questionHtmlMap' => $questionHtmlMap,
+            'withAnswers' => true,
+        ])->render();
+        if ($this->saveDocxViaPandoc($wordHtmlAns, $docAns)) {
+            Log::info('DOCX (with answers) generated via pandoc', ['path' => $docAns]);
+        } else {
+            Log::error('Pandoc failed to generate DOCX (with answers)', ['target' => $docAns]);
         }
 
         // ZIP
         $zip = new ZipArchive();
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
-            $zip->addFile($pdfNoAns, basename($pdfNoAns));
-            $zip->addFile($pdfAns, basename($pdfAns));
-            $zip->addFile($docNoAns, basename($docNoAns));
-            $zip->addFile($docAns, basename($docAns));
+            if (is_file($pdfNoAns)) { $zip->addFile($pdfNoAns, basename($pdfNoAns)); }
+            if (is_file($pdfAns))   { $zip->addFile($pdfAns, basename($pdfAns)); }
+            if (is_file($docNoAns)) { $zip->addFile($docNoAns, basename($docNoAns)); }
+            if (is_file($docAns))   { $zip->addFile($docAns, basename($docAns)); }
             $zip->close();
         }
     }

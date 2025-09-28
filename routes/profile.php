@@ -5,8 +5,10 @@ use App\Models\Subject;
 use App\Models\Task;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Subscribe;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\Order;
 
 Route::group(['prefix' => 'profile', 'middleware' => 'auth'], function () {
     Route::get('/', function () {
@@ -16,12 +18,24 @@ Route::group(['prefix' => 'profile', 'middleware' => 'auth'], function () {
     Route::get('/constructor', function () {
         return Inertia::render('Profile/Constructor');
     })->name('profile.constructor');
+
     Route::get('/constructor/manual', function () {
-        return Inertia::render('Profile/ConstructorManual');
+        $user = auth()->user();
+        $data = [
+            'is_subscribe' => $user->isSubscribe(),
+        ];
+        return Inertia::render('Profile/ConstructorManual', $data);
     })->name('profile.constructor.manual');
 
     Route::get('/history', function () {
-        return Inertia::render('Profile/History');
+        $user = auth()->user();
+        $orders = Order::where('user_id', $user->id)
+        ->with('subject')
+        ->get()
+        ->toArray(); // важно
+        return Inertia::render('Profile/History', [
+            'orders' => $orders,
+        ]);
     })->name('profile.history');
 
     Route::get('/logout', function () {

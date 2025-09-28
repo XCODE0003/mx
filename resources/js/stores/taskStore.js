@@ -57,6 +57,16 @@ export const useTaskStore = defineStore("task", {
             });
             return response.data;
         },
+        async exportPdfAuto(subjectId) {
+            const response = await axiosClient.post(`/auto/tasks/download`, {
+                task_subject_id: subjectId
+            });
+            return response.data;
+        },
+        async getAutoStatus(taskId, file) {
+            const response = await axiosClient.get(`/auto/tasks/status/${taskId}/${encodeURIComponent(file)}`);
+            return response.data;
+        },
         async getManualStatus(taskId, file) {
             const response = await axiosClient.get(`/manual/tasks/status/${taskId}/${encodeURIComponent(file)}`);
             return response.data;
