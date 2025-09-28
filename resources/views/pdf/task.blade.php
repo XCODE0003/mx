@@ -14,8 +14,6 @@
             line-height: 1.6;
             color: #000;
         }
-        /* Принудительно Times New Roman для всего содержимого */
-        body, * { font-family: 'Times New Roman', serif !important; }
 
         .container {
             width: 100%;
@@ -152,32 +150,21 @@
             text-align: justify;
         }
 
-        /* Компактная вёрстка задания: текст слева, номер справа в квадрате */
-        .task-block { margin-bottom: 12px; }
-        .task-row {
+        .task-content {
             display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 12px;
+            gap: 10px;
         }
-        .task-body {
-            flex: 1 1 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .task-number {
+
+        .task-title {
             font-weight: 700;
-            width: 31px;
             height: 31px;
+            width: 31px;
             display: flex;
             align-items: center;
             justify-content: center;
             border: 1px solid #000;
-            flex-shrink: 0;
+            height: fit-content;
         }
-
-        /* .task-title больше не используется */
 
         .MsoNormalTable,
         .MsoTableGrid,
@@ -255,29 +242,37 @@
         </div>
         <div class="page-break"></div>
         @foreach ($tasks as $t)
-            <div class="task-block">
-                <div class="task-row">
-                    <div class="task-body">
-                        <div class="task-html">
-                            {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
-                        </div>
-                        <div style="display: inline-flex; gap: 6px; align-items: baseline;">
-                            <span>Ответ:</span>
-                            @if ($withAnswers)
-                                @php $ans = trim(strip_tags($t->response ?? '')); @endphp
-                                @if($ans !== '')
-                                    <span style="min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5; display: inline-block;">{{ $ans }}</span>
-                                @else
-                                    <span>___________________________</span>
-                                @endif
-                            @else
-                                <span>___________________________</span>
-                            @endif
-                        </div>
+            <div class="task-content">
+
+                <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
+
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <div class="task-content">
+                        {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
+
                     </div>
-                    <div class="task-number">{{ optional($t->group)->formatted_title ?? '№' }}</div>
+                    <div style="display: inline-flex; gap: 5px;">
+                        Ответ:
+                        @if ($withAnswers)
+                            @php
+                                $ans = $t->response ?? '';
+                            @endphp
+                            @if($ans !== '')
+                                <div style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
+                                    {!! $ans !!}
+                                </div>
+                            @else
+                                ___________________________
+                            @endif
+                        @else
+                            ___________________________
+                        @endif
+                    </div>
                 </div>
+
             </div>
+            <br><br>
+
         @endforeach
 
 
