@@ -59,10 +59,14 @@ class GenerateTaskPdf implements ShouldQueue
             $questionHtmlMap[$t->id] = $this->inlineImages($t->question);
         }
 
+        // Ensure $withAnswers is defined and passed to the view
+        $withAnswers = true;
+
         $html = view('pdf.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
             'questionHtmlMap' => $questionHtmlMap,
+            'withAnswers' => $withAnswers,
         ])->render();
 
         $dir = public_path('exports/tasks/'.$this->baseTaskId);

@@ -13,9 +13,8 @@ class TaskExportController extends Controller
     public function view(Task $task)
     {
         $groups = $task->subject->groups;
-
         $randomTasks = $groups->map(function ($group) use ($task) {
-            return $group->tasks()->where('article_id', $task->article_id)->first();
+            return $group->tasks()->where('id', $task->id)->first();
             // return $group->tasks()->inRandomOrder()->first();
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
