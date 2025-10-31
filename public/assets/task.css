@@ -50366,7 +50366,9 @@ button.swiper-pagination-bullet {
         text-align: right;
     }
 }
-
+.d-lg-none img{
+    max-width: 350px;
+}
 /* Display utilities */
 .d-none { display: none !important; }
 .d-inline { display: inline !important; }
