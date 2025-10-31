@@ -175,7 +175,9 @@
 
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div class="task-content">
+                    <div>
                     {!! ($questionHtmlMap[$task->id] ?? $task->question) !!}
+                    </div>
 
                 </div>
                 Ответ: ___________________________

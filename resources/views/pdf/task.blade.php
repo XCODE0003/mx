@@ -248,8 +248,10 @@
 
                 <div style="display: flex; flex-direction: column; gap: 5px;">
                     <div class="task-content">
+                        <div>
                         {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
+                        </div>
                     </div>
                     <div style="display: inline-flex; gap: 5px;">
                         Ответ:
