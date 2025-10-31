@@ -50369,6 +50369,9 @@ button.swiper-pagination-bullet {
 .d-lg-none img{
     max-width: 350px;
 }
+.mjx-mrow{
+    text-wrap: wrap;
+}
 /* Display utilities */
 .d-none { display: none !important; }
 .d-inline { display: inline !important; }
