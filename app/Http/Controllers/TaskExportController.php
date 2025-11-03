@@ -16,9 +16,17 @@ class TaskExportController extends Controller
         $randomTasks = $groups->map(function ($group) use ($task) {
             return $group->tasks()->where('id', $task->id)->first();
             // return $group->tasks()->inRandomOrder()->first();
-        })->filter()->sortBy(function ($task) {
-            return (int) $task->group->formatted_title;
-        });
+        })->filter();
+
+        // If no tasks found in groups, use the original task
+        if ($randomTasks->isEmpty()) {
+            $randomTasks = collect([$task]);
+        } else {
+            $randomTasks = $randomTasks->sortBy(function ($task) {
+                return (int) $task->group->formatted_title;
+            });
+        }
+
         return response()->view('pdf.task', [
             'tasks'    => $randomTasks,
             'group'    => $task->group,
