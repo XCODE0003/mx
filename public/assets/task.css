@@ -50373,6 +50373,10 @@ button.swiper-pagination-bullet {
     text-wrap: wrap;
 }
 
+span:not(.mjx-mn), span:not(.mjx-char), p, li, td, th, h1, h2, h3, h4, h5, h6 {
+    font-size: 16px !important;
+}
+
 .mjx-math * {
     text-wrap: wrap;
 }
@@ -52868,4 +52872,21 @@ button.swiper-pagination-bullet {
   .su-youtube iframe {
     border:none!important
   }
-  
+.MsoNormal br {
+    display: none !important;
+    line-height: 0 !important;
+    font-size: 0 !important;
+}
+
+
+.btn{
+    display: none !important;
+}
+
+.mjx-mtable{
+    width: 100% !important;
+}
+
+#hint{
+    display: none !important;
+}

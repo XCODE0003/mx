@@ -173,10 +173,12 @@
             padding: 0;
         }
 
-        .submit-outblock {
+        /* .submit-outblock {
             display: none;
+        } */
+        .MsoTableGrid {
+            border: 0;
         }
-
         *,
         ::after,
         ::before {
@@ -187,6 +189,70 @@
             margin: 0 !important;
         }
     </style>
+
+    <!-- Image display functions (must be loaded before body content) -->
+    <script>
+        // глобальные настройки
+        window.qguid = '';
+        window.qfiles_location = '../../'; // при необходимости поправьте путь к папке с файлами
+
+        // Вспомог: убираем вхождения ". " внутри имени
+        function cleanName(s) {
+            var p;
+            while ((p = s.indexOf('. ')) > 0) {
+                s = s.substring(0, p + 1) + s.substring(p + 2);
+            }
+            return s;
+        }
+
+        // Показывает картинку внутри контента
+        window.ShowPictureQ = function(s, hint) {
+            s = cleanName(s);
+            document.write('<img src="' + window.qfiles_location + s + '" align="absmiddle" alt="' + (hint || '') + '" border="0"> ');
+        };
+
+        window.ShowPictureQBL = function(s, hint, h, bl) {
+            s = cleanName(s);
+            var vspace = h / 2 - bl;
+            if (vspace < 0) vspace = -vspace;
+            document.write('<img src="' + window.qfiles_location + s + '" align="middle" border="0" alt="' + (hint || '') + '" vspace="' + vspace + '" style="position:relative; top:' + (h/2 - bl) + 'px;">');
+        };
+
+        window.ShowPictureQ2WH = function(s, s2, hint, w, h) {
+            if (s.indexOf('.flv') > 0 || s.indexOf('.mp4') > 0 || s.indexOf('.swf') > 0) {
+                s = '../../show_media.php?m=' + encodeURIComponent(s) + '&w=' + w + '&h=' + h;
+            }
+            w = w + 40;
+            h = h + 30;
+            var url = window.qfiles_location + s;
+            var popup = "var wnd=open('" + url + "','','',status=1,resizable=1,menubar=0,scrollbars=1,width=" + w + ",height=" + h + ",left=" + ((screen.width - w)/2) + ",top=" + ((screen.height - h)/2) + ");wnd.focus();";
+            document.write('<a href="javascript:' + popup + '"><img border="0" src="' + window.qfiles_location + s2 + '" align="absmiddle" style="cursor:pointer" alt="' + (hint || '') + '"></a> ');
+        };
+
+        window.ShowPictureQ3WH = function(s, s2, s3, hint, w, h) {
+            window.ShowPictureQ2WH(s, s2, hint, w, h);
+        };
+
+        window.ShowPictureQ2 = function(s, s2, hint) {
+            window.ShowPictureQ2WH(s, s2, hint, 600, 400);
+        };
+
+        window.invertImage = function(img, s, s2) {
+            if (img.src.indexOf(s) > 0) img.src = window.qfiles_location + s2;
+            else img.src = window.qfiles_location + s;
+        };
+
+        window.ShowPictureQ3 = function(s, s2, hint) {
+            s = cleanName(s);
+            var src2 = window.qfiles_location + s2;
+            if (s.indexOf('.jpg') > 0 || s.indexOf('.png') > 0 || s.indexOf('.gif') > 0) {
+                var src1 = window.qfiles_location + s;
+                document.write('<img src="' + src2 + '" onclick="invertImage(this, \'' + src1 + '\', \'' + src2 + '\')" align="absmiddle" style="cursor:pointer" alt="' + (hint || '') + '" border="0"> ');
+            } else {
+                document.write('<img src="' + src2 + '" align="absmiddle" style="cursor:pointer" alt="' + (hint || '') + '" border="0"> ');
+            }
+        };
+    </script>
 </head>
 
 <body>
@@ -278,7 +344,6 @@
         @endforeach
 
 
-
         <script>
             // (function () {
             //     function hideEmptyMsoParagraphs() {
@@ -297,6 +362,37 @@
             //         MathJax.Hub.Queue(hideEmptyMsoParagraphs);
             //     }
             // })();
+
+            (function () {
+        function hideEmptyElements() {
+            // Скрываем пустые параграфы MsoNormal
+            document.querySelectorAll('p.MsoNormal').forEach(function (p) {
+                var text = (p.textContent || '')
+                    .replace(/\u00A0/g, '') // убрать &nbsp;
+                    .trim();
+                if (text.length === 0) {
+                    p.style.display = 'none';
+                }
+            });
+
+            // Скрываем пустые strong элементы
+            document.querySelectorAll('strong').forEach(function (strong) {
+                var text = (strong.textContent || '')
+                    .replace(/\u00A0/g, '') // убрать &nbsp;
+                    .replace(/\s/g, '')     // убрать все пробелы
+                    .trim();
+                if (text.length === 0) {
+                    strong.style.display = 'none';
+                }
+            });
+        }
+
+        if (document.readyState !== 'loading') hideEmptyElements();
+        else document.addEventListener('DOMContentLoaded', hideEmptyElements);
+        if (MathJax && MathJax.Hub && MathJax.Hub.Queue) {
+            MathJax.Hub.Queue(hideEmptyElements);
+        }
+    })();
         </script>
     </div>
 </body>

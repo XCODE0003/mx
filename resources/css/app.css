@@ -153,9 +153,9 @@ form[name="chkcodeform"] {
     margin: 0;
     padding: 0;
 }
-.submit-outblock{
+/* .submit-outblock{
     display: none;
-}
+} */
 *, ::after, ::before{
     box-sizing: border-box !important;
 }
