@@ -50369,17 +50369,21 @@ button.swiper-pagination-bullet {
 .d-lg-none img{
     max-width: 250px;
 }
-.mjx-mrow{
-    text-wrap: wrap;
+/*.mjx-mrow{*/
+/*    text-wrap: wrap;*/
+/*}*/
+
+.mjx-char,
+.mjx-mn {
+    font-size: unset !important;
 }
 
-span:not(.mjx-mn), span:not(.mjx-char), p, li, td, th, h1, h2, h3, h4, h5, h6 {
-    font-size: 16px !important;
-}
 
-.mjx-math * {
-    text-wrap: wrap;
-}
+
+
+/*.mjx-math * {*/
+/*    text-wrap: wrap;*/
+/*}*/
 
 /* Display utilities */
 .d-none { display: none !important; }
@@ -52878,7 +52882,7 @@ span:not(.mjx-mn), span:not(.mjx-char), p, li, td, th, h1, h2, h3, h4, h5, h6 {
     font-size: 0 !important;
 }
 
-
+.mjx-mrow
 .btn{
     display: none !important;
 }
