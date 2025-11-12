@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Задание </title>
     <base href="{{ url('/') }}/">
-    <link rel="stylesheet" href="/assets/task.css?v=1">
+    <link rel="stylesheet" href="/assets/task.css?v={{ time() }}">
     <style>
         body {
             font-family: 'Times New Roman', serif;
@@ -134,13 +134,14 @@
             document.body.setAttribute('data-mathjax-ready','1');
         }]);
     </script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     <style>
         .header {
             text-align: center;
         }
 
-        form>table>tbody>tr>td {
+        form > table > tbody > tr > td {
             padding: 0 !important;
             margin: 0 !important;
         }
@@ -179,6 +180,7 @@
         .MsoTableGrid {
             border: 0;
         }
+
         *,
         ::after,
         ::before {
@@ -215,7 +217,7 @@
             s = cleanName(s);
             var vspace = h / 2 - bl;
             if (vspace < 0) vspace = -vspace;
-            document.write('<img src="' + window.qfiles_location + s + '" align="middle" border="0" alt="' + (hint || '') + '" vspace="' + vspace + '" style="position:relative; top:' + (h/2 - bl) + 'px;">');
+            document.write('<img src="' + window.qfiles_location + s + '" align="middle" border="0" alt="' + (hint || '') + '" vspace="' + vspace + '" style="position:relative; top:' + (h / 2 - bl) + 'px;">');
         };
 
         window.ShowPictureQ2WH = function(s, s2, hint, w, h) {
@@ -225,7 +227,7 @@
             w = w + 40;
             h = h + 30;
             var url = window.qfiles_location + s;
-            var popup = "var wnd=open('" + url + "','','',status=1,resizable=1,menubar=0,scrollbars=1,width=" + w + ",height=" + h + ",left=" + ((screen.width - w)/2) + ",top=" + ((screen.height - h)/2) + ");wnd.focus();";
+            var popup = 'var wnd=open(\'' + url + '\',\'\',\'\',status=1,resizable=1,menubar=0,scrollbars=1,width=' + w + ',height=' + h + ',left=' + ((screen.width - w) / 2) + ',top=' + ((screen.height - h) / 2) + ');wnd.focus();';
             document.write('<a href="javascript:' + popup + '"><img border="0" src="' + window.qfiles_location + s2 + '" align="absmiddle" style="cursor:pointer" alt="' + (hint || '') + '"></a> ');
         };
 
@@ -256,77 +258,82 @@
 </head>
 
 <body>
-    <div class="container preview-page">
-        <div class="header">
-            <b>Тренировочная работа в формате ОГЭ по МАТЕМАТИКЕ</b>
-            <br>
-            <br>
+<div class="container preview-page">
+    <div class="header">
+        <b>Тренировочная работа в формате ОГЭ по МАТЕМАТИКЕ</b>
+        <br>
+        <br>
 
-            9 КЛАСС
-            <br>
-            <br>
-            Дата: ___ ___ 2023 г.
-            <br>
-            Вариант №: ___
-            <br>
-            Выполнена: ФИО_________________________________
-            <br><br>
-            <b>Инструкция по выполнению работы</b>
-            <br>
-            <div class="instruction">
-                Работа состоит из двух частей, включающих в себя 25 заданий. Часть 1 содержит
-                19 заданий, часть 2 содержит 6 заданий с развёрнутым ответом.
-                На выполнение работы по математике отводится 3 часа 55 минут (235 минут).
-                Ответы к заданиям 7 и 13 запишите в виде одной цифры, которая соответствует
-                номеру правильного ответа.
-                Для остальных заданий части 1 ответом является число или последовательность
-                цифр. Если получилась обыкновенная дробь, ответ запишите в виде десятичной.
-                Решения заданий части 2 и ответы к ним запишите на отдельном листе бумаги.
-                Задания можно выполнять в любом порядке. Текст задания переписывать не надо,
-                необходимо только указать его номер.
-                Сначала выполняйте задания части 1. Начать советуем с тех заданий, которые
-                вызывают у вас меньше затруднений, затем переходите к другим заданиям. Для
-                экономии времени пропускайте задание, которое не удаётся выполнить сразу, и
-                переходите к следующему. Если у вас останется время, вы сможете вернуться к
-                пропущенным заданиям.
-                При выполнении части 1 все необходимые вычисления, преобразования
-                выполняйте в черновике. <b>Записи в черновике, а также в тексте контрольных
-                    измерительных материалов не учитываются при оценивании работы.</b>
-                Если задание содержит рисунок, то на нём непосредственно в тексте работы
-                можно выполнять необходимые вам построения. Рекомендуем внимательно читать
-                условие и проводить проверку полученного ответа.
-                При выполнении работы вы можете воспользоваться справочными материалами,
-                выданными вместе с вариантом КИМ, и линейкой.
-                Баллы, полученные вами за выполненные задания, суммируются. Постарайтесь
-                выполнить как можно больше заданий и набрать наибольшее количество баллов.
-                После завершения работы проверьте, чтобы ответ на каждое задание был записан
-                под правильным номером.
+        9 КЛАСС
+        <br>
+        <br>
+        Дата: ___ ___ 2023 г.
+        <br>
+        Вариант №: ___
+        <br>
+        Выполнена: ФИО_________________________________
+        <br><br>
+        <b>Инструкция по выполнению работы</b>
+        <br>
+        <div class="instruction">
+            Работа состоит из двух частей, включающих в себя 25 заданий. Часть 1 содержит
+            19 заданий, часть 2 содержит 6 заданий с развёрнутым ответом.
+            На выполнение работы по математике отводится 3 часа 55 минут (235 минут).
+            Ответы к заданиям 7 и 13 запишите в виде одной цифры, которая соответствует
+            номеру правильного ответа.
+            Для остальных заданий части 1 ответом является число или последовательность
+            цифр. Если получилась обыкновенная дробь, ответ запишите в виде десятичной.
+            Решения заданий части 2 и ответы к ним запишите на отдельном листе бумаги.
+            Задания можно выполнять в любом порядке. Текст задания переписывать не надо,
+            необходимо только указать его номер.
+            Сначала выполняйте задания части 1. Начать советуем с тех заданий, которые
+            вызывают у вас меньше затруднений, затем переходите к другим заданиям. Для
+            экономии времени пропускайте задание, которое не удаётся выполнить сразу, и
+            переходите к следующему. Если у вас останется время, вы сможете вернуться к
+            пропущенным заданиям.
+            При выполнении части 1 все необходимые вычисления, преобразования
+            выполняйте в черновике. <b>Записи в черновике, а также в тексте контрольных
+                измерительных материалов не учитываются при оценивании работы.</b>
+            Если задание содержит рисунок, то на нём непосредственно в тексте работы
+            можно выполнять необходимые вам построения. Рекомендуем внимательно читать
+            условие и проводить проверку полученного ответа.
+            При выполнении работы вы можете воспользоваться справочными материалами,
+            выданными вместе с вариантом КИМ, и линейкой.
+            Баллы, полученные вами за выполненные задания, суммируются. Постарайтесь
+            выполнить как можно больше заданий и набрать наибольшее количество баллов.
+            После завершения работы проверьте, чтобы ответ на каждое задание был записан
+            под правильным номером.
 
-            </div>
-            <br><br>
-            Желаем успеха!
         </div>
-        <div class="page-break"></div>
-        @foreach ($tasks as $t)
-            <div class="task-content">
+        <br><br>
+        Желаем успеха!
+    </div>
+    <div class="page-break"></div>
+    @foreach ($tasks as $t)
+        <div class="task-content">
 
-                <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
+            <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
 
-                <div style="display: flex; flex-direction: column; gap: 5px;">
-                    <div class="task-content">
-                        <div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <div class="task-content">
+                    <div>
                         {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
-                        </div>
                     </div>
-                    <div style="display: inline-flex; gap: 5px;">
+                </div>
+                <div class="lex flex-col gap-1 border border-1 border-solidf" style="flex flex-direction: column; gap: 5px; border: 1px solid">
+                    <p>
                         Ответ:
+                    </p>
+                    <div style="display: inline-flex; gap: 5px;">
+
                         @if ($withAnswers)
                             @php
                                 $ans = $t->response ?? '';
                             @endphp
                             @if($ans !== '')
-                                <div style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
+                                <div
+                                    style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
                                     {!! $ans !!}
                                 </div>
                             @else
@@ -337,72 +344,73 @@
                         @endif
                     </div>
                 </div>
-
             </div>
-            <br><br>
 
-        @endforeach
+        </div>
+        <br><br>
+
+    @endforeach
 
 
-        <script>
-            // (function () {
-            //     function hideEmptyMsoParagraphs() {
-            //         document.querySelectorAll('p.MsoNormal').forEach(function (p) {
-            //             var text = (p.textContent || '')
-            //                 .replace(/\u00A0/g, '') // убрать &nbsp;
-            //                 .trim();
-            //             if (text.length === 0) {
-            //                 p.style.display = 'none';
-            //             }
-            //         });
-            //     }
-            //     if (document.readyState !== 'loading') hideEmptyMsoParagraphs();
-            //     else document.addEventListener('DOMContentLoaded', hideEmptyMsoParagraphs);
-            //     if (window.MathJax && MathJax.Hub && MathJax.Hub.Queue) {
-            //         MathJax.Hub.Queue(hideEmptyMsoParagraphs);
-            //     }
-            // })();
+    <script>
+        // (function () {
+        //     function hideEmptyMsoParagraphs() {
+        //         document.querySelectorAll('p.MsoNormal').forEach(function (p) {
+        //             var text = (p.textContent || '')
+        //                 .replace(/\u00A0/g, '') // убрать &nbsp;
+        //                 .trim();
+        //             if (text.length === 0) {
+        //                 p.style.display = 'none';
+        //             }
+        //         });
+        //     }
+        //     if (document.readyState !== 'loading') hideEmptyMsoParagraphs();
+        //     else document.addEventListener('DOMContentLoaded', hideEmptyMsoParagraphs);
+        //     if (window.MathJax && MathJax.Hub && MathJax.Hub.Queue) {
+        //         MathJax.Hub.Queue(hideEmptyMsoParagraphs);
+        //     }
+        // })();
 
-            (function () {
-        function hideEmptyElements() {
-            // Скрываем пустые параграфы MsoNormal
-            document.querySelectorAll('p.MsoNormal').forEach(function (p) {
-                // Не скрывать элементы, содержащие изображения или другие медиа/MathML
-                if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
+        (function() {
+            function hideEmptyElements() {
+                // Скрываем пустые параграфы MsoNormal
+                document.querySelectorAll('p.MsoNormal').forEach(function(p) {
+                    // Не скрывать элементы, содержащие изображения или другие медиа/MathML
+                    if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
 
-                var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
-                if (text.length === 0) {
-                    // Клонируем и удаляем пустые вложенные теги (например пустые span с &nbsp;)
-                    var temp = p.cloneNode(true);
-                    temp.querySelectorAll('*').forEach(function (el) {
-                        if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
-                            el.parentNode.removeChild(el);
+                    var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
+                    if (text.length === 0) {
+                        // Клонируем и удаляем пустые вложенные теги (например пустые span с &nbsp;)
+                        var temp = p.cloneNode(true);
+                        temp.querySelectorAll('*').forEach(function(el) {
+                            if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
+                                el.parentNode.removeChild(el);
+                            }
+                        });
+                        var remaining = (temp.textContent || '').replace(/\u00A0/g, '').trim();
+                        if (remaining.length === 0) {
+                            p.style.display = 'none';
                         }
-                    });
-                    var remaining = (temp.textContent || '').replace(/\u00A0/g, '').trim();
-                    if (remaining.length === 0) {
-                        p.style.display = 'none';
                     }
-                }
-            });
-            // Скрываем пустые strong элементы
-            document.querySelectorAll('strong').forEach(function (strong) {
-                var text = (strong.textContent || '')
-                    .replace(/\u00A0/g, '') // убрать &nbsp;
-                    .replace(/\s/g, '')     // убрать все пробелы
-                    .trim();
-                if (text.length === 0) {
-                    strong.style.display = 'none';
-                }
-            });
-        }
+                });
+                // Скрываем пустые strong элементы
+                document.querySelectorAll('strong').forEach(function(strong) {
+                    var text = (strong.textContent || '')
+                        .replace(/\u00A0/g, '') // убрать &nbsp;
+                        .replace(/\s/g, '')     // убрать все пробелы
+                        .trim();
+                    if (text.length === 0) {
+                        strong.style.display = 'none';
+                    }
+                });
+            }
 
-        if (document.readyState !== 'loading') hideEmptyElements();
-        else document.addEventListener('DOMContentLoaded', hideEmptyElements);
-        if (MathJax && MathJax.Hub && MathJax.Hub.Queue) {
-            MathJax.Hub.Queue(hideEmptyElements);
-        }
-    })();
-        </script>
-    </div>
+            if (document.readyState !== 'loading') hideEmptyElements();
+            else document.addEventListener('DOMContentLoaded', hideEmptyElements);
+            if (MathJax && MathJax.Hub && MathJax.Hub.Queue) {
+                MathJax.Hub.Queue(hideEmptyElements);
+            }
+        })();
+    </script>
+</div>
 </body>
