@@ -367,14 +367,24 @@
         function hideEmptyElements() {
             // Скрываем пустые параграфы MsoNormal
             document.querySelectorAll('p.MsoNormal').forEach(function (p) {
-                var text = (p.textContent || '')
-                    .replace(/\u00A0/g, '') // убрать &nbsp;
-                    .trim();
+                // Не скрывать элементы, содержащие изображения или другие медиа/MathML
+                if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
+
+                var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
                 if (text.length === 0) {
-                    p.style.display = 'none';
+                    // Клонируем и удаляем пустые вложенные теги (например пустые span с &nbsp;)
+                    var temp = p.cloneNode(true);
+                    temp.querySelectorAll('*').forEach(function (el) {
+                        if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
+                            el.parentNode.removeChild(el);
+                        }
+                    });
+                    var remaining = (temp.textContent || '').replace(/\u00A0/g, '').trim();
+                    if (remaining.length === 0) {
+                        p.style.display = 'none';
+                    }
                 }
             });
-
             // Скрываем пустые strong элементы
             document.querySelectorAll('strong').forEach(function (strong) {
                 var text = (strong.textContent || '')
