@@ -115,7 +115,11 @@
                 availableFonts: ["STIX","TeX"],
                 preferredFont: "STIX",
                 webFont: "STIX-Web",
-                imageFont: null
+                imageFont: null,
+                linebreaks: { automatic: true, width: "680px" }
+            },
+            SVG: {
+                linebreaks: { automatic: true, width: "680px" }
             },
             MMLorHTML: {
                 prefer: { MSIE: "MML", Firefox: "HTML", Safari: "HTML", Chrome: "HTML" }
@@ -128,6 +132,8 @@
                 preview: "TeX"
             },
             mml2jax: { processClass: "mml" },
+            displayAlign: "center",
+            displayIndent: "0em",
             TeX: { extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"] }
         });
         MathJax.Hub.Queue(["Typeset", MathJax.Hub, function(){
@@ -140,7 +146,24 @@
         .header {
             text-align: center;
         }
+        :root { --math-width: 680px; }
+        .MathJax, .MathJax_Display, .mjx-chtml {
+            max-width: var(--math-width) !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+            page-break-inside: auto !important;
+        }
+        .MathJax_Display {
+            display: block;
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+        }
 
+        /* Сохраняем поведение для отдельных символов */
+        .mjx-mn, .mjx-char {
+            white-space: nowrap !important;
+        }
         form > table > tbody > tr > td {
             padding: 0 !important;
             margin: 0 !important;
@@ -321,7 +344,8 @@
 
                     </div>
                 </div>
-                <div class="lex flex-col gap-1 border border-1 border-solidf" style="flex flex-direction: column; gap: 5px; border: 1px solid">
+                <div class="lex flex-col gap-1 border border-1 border-solidf"
+                     style="flex flex-direction: column; gap: 5px; border: 1px solid">
                     <p>
                         Ответ:
                     </p>
