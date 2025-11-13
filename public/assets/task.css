@@ -52897,3 +52897,21 @@ button.swiper-pagination-bullet {
 #hint{
     display: none !important;
 }
+
+.mjx-math > .mjx-mrow:first-child{
+    white-space: normal !important;
+}
+
+/* Отменяем для вложенных элементов */
+.mjx-math > .mjx-mrow:first-child .mjx-mrow {
+    white-space: nowrap !important;
+}
+/*
+.mjx-char.MJXc-TeX-size4-R[style*="line-height: 0.1"],
+.mjx-char.MJXc-TeX-size4-R[style*="line-height: 0.2"],
+.mjx-char.MJXc-TeX-size4-R[style*="margin-bottom: 0.087em"],
+span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
+    opacity: 0 !important;
+    width: 0 !important;
+} */
+

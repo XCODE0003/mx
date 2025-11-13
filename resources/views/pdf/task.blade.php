@@ -17,7 +17,7 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
+            /* max-width: 800px; */
             margin: 0 auto;
         }
 
@@ -72,10 +72,12 @@
         }
 
         .preview-page {
-            width: 210mm;
+            width: 240mm;
+            /* width: 210mm; */
             min-height: 297mm;
             margin: 5mm auto;
             padding: 15mm;
+            /* padding: 15mm; */
             background: #fff;
             box-shadow: 0 0 6mm rgba(0, 0, 0, .15);
             box-sizing: border-box;
@@ -116,11 +118,8 @@
                 preferredFont: "STIX",
                 webFont: "STIX-Web",
                 imageFont: null,
-                linebreaks: { automatic: true, width: "680px" }
             },
-            SVG: {
-                linebreaks: { automatic: true, width: "680px" }
-            },
+
             MMLorHTML: {
                 prefer: { MSIE: "MML", Firefox: "HTML", Safari: "HTML", Chrome: "HTML" }
             },
@@ -146,7 +145,7 @@
         .header {
             text-align: center;
         }
-        :root { --math-width: 680px; }
+        :root { --math-width: 550px; }
 
         .MathJax_Display {
             display: block;
@@ -154,10 +153,7 @@
             break-inside: auto !important;
         }
 
-        /* Сохраняем поведение для отдельных символов */
-        .mjx-mn, .mjx-char {
-            white-space: nowrap !important;
-        }
+
         form > table > tbody > tr > td {
             padding: 0 !important;
             margin: 0 !important;
@@ -331,19 +327,21 @@
 
             <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
 
-            <div style="display: flex; flex-direction: column; gap: 5px;">
+            <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
                 <div class="task-content">
                     <div>
                         {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
                     </div>
                 </div>
-                <div class="lex flex-col gap-1 border border-1 border-solidf"
-                     style="flex flex-direction: column; gap: 5px; border: 1px solid">
+                <div class="flex flex-col gap-1 border border-1 border-solid"
+style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
+
+ width: 100%">
                     <p>
                         Ответ:
                     </p>
-                    <div style="display: inline-flex; gap: 5px;">
+                    <div style="display: inline-flex; gap: 5px; width: 100%">
 
                         @if ($withAnswers)
                             @php
