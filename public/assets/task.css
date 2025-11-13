@@ -52880,12 +52880,26 @@ button.swiper-pagination-bullet {
   .su-youtube iframe {
     border:none!important
   }
-.MsoNormal br {
+.qblock br {
     display: none !important;
     line-height: 0 !important;
     font-size: 0 !important;
 }
 
+tr select{
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    height: 40px;
+    -moz-appearance: none !important;
+    border: none !important;
+    font-size: 100% !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-family: inherit !important;
+}
+.answer-table tr td{
+    border: 1px solid #000 !important;
+}
 .btn{
     display: none !important;
 }
