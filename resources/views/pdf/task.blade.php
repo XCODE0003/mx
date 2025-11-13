@@ -147,13 +147,7 @@
             text-align: center;
         }
         :root { --math-width: 680px; }
-        .MathJax, .MathJax_Display, .mjx-chtml {
-            max-width: var(--math-width) !important;
-            white-space: normal !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-            page-break-inside: auto !important;
-        }
+
         .MathJax_Display {
             display: block;
             page-break-inside: auto !important;
