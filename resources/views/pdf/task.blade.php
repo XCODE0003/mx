@@ -341,7 +341,7 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
                     <p>
                         Ответ:
                     </p>
-                    <div style="display: inline-flex; gap: 5px; width: 100%">
+                    <div id="answer_kim" style="display: inline-flex; gap: 5px; width: 100%">
 
                         @if ($withAnswers)
                             @php
@@ -428,5 +428,19 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
             }
         })();
     </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const answer = document.getElementById('answer_kim');
+        const answer_p = answer.getElementsByTagName('p');
+        for (let i = 0; i < answer_p.length; i++) {
+            const answer_div = answer_p[i];
+            const isIncludeAnswer = answer_div.textContent.includes('Ответ:');
+            answer_div.style.display = isIncludeAnswer ? 'none' : 'block';
+
+        }
+    });
+</script>
+
 </div>
 </body>

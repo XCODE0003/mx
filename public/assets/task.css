@@ -52915,3 +52915,7 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
     width: 0 !important;
 } */
 
+.answer-line {
+  font-weight: 700;
+  font-size: 16px;
+}
