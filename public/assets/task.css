@@ -14292,7 +14292,7 @@ a[href^="#awb-oc__"].awb-oc-active .awb-oc-close-icon {
     --progressbar_unfilled_color: #f2f3f5;
     --progressbar_filled_border_size: 0px;
     --progressbar_filled_border_color: #ffffff;
-    --sep_color: #e2e2e2;
+    --sep_color: transparent;
     --tabs_bg_color: #ffffff;
     --tabs_inactive_color: #f9f9fb;
     --tabs_border_color: #e2e2e2;
@@ -52885,7 +52885,9 @@ button.swiper-pagination-bullet {
     line-height: 0 !important;
     font-size: 0 !important;
 }
-
+.qblock, .task-content{
+    width: 100% !important;
+}
 tr select{
     appearance: none !important;
     -webkit-appearance: none !important;
@@ -52932,4 +52934,12 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 .answer-line {
   font-weight: 700;
   font-size: 16px;
+}
+.MsoNormal img{
+    margin-left: auto;
+    min-width: 80px
+}
+
+.MsoNormalCxSpFirst {
+    margin: 0 !important;
 }

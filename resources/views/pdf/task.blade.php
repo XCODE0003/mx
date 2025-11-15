@@ -329,7 +329,7 @@
 
             <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
                 <div class="task-content">
-                    <div>
+                    <div style="width: 100%;">
                         {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
                     </div>
@@ -433,11 +433,17 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
     document.addEventListener('DOMContentLoaded', function() {
         const answer = document.getElementById('answer_kim');
         const answer_p = answer.getElementsByTagName('p');
+        const answer_is_already_visible = [];
         for (let i = 0; i < answer_p.length; i++) {
             const answer_div = answer_p[i];
             const isIncludeAnswer = answer_div.textContent.includes('Ответ:');
             answer_div.style.display = isIncludeAnswer ? 'none' : 'block';
-
+            if(answer_is_already_visible.length > 0) {
+                answer_div.style.display = 'none';
+            }
+            if(isIncludeAnswer) {
+                answer_is_already_visible.push(answer_div);
+            }
         }
     });
 </script>
