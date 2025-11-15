@@ -14292,7 +14292,7 @@ a[href^="#awb-oc__"].awb-oc-active .awb-oc-close-icon {
     --progressbar_unfilled_color: #f2f3f5;
     --progressbar_filled_border_size: 0px;
     --progressbar_filled_border_color: #ffffff;
-    --sep_color: transparent;
+    --sep_color: #e2e2e2;
     --tabs_bg_color: #ffffff;
     --tabs_inactive_color: #f9f9fb;
     --tabs_border_color: #e2e2e2;
