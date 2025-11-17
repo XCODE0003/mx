@@ -52943,9 +52943,28 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 .MsoNormalCxSpFirst {
     margin: 0 !important;
 }
-.MsoTableGrid{
+/* .MsoTableGrid, .MsoTableGrid > .MsoNormal{
+
+} */
+
+.MsoNormalTable tbody td:has(.MsoNormal img),
+.MsoTableGrid tbody td:has(.MsoNormal img) {
+    border-color: transparent;
     width: 100%;
 }
-.MsoNormalTable tbody td:has(.MsoNormal img) {
-    border-color: transparent;
+
+
+.MsoTableGrid tbody td:not(:has(.MsoNormal img)):first-child {
+    width: auto;
+    white-space: normal;
+    min-width: 500px; /* минимальная ширина для комфортного чтения */
+}
+
+
+.active-distractor b{
+    font-weight: normal;
+}
+
+.MsoNormalTable[border="1"] {
+    margin: auto;
 }
