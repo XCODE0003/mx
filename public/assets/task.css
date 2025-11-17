@@ -52937,9 +52937,15 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 }
 .MsoNormal img{
     margin-left: auto;
-    min-width: 80px
+    min-width: 100px
 }
 
 .MsoNormalCxSpFirst {
     margin: 0 !important;
+}
+.MsoTableGrid{
+    width: 100%;
+}
+.MsoNormalTable tbody td:has(.MsoNormal img) {
+    border-color: transparent;
 }
