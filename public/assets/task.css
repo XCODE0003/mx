@@ -52885,6 +52885,10 @@ button.swiper-pagination-bullet {
     line-height: 0 !important;
     font-size: 0 !important;
 }
+.MsoNormal span img{
+    min-width: unset;
+}
+
 .qblock, .task-content{
     width: 100% !important;
 }
