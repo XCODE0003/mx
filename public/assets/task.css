@@ -58763,9 +58763,11 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 /* .MsoTableGrid, .MsoTableGrid > .MsoNormal{
 
 } */
-#group_79 .MsoNormalTable[border="0"] {
+#group_79 .MsoNormalTable[border="0"],
+#group_79 .MsoNormalTable[border="0"] td,
+#group_79 .MsoNormalTable[border="0"] th {
+    border: 1px solid gray;
     border-collapse: collapse;
-    border: 1px solid #000;
 }
 .MsoNormalTable tbody td:has(.MsoNormal img),
 .MsoTableGrid tbody td:has(img),
