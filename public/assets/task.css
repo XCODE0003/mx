@@ -58769,6 +58769,10 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
     border: 1px solid gray;
     border-collapse: collapse;
 }
+
+td[bgcolor]{
+    background-color: #fff;
+}
 .MsoNormalTable tbody td:has(.MsoNormal img),
 .MsoTableGrid tbody td:has(img),
 .MsoTableGrid tbody td:has(.MsoNormal img) {
