@@ -12,7 +12,7 @@ Route::get('/', function () {
 
 Route::get('/test', function () {
     return Inertia::render('test');
-})->name('home');
+})->name('test');
 Route::get('/login', function () {
     return Inertia::render('Auth/Login');
 })->name('login');
