@@ -52,7 +52,7 @@ jobs:
 
             # Import database dump
             echo "💾 Importing database dump..."
-            sudo mysql -u root kim365_ru < MX.sql
+            sudo mysql -u root kim365_ru < /var/www/kim365_ru_usr/data/www/kim365.ru/MX.sql
 
             echo "✅ Deployment completed successfully!"
 
