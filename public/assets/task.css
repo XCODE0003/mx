@@ -58778,7 +58778,9 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 #answer_kim p, span{
     color: #000 !important;
 }
-
+.task-content p:first-child{
+    margin-top: 0 !important;
+}
 
 .MsoTableGrid tbody td:not(:has(img)):not([width]):first-child,
 .MsoTableGrid tbody td:not(:has(.MsoNormal img)):not([width]):first-child {
