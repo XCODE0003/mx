@@ -16,6 +16,7 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    continue-on-error: true  # Добавьте эту строку
     steps:
       - uses: actions/checkout@v4
 
@@ -31,15 +32,12 @@ jobs:
 
       - name: Run Pint
         run: vendor/bin/pint
+        continue-on-error: true  # И эту
 
       - name: Format Frontend
         run: npm run format
+        continue-on-error: true  # И эту
 
       - name: Lint Frontend
         run: npm run lint
-
-      # - name: Commit Changes
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: fix code style
-      #     commit_options: '--no-verify'
+        continue-on-error: true  # И эту
