@@ -270,7 +270,7 @@
     </script>
 </head>
 
-<body id="group_{{ $group->id }}">
+<body id="group_{{ $group->id ?? 'unknown' }}">
 <div class="container preview-page">
     <div class="header">
         <b>Тренировочная работа в формате ОГЭ по МАТЕМАТИКЕ</b>
