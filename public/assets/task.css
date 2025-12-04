@@ -58763,7 +58763,10 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 /* .MsoTableGrid, .MsoTableGrid > .MsoNormal{
 
 } */
-
+#group_79 .MsoNormalTable[border="0"] {
+    border-collapse: collapse;
+    border: 1px solid #000;
+}
 .MsoNormalTable tbody td:has(.MsoNormal img),
 .MsoTableGrid tbody td:has(img),
 .MsoTableGrid tbody td:has(.MsoNormal img) {
@@ -58811,9 +58814,11 @@ table:first-child:not(img) > .MsoNormalTable tbody td:not(:has(.MsoNormal img)):
 .MsoNormalTable[style*="width"] {
     width: 100% !important;
 }
-.MsoTableGrid:not([align="right"]){
+.MsoTableGrid:not([align="right"]), .MsoNormalTable:not([align="right"]){
     width: 100%;
 }
+
+
 .Basis {
     margin: 0 !important;
 }
