@@ -58809,9 +58809,9 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 .MsoNormalTable[style*="width"] {
     width: 100% !important;
 }
-
-
-
+.MsoTableGrid:not([align="right"]){
+    width: 100%;
+}
 .Basis {
     margin: 0 !important;
 }
