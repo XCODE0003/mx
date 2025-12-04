@@ -58783,13 +58783,20 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 }
 
 .MsoTableGrid tbody td:not(:has(img)):not([width]):first-child,
-.MsoTableGrid tbody td:not(:has(.MsoNormal img)):not([width]):first-child {
+.MsoTableGrid tbody td:not(:has(.MsoNormal img)):not([width]):first-child,
+.MsoNormalTable tbody td:not(:has(img)):not([width]):first-child,
+.MsoNormalTable tbody td:not(:has(.MsoNormal img)):not([width]):first-child{
     width: auto;
     white-space: normal;
-    min-width: 500px;
-    /* минимальная ширина для комфортного чтения */
+    min-width: 500px !important;
 }
+.MsoNormalTable tbody td:not(:has(img)):first-child,
+.MsoNormalTable tbody td:not(:has(.MsoNormal img)):first-child{
+    width: auto;
+    white-space: normal;
+    min-width: 500px !important;
 
+}
 
 .active-distractor b {
     font-weight: normal;
