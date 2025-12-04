@@ -58782,16 +58782,18 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
     margin-top: 0 !important;
 }
 
-.MsoTableGrid tbody td:not(:has(img)):not([width]):first-child,
-.MsoTableGrid tbody td:not(:has(.MsoNormal img)):not([width]):first-child,
-.MsoNormalTable tbody td:not(:has(img)):not([width]):first-child,
-.MsoNormalTable tbody td:not(:has(.MsoNormal img)):not([width]):first-child{
+table:first-child:not(img) > .MsoTableGrid tbody td:not(:has(img)):not([width]):first-child,
+table:first-child:not(img) > .MsoTableGrid tbody td:not(:has(.MsoNormal img)):not([width]):first-child,
+table:first-child:not(img) > .MsoNormalTable tbody td:not(:has(img)):not([width]):first-child,
+table:first-child:not(img) > .MsoNormalTable tbody td:not(:has(.MsoNormal img)):not([width]):first-child,
+table:not(img) > .MsoNormalTable tbody td:not(:has(img)):not([width]):first-child,
+table:not(img) > .MsoNormalTable tbody td:not(:has(.MsoNormal img)):not([width]):first-child{
     width: auto;
     white-space: normal;
     min-width: 500px !important;
 }
-.MsoNormalTable tbody td:not(:has(img)):first-child,
-.MsoNormalTable tbody td:not(:has(.MsoNormal img)):first-child{
+table:first-child:not(img) > .MsoNormalTable tbody td:not(:has(img)):first-child,
+table:first-child:not(img) > .MsoNormalTable tbody td:not(:has(.MsoNormal img)):first-child{
     width: auto;
     white-space: normal;
     min-width: 500px !important;
