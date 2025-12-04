@@ -438,7 +438,7 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
             const answer_div = answer_p[i];
             const isIncludeAnswer = answer_div.textContent.includes('Ответ:');
             answer_div.style.display = isIncludeAnswer ? 'none' : 'block';
-            if(answer_is_already_visible.length > 0) {
+            if(answer_is_already_visible.length > 0 && !answer_div.textContent.includes('ОТВЕТ:') ) {
                 answer_div.style.display = 'none';
             }
             if(isIncludeAnswer) {

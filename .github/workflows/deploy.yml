@@ -1,0 +1,59 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          script_stop: true
+          command_timeout: 30m
+          script: |
+            set -euo pipefail
+
+            # Navigate to project directory
+            cd /var/www/kim365_ru_usr/data/www/kim365.ru/
+
+            # Pull latest code
+            echo "🔄 Pulling latest code from main branch..."
+            git fetch --all --prune
+            git checkout main
+            git reset --hard origin/main
+
+            # Setup Node.js if nvm is available
+            if [ -s "$HOME/.nvm/nvm.sh" ]; then
+              . "$HOME/.nvm/nvm.sh"
+              nvm use 22 2>/dev/null || nvm install 22
+            fi
+
+            # Install PHP dependencies
+            echo "📦 Installing PHP dependencies..."
+            composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+            # Build frontend assets
+            echo "🏗️  Building frontend assets..."
+            npm ci
+            npm run build
+
+            # Clear and optimize Laravel caches
+            echo "⚡ Optimizing Laravel..."
+            php artisan optimize:clear
+            php artisan optimize
+
+            # Import database dump
+            echo "💾 Importing database dump..."
+            sudo mysql -u root kim365_ru < MX.sql
+
+            echo "✅ Deployment completed successfully!"
+
