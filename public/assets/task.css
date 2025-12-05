@@ -58773,6 +58773,12 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 td[bgcolor]{
     background-color: #fff;
 }
+.MsoNormalTable td:has(> p.MsoNormal[style*="display: none"])
+{
+    display: none;
+}
+
+
 .MsoNormalTable tbody td:has(.MsoNormal img),
 .MsoTableGrid tbody td:has(img),
 .MsoTableGrid tbody td:has(.MsoNormal img) {
