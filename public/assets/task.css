@@ -58691,7 +58691,7 @@ button.swiper-pagination-bullet {
 
 }
 .MsoNormal img {
-    max-width: 180px;
+    /* max-width: 180px; */
     max-height: 180px;
 }
 
