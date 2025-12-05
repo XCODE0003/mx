@@ -68,7 +68,7 @@
     </script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
         @routes
-        @vite(['resources/js/app.js', "resources/js/pages/{$page['component']}.vue"])
+        @vite(['resources/js/app.js'])
         @inertiaHead
     </head>
     <body class="font-sans antialiased">
