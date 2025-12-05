@@ -58773,7 +58773,7 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 td[bgcolor]{
     background-color: #fff;
 }
-.MsoNormalTable td:has(> p.MsoNormal[style*="display: none"])
+.MsoNormalTable td:has(> p.MsoNormal[style*="display: none"]):not(:has(span))
 {
     display: none;
 }
