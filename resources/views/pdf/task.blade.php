@@ -346,6 +346,12 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
                         @if ($withAnswers)
                             @php
                                 $ans = $t->response ?? '';
+                                // Для группы 132 удаляем "ОТВЕТ:" из ответа
+                                if (($group->id ?? null) == 132 && $ans !== '') {
+                                    $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
+                                    $ans = preg_replace('/Ответ:\s*/i', '', $ans);
+                                    $ans = trim($ans);
+                                }
                             @endphp
                             @if($ans !== '')
                                 <div
@@ -431,6 +437,10 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Проверяем, что это группа 132
+        const bodyId = document.body.id;
+        const isGroup132 = bodyId === 'group_132';
+
         const answer = document.getElementById('answer_kim');
         const answer_p = answer.getElementsByTagName('p');
         const answer_is_already_visible = [];
@@ -449,8 +459,26 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
                 answer_div.innerHTML = answer_div.innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
             }
         }
+
+        // Для группы 132 удаляем "ОТВЕТ:" из ответов, оставляя только число
+        if (isGroup132) {
+            const answerDivs = answer.querySelectorAll('div');
+            answerDivs.forEach(function(div) {
+                let text = div.textContent || div.innerText || '';
+                // Удаляем "ОТВЕТ:" или "Ответ:" и оставляем только число
+                text = text.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '').trim();
+                // Если остался только число, заменяем содержимое
+                if (/^\d+$/.test(text.trim())) {
+                    div.textContent = text.trim();
+                } else {
+                    // Если есть другой текст, просто удаляем "ОТВЕТ:" или "Ответ:"
+                    div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
+                }
+            });
+        }
     });
 </script>
+
 
 </div>
 </body>
