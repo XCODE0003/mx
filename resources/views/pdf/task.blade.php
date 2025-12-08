@@ -439,7 +439,7 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
     document.addEventListener('DOMContentLoaded', function() {
         // Проверяем, что это группа 132
         const bodyId = document.body.id;
-        const isGroup132 = bodyId === 'group_132';
+        const isGroup132 = bodyId === 'group_132' || bodyId === 'group_133' || bodyId === 'group_134' || bodyId === 'group_26' || bodyId === 'group_28' || bodyId === 'group_29';
 
         const answer = document.getElementById('answer_kim');
         const answer_p = answer.getElementsByTagName('p');
