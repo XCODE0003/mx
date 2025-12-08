@@ -444,6 +444,10 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
             if(isIncludeAnswer) {
                 answer_is_already_visible.push(answer_div);
             }
+            // Заменяем "ОТВЕТ:" на "Ответ:" в тексте после проверки
+            if(answer_div.innerHTML.includes('ОТВЕТ:')) {
+                answer_div.innerHTML = answer_div.innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
+            }
         }
     });
 </script>

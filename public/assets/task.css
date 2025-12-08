@@ -55485,6 +55485,9 @@ button.swiper-pagination-bullet {
 .d-lg-none img {
     max-width: 250px;
 }
+#group_64 #answer_kim img{
+    max-width: 180px;
+}
 
 /*.mjx-mrow{*/
 /*    text-wrap: wrap;*/
@@ -58773,7 +58776,7 @@ span.mjx-delim-v .mjx-char[style*="line-height"][style*="margin-bottom"] {
 td[bgcolor]{
     background-color: #fff;
 }
-.MsoNormalTable td:has(> p.MsoNormal[style*="display: none"]):not(:has(span))
+.MsoNormalTable td:has(> p.MsoNormal[style*="display: none"]):not(:has(span)):has(> p:only-child)
 {
     display: none;
 }
