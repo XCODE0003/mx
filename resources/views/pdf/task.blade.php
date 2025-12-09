@@ -139,13 +139,15 @@
             document.body.setAttribute('data-mathjax-ready','1');
         }]);
     </script>
-    <script type="text/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
     <style>
         .header {
             text-align: center;
         }
-        :root { --math-width: 550px; }
+
+        :root {
+            --math-width: 550px;
+        }
 
         .MathJax_Display {
             display: block;
@@ -154,7 +156,7 @@
         }
 
 
-        form > table > tbody > tr > td {
+        form>table>tbody>tr>td {
             padding: 0 !important;
             margin: 0 !important;
         }
@@ -221,19 +223,19 @@
         }
 
         // Показывает картинку внутри контента
-        window.ShowPictureQ = function(s, hint) {
+        window.ShowPictureQ = function (s, hint) {
             s = cleanName(s);
             document.write('<img src="' + window.qfiles_location + s + '" align="absmiddle" alt="' + (hint || '') + '" border="0"> ');
         };
 
-        window.ShowPictureQBL = function(s, hint, h, bl) {
+        window.ShowPictureQBL = function (s, hint, h, bl) {
             s = cleanName(s);
             var vspace = h / 2 - bl;
             if (vspace < 0) vspace = -vspace;
             document.write('<img src="' + window.qfiles_location + s + '" align="middle" border="0" alt="' + (hint || '') + '" vspace="' + vspace + '" style="position:relative; top:' + (h / 2 - bl) + 'px;">');
         };
 
-        window.ShowPictureQ2WH = function(s, s2, hint, w, h) {
+        window.ShowPictureQ2WH = function (s, s2, hint, w, h) {
             if (s.indexOf('.flv') > 0 || s.indexOf('.mp4') > 0 || s.indexOf('.swf') > 0) {
                 s = '../../show_media.php?m=' + encodeURIComponent(s) + '&w=' + w + '&h=' + h;
             }
@@ -244,20 +246,20 @@
             document.write('<a href="javascript:' + popup + '"><img border="0" src="' + window.qfiles_location + s2 + '" align="absmiddle" style="cursor:pointer" alt="' + (hint || '') + '"></a> ');
         };
 
-        window.ShowPictureQ3WH = function(s, s2, s3, hint, w, h) {
+        window.ShowPictureQ3WH = function (s, s2, s3, hint, w, h) {
             window.ShowPictureQ2WH(s, s2, hint, w, h);
         };
 
-        window.ShowPictureQ2 = function(s, s2, hint) {
+        window.ShowPictureQ2 = function (s, s2, hint) {
             window.ShowPictureQ2WH(s, s2, hint, 600, 400);
         };
 
-        window.invertImage = function(img, s, s2) {
+        window.invertImage = function (img, s, s2) {
             if (img.src.indexOf(s) > 0) img.src = window.qfiles_location + s2;
             else img.src = window.qfiles_location + s;
         };
 
-        window.ShowPictureQ3 = function(s, s2, hint) {
+        window.ShowPictureQ3 = function (s, s2, hint) {
             s = cleanName(s);
             var src2 = window.qfiles_location + s2;
             if (s.indexOf('.jpg') > 0 || s.indexOf('.png') > 0 || s.indexOf('.gif') > 0) {
@@ -271,288 +273,294 @@
 </head>
 
 <body id="group_{{ $group->id ?? 'unknown' }}">
-<div class="container preview-page">
-    <div class="header">
-        <b>Тренировочная работа в формате ОГЭ по МАТЕМАТИКЕ</b>
-        <br>
-        <br>
+    <div class="container preview-page">
+        <div class="header">
+            <b>Тренировочная работа в формате ОГЭ по МАТЕМАТИКЕ</b>
+            <br>
+            <br>
 
-        9 КЛАСС
-        <br>
-        <br>
-        Дата: ___ ___ 2023 г.
-        <br>
-        Вариант №: ___
-        <br>
-        Выполнена: ФИО_________________________________
-        <br><br>
-        <b>Инструкция по выполнению работы</b>
-        <br>
-        <div class="instruction">
-            Работа состоит из двух частей, включающих в себя 25 заданий. Часть 1 содержит
-            19 заданий, часть 2 содержит 6 заданий с развёрнутым ответом.
-            На выполнение работы по математике отводится 3 часа 55 минут (235 минут).
-            Ответы к заданиям 7 и 13 запишите в виде одной цифры, которая соответствует
-            номеру правильного ответа.
-            Для остальных заданий части 1 ответом является число или последовательность
-            цифр. Если получилась обыкновенная дробь, ответ запишите в виде десятичной.
-            Решения заданий части 2 и ответы к ним запишите на отдельном листе бумаги.
-            Задания можно выполнять в любом порядке. Текст задания переписывать не надо,
-            необходимо только указать его номер.
-            Сначала выполняйте задания части 1. Начать советуем с тех заданий, которые
-            вызывают у вас меньше затруднений, затем переходите к другим заданиям. Для
-            экономии времени пропускайте задание, которое не удаётся выполнить сразу, и
-            переходите к следующему. Если у вас останется время, вы сможете вернуться к
-            пропущенным заданиям.
-            При выполнении части 1 все необходимые вычисления, преобразования
-            выполняйте в черновике. <b>Записи в черновике, а также в тексте контрольных
-                измерительных материалов не учитываются при оценивании работы.</b>
-            Если задание содержит рисунок, то на нём непосредственно в тексте работы
-            можно выполнять необходимые вам построения. Рекомендуем внимательно читать
-            условие и проводить проверку полученного ответа.
-            При выполнении работы вы можете воспользоваться справочными материалами,
-            выданными вместе с вариантом КИМ, и линейкой.
-            Баллы, полученные вами за выполненные задания, суммируются. Постарайтесь
-            выполнить как можно больше заданий и набрать наибольшее количество баллов.
-            После завершения работы проверьте, чтобы ответ на каждое задание был записан
-            под правильным номером.
+            9 КЛАСС
+            <br>
+            <br>
+            Дата: ___ ___ 2023 г.
+            <br>
+            Вариант №: ___
+            <br>
+            Выполнена: ФИО_________________________________
+            <br><br>
+            <b>Инструкция по выполнению работы</b>
+            <br>
+            <div class="instruction">
+                Работа состоит из двух частей, включающих в себя 25 заданий. Часть 1 содержит
+                19 заданий, часть 2 содержит 6 заданий с развёрнутым ответом.
+                На выполнение работы по математике отводится 3 часа 55 минут (235 минут).
+                Ответы к заданиям 7 и 13 запишите в виде одной цифры, которая соответствует
+                номеру правильного ответа.
+                Для остальных заданий части 1 ответом является число или последовательность
+                цифр. Если получилась обыкновенная дробь, ответ запишите в виде десятичной.
+                Решения заданий части 2 и ответы к ним запишите на отдельном листе бумаги.
+                Задания можно выполнять в любом порядке. Текст задания переписывать не надо,
+                необходимо только указать его номер.
+                Сначала выполняйте задания части 1. Начать советуем с тех заданий, которые
+                вызывают у вас меньше затруднений, затем переходите к другим заданиям. Для
+                экономии времени пропускайте задание, которое не удаётся выполнить сразу, и
+                переходите к следующему. Если у вас останется время, вы сможете вернуться к
+                пропущенным заданиям.
+                При выполнении части 1 все необходимые вычисления, преобразования
+                выполняйте в черновике. <b>Записи в черновике, а также в тексте контрольных
+                    измерительных материалов не учитываются при оценивании работы.</b>
+                Если задание содержит рисунок, то на нём непосредственно в тексте работы
+                можно выполнять необходимые вам построения. Рекомендуем внимательно читать
+                условие и проводить проверку полученного ответа.
+                При выполнении работы вы можете воспользоваться справочными материалами,
+                выданными вместе с вариантом КИМ, и линейкой.
+                Баллы, полученные вами за выполненные задания, суммируются. Постарайтесь
+                выполнить как можно больше заданий и набрать наибольшее количество баллов.
+                После завершения работы проверьте, чтобы ответ на каждое задание был записан
+                под правильным номером.
 
-        </div>
-        <br><br>
-        Желаем успеха!
-    </div>
-    <div class="page-break"></div>
-    @foreach ($tasks as $t)
-        <div class="task-content">
-
-            <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
-
-            <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
-                <div class="task-content">
-                    <div style="width: 100%;">
-                        {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
-
-                    </div>
-                </div>
-                <div class="flex flex-col gap-1 border border-1 border-solid"
-style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
-
- width: 100%">
-                    <p>
-                        Ответ:
-                    </p>
-                    <div id="answer_kim" style="display: inline-flex; gap: 5px; width: 100%">
-
-                        @if ($withAnswers)
-                            @php
-                                $ans = $t->response ?? '';
-                                // Для группы 132 удаляем "ОТВЕТ:" из ответа
-                                if (($group->id ?? null) == 132 && $ans !== '') {
-                                    $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
-                                    $ans = preg_replace('/Ответ:\s*/i', '', $ans);
-                                    $ans = trim($ans);
-                                }
-                            @endphp
-                            @if($ans !== '')
-                                <div
-                                    style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
-                                    {!! $ans !!}
-                                </div>
-                            @else
-                                ___________________________
-                            @endif
-                        @else
-                            ___________________________
-                        @endif
-                    </div>
-                </div>
             </div>
-
+            <br><br>
+            Желаем успеха!
         </div>
-        <br><br>
+        <div class="page-break"></div>
+        @foreach ($tasks as $t)
+                    <div class="task-content">
 
-    @endforeach
+                        <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
+
+                        <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
+                            <div class="task-content">
+                                <div style="width: 100%;">
+                                    {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
+                                    @if(isset($group) && ($group->id == 68 || $group->id == 54))
+                                        <div style="display: flex; gap: 5px; align-items: center;">
+                                            <span>Ответ:</span>
+                                            <div style="width: 32px; height: 32px; border: 1px solid #000; margin-top: 10px;">
+
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
+                            </div>
+                            <div class="flex flex-col gap-1 border border-1 border-solid" style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
+
+             width: 100%">
+                                <p>
+                                    Ответ:
+                                </p>
+                                <div id="answer_kim" style="display: inline-flex; gap: 5px; width: 100%">
+
+                                    @if ($withAnswers)
+                                        @php
+                                            $ans = $t->response ?? '';
+                                            // Для группы 132 удаляем "ОТВЕТ:" из ответа
+                                            if (($group->id ?? null) == 132 && $ans !== '') {
+                                                $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
+                                                $ans = preg_replace('/Ответ:\s*/i', '', $ans);
+                                                $ans = trim($ans);
+                                            }
+                                        @endphp
+                                        @if($ans !== '')
+                                            <div style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
+                                                {!! $ans !!}
+                                            </div>
+                                        @else
+                                            ___________________________
+                                        @endif
+                                    @else
+                                        ___________________________
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <br><br>
+
+        @endforeach
 
 
-    <script>
-        // (function () {
-        //     function hideEmptyMsoParagraphs() {
-        //         document.querySelectorAll('p.MsoNormal').forEach(function (p) {
-        //             var text = (p.textContent || '')
-        //                 .replace(/\u00A0/g, '') // убрать &nbsp;
-        //                 .trim();
-        //             if (text.length === 0) {
-        //                 p.style.display = 'none';
-        //             }
-        //         });
-        //     }
-        //     if (document.readyState !== 'loading') hideEmptyMsoParagraphs();
-        //     else document.addEventListener('DOMContentLoaded', hideEmptyMsoParagraphs);
-        //     if (window.MathJax && MathJax.Hub && MathJax.Hub.Queue) {
-        //         MathJax.Hub.Queue(hideEmptyMsoParagraphs);
-        //     }
-        // })();
+        <script>
+            // (function () {
+            //     function hideEmptyMsoParagraphs() {
+            //         document.querySelectorAll('p.MsoNormal').forEach(function (p) {
+            //             var text = (p.textContent || '')
+            //                 .replace(/\u00A0/g, '') // убрать &nbsp;
+            //                 .trim();
+            //             if (text.length === 0) {
+            //                 p.style.display = 'none';
+            //             }
+            //         });
+            //     }
+            //     if (document.readyState !== 'loading') hideEmptyMsoParagraphs();
+            //     else document.addEventListener('DOMContentLoaded', hideEmptyMsoParagraphs);
+            //     if (window.MathJax && MathJax.Hub && MathJax.Hub.Queue) {
+            //         MathJax.Hub.Queue(hideEmptyMsoParagraphs);
+            //     }
+            // })();
 
-        (function() {
-            function hideEmptyElements() {
-                // Скрываем пустые параграфы MsoNormal
-                document.querySelectorAll('p.MsoNormal').forEach(function(p) {
-                    // Не скрывать элементы, содержащие изображения или другие медиа/MathML
-                    if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
+            (function () {
+                function hideEmptyElements() {
+                    // Скрываем пустые параграфы MsoNormal
+                    document.querySelectorAll('p.MsoNormal').forEach(function (p) {
+                        // Не скрывать элементы, содержащие изображения или другие медиа/MathML
+                        if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
 
-                    var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
-                    if (text.length === 0) {
-                        // Клонируем и удаляем пустые вложенные теги (например пустые span с &nbsp;)
-                        var temp = p.cloneNode(true);
-                        temp.querySelectorAll('*').forEach(function(el) {
-                            if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
-                                el.parentNode.removeChild(el);
+                        var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
+                        if (text.length === 0) {
+                            // Клонируем и удаляем пустые вложенные теги (например пустые span с &nbsp;)
+                            var temp = p.cloneNode(true);
+                            temp.querySelectorAll('*').forEach(function (el) {
+                                if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
+                                    el.parentNode.removeChild(el);
+                                }
+                            });
+                            var remaining = (temp.textContent || '').replace(/\u00A0/g, '').trim();
+                            if (remaining.length === 0) {
+                                p.style.display = 'none';
                             }
-                        });
-                        var remaining = (temp.textContent || '').replace(/\u00A0/g, '').trim();
-                        if (remaining.length === 0) {
-                            p.style.display = 'none';
                         }
-                    }
-                });
-                // Скрываем пустые strong элементы
-                document.querySelectorAll('strong').forEach(function(strong) {
-                    var text = (strong.textContent || '')
-                        .replace(/\u00A0/g, '') // убрать &nbsp;
-                        .replace(/\s/g, '')     // убрать все пробелы
-                        .trim();
-                    if (text.length === 0) {
-                        strong.style.display = 'none';
-                    }
-                });
-            }
+                    });
+                    // Скрываем пустые strong элементы
+                    document.querySelectorAll('strong').forEach(function (strong) {
+                        var text = (strong.textContent || '')
+                            .replace(/\u00A0/g, '') // убрать &nbsp;
+                            .replace(/\s/g, '')     // убрать все пробелы
+                            .trim();
+                        if (text.length === 0) {
+                            strong.style.display = 'none';
+                        }
+                    });
+                }
 
-            if (document.readyState !== 'loading') hideEmptyElements();
-            else document.addEventListener('DOMContentLoaded', hideEmptyElements);
-            if (MathJax && MathJax.Hub && MathJax.Hub.Queue) {
-                MathJax.Hub.Queue(hideEmptyElements);
-            }
-        })();
-    </script>
+                if (document.readyState !== 'loading') hideEmptyElements();
+                else document.addEventListener('DOMContentLoaded', hideEmptyElements);
+                if (MathJax && MathJax.Hub && MathJax.Hub.Queue) {
+                    MathJax.Hub.Queue(hideEmptyElements);
+                }
+            })();
+        </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Проверяем, что это группа 132
-        const bodyId = document.body.id;
-        const isGroup132 = bodyId === 'group_132' || bodyId === 'group_133' || bodyId === 'group_134' || bodyId === 'group_26' || bodyId === 'group_28' || bodyId === 'group_29';
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Проверяем, что это группа 132
+                const bodyId = document.body.id;
+                const isGroup132 = bodyId === 'group_132' || bodyId === 'group_133' || bodyId === 'group_134' || bodyId === 'group_26' || bodyId === 'group_28' || bodyId === 'group_29';
 
-        const answer = document.getElementById('answer_kim');
-        const answer_p = answer.getElementsByTagName('p');
+                const answer = document.getElementById('answer_kim');
+                const answer_p = answer.getElementsByTagName('p');
 
-        // Функция для проверки, является ли параграф продолжением ответа
-        function isAnswerContinuation(text) {
-            const trimmed = text.trim();
-            // Проверяем, начинается ли с буквы ответа (б), в), г) и т.д.)
-            return /^[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed) ||
-                   /^\s*[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed);
-        }
+                // Функция для проверки, является ли параграф продолжением ответа
+                function isAnswerContinuation(text) {
+                    const trimmed = text.trim();
+                    // Проверяем, начинается ли с буквы ответа (б), в), г) и т.д.)
+                    return /^[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed) ||
+                        /^\s*[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed);
+                }
 
-        // Находим индекс последнего блока с "ОТВЕТ:" (приоритет) или "Ответ:"
-        let lastAnswerIndex = -1;
-        let hasOtvets = false;
+                // Находим индекс последнего блока с "ОТВЕТ:" (приоритет) или "Ответ:"
+                let lastAnswerIndex = -1;
+                let hasOtvets = false;
 
-        for (let i = 0; i < answer_p.length; i++) {
-            const textContent = answer_p[i].textContent || '';
-            const innerHTML = answer_p[i].innerHTML || '';
-            // Проверяем и в тексте, и в HTML (для случаев с <strong>Ответ:</strong>)
-            const hasOtvetsInText = textContent.includes('ОТВЕТ:') || innerHTML.includes('ОТВЕТ:');
-            const hasAnswerInText = textContent.includes('Ответ:') || innerHTML.includes('Ответ:');
+                for (let i = 0; i < answer_p.length; i++) {
+                    const textContent = answer_p[i].textContent || '';
+                    const innerHTML = answer_p[i].innerHTML || '';
+                    // Проверяем и в тексте, и в HTML (для случаев с <strong>Ответ:</strong>)
+                    const hasOtvetsInText = textContent.includes('ОТВЕТ:') || innerHTML.includes('ОТВЕТ:');
+                    const hasAnswerInText = textContent.includes('Ответ:') || innerHTML.includes('Ответ:');
 
-            if (hasOtvetsInText) {
-                lastAnswerIndex = i;
-                hasOtvets = true;
-            } else if (hasAnswerInText && !hasOtvets) {
-                lastAnswerIndex = i;
-            }
-        }
-
-        // Если нашли блок с ответом, обрабатываем все параграфы
-        if (lastAnswerIndex >= 0) {
-            let hidingContinuation = false;
-
-            for (let i = 0; i < answer_p.length; i++) {
-                const answer_div = answer_p[i];
-                const textContent = answer_div.textContent || '';
-                const innerHTML = answer_div.innerHTML || '';
-                const hasAnswer = textContent.includes('Ответ:') || textContent.includes('ОТВЕТ:') ||
-                                 innerHTML.includes('Ответ:') || innerHTML.includes('ОТВЕТ:');
-
-                // Если мы скрываем продолжение ответа
-                if (hidingContinuation) {
-                    // Если это продолжение ответа, скрываем его
-                    if (isAnswerContinuation(textContent)) {
-                        answer_div.style.display = 'none';
-                        continue;
-                    } else if (hasAnswer && i === lastAnswerIndex) {
-                        // Встретили последний блок с ответом - прекращаем скрывать продолжения
-                        hidingContinuation = false;
-                    } else if (hasAnswer) {
-                        // Встретили другой блок с ответом - продолжаем скрывать
-                        answer_div.style.display = 'none';
-                        hidingContinuation = true;
-                        continue;
-                    } else {
-                        // Встретили обычный текст - прекращаем скрывать продолжения
-                        hidingContinuation = false;
+                    if (hasOtvetsInText) {
+                        lastAnswerIndex = i;
+                        hasOtvets = true;
+                    } else if (hasAnswerInText && !hasOtvets) {
+                        lastAnswerIndex = i;
                     }
                 }
 
-                // Если это параграф с ответом
-                if (hasAnswer) {
-                    if (i === lastAnswerIndex) {
-                        // Последний блок с ответом - показываем и заменяем "ОТВЕТ:" на "Ответ:"
-                        answer_div.style.display = 'block';
-                        if(innerHTML.includes('ОТВЕТ:')) {
-                            answer_div.innerHTML = innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
-                        }
-                        // Сбрасываем флаг, чтобы показать продолжения после последнего блока
-                        hidingContinuation = false;
-                    } else {
-                        // Предыдущие блоки с ответом - скрываем
-                        answer_div.style.display = 'none';
-                        // Устанавливаем флаг для скрытия следующих параграфов-продолжений ответа
-                        hidingContinuation = true;
-                    }
-                } else {
-                    // Параграф без ответа - показываем всегда
-                    answer_div.style.display = 'block';
-                }
-            }
-        }
+                // Если нашли блок с ответом, обрабатываем все параграфы
+                if (lastAnswerIndex >= 0) {
+                    let hidingContinuation = false;
 
-        // Для группы 132 удаляем "ОТВЕТ:" из ответов, оставляя только число
-        if (isGroup132) {
-            const answerDivs = answer.querySelectorAll('div');
-            answerDivs.forEach(function(div) {
-                let text = div.textContent || div.innerText || '';
-                // Удаляем "ОТВЕТ:" или "Ответ:" и оставляем только число
-                text = text.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '').trim();
-                // Если остался только число, заменяем содержимое
-                if (/^\d+$/.test(text.trim())) {
-                    div.textContent = text.trim();
-                } else {
-                    // Если есть другой текст, просто удаляем "ОТВЕТ:" или "Ответ:"
-                    // div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
+                    for (let i = 0; i < answer_p.length; i++) {
+                        const answer_div = answer_p[i];
+                        const textContent = answer_div.textContent || '';
+                        const innerHTML = answer_div.innerHTML || '';
+                        const hasAnswer = textContent.includes('Ответ:') || textContent.includes('ОТВЕТ:') ||
+                            innerHTML.includes('Ответ:') || innerHTML.includes('ОТВЕТ:');
+
+                        // Если мы скрываем продолжение ответа
+                        if (hidingContinuation) {
+                            // Если это продолжение ответа, скрываем его
+                            if (isAnswerContinuation(textContent)) {
+                                answer_div.style.display = 'none';
+                                continue;
+                            } else if (hasAnswer && i === lastAnswerIndex) {
+                                // Встретили последний блок с ответом - прекращаем скрывать продолжения
+                                hidingContinuation = false;
+                            } else if (hasAnswer) {
+                                // Встретили другой блок с ответом - продолжаем скрывать
+                                answer_div.style.display = 'none';
+                                hidingContinuation = true;
+                                continue;
+                            } else {
+                                // Встретили обычный текст - прекращаем скрывать продолжения
+                                hidingContinuation = false;
+                            }
+                        }
+
+                        // Если это параграф с ответом
+                        if (hasAnswer) {
+                            if (i === lastAnswerIndex) {
+                                // Последний блок с ответом - показываем и заменяем "ОТВЕТ:" на "Ответ:"
+                                answer_div.style.display = 'block';
+                                if (innerHTML.includes('ОТВЕТ:')) {
+                                    answer_div.innerHTML = innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
+                                }
+                                // Сбрасываем флаг, чтобы показать продолжения после последнего блока
+                                hidingContinuation = false;
+                            } else {
+                                // Предыдущие блоки с ответом - скрываем
+                                answer_div.style.display = 'none';
+                                // Устанавливаем флаг для скрытия следующих параграфов-продолжений ответа
+                                hidingContinuation = true;
+                            }
+                        } else {
+                            // Параграф без ответа - показываем всегда
+                            answer_div.style.display = 'block';
+                        }
+                    }
+                }
+
+                // Для группы 132 удаляем "ОТВЕТ:" из ответов, оставляя только число
+                if (isGroup132) {
+                    const answerDivs = answer.querySelectorAll('div');
+                    answerDivs.forEach(function (div) {
+                        let text = div.textContent || div.innerText || '';
+                        // Удаляем "ОТВЕТ:" или "Ответ:" и оставляем только число
+                        text = text.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '').trim();
+                        // Если остался только число, заменяем содержимое
+                        if (/^\d+$/.test(text.trim())) {
+                            div.textContent = text.trim();
+                        } else {
+                            // Если есть другой текст, просто удаляем "ОТВЕТ:" или "Ответ:"
+                            // div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
+                        }
+                    });
                 }
             });
-        }
-    });
-</script>
-<script>
-    // Удаляем &nbsp; из контента задач
-    document.addEventListener('DOMContentLoaded', function() {
-        const taskContents = document.querySelectorAll('.task-content');
-        taskContents.forEach(function(content) {
-            // Заменяем &nbsp; на обычный пробел
-            content.innerHTML = content.innerHTML.replace(/&nbsp;/g, ' ');
-        });
-    });
-</script>
+        </script>
+        <script>
+            // Удаляем &nbsp; из контента задач
+            document.addEventListener('DOMContentLoaded', function () {
+                const taskContents = document.querySelectorAll('.task-content');
+                taskContents.forEach(function (content) {
+                    // Заменяем &nbsp; на обычный пробел
+                    content.innerHTML = content.innerHTML.replace(/&nbsp;/g, ' ');
+                });
+            });
+        </script>
 
-</div>
+    </div>
 </body>
