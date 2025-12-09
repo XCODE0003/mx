@@ -443,20 +443,85 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
 
         const answer = document.getElementById('answer_kim');
         const answer_p = answer.getElementsByTagName('p');
-        const answer_is_already_visible = [];
+
+        // Функция для проверки, является ли параграф продолжением ответа
+        function isAnswerContinuation(text) {
+            const trimmed = text.trim();
+            // Проверяем, начинается ли с буквы ответа (б), в), г) и т.д.)
+            return /^[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed) ||
+                   /^\s*[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed);
+        }
+
+        // Находим индекс последнего блока с "ОТВЕТ:" (приоритет) или "Ответ:"
+        let lastAnswerIndex = -1;
+        let hasOtvets = false;
+
         for (let i = 0; i < answer_p.length; i++) {
-            const answer_div = answer_p[i];
-            const isIncludeAnswer = answer_div.textContent.includes('Ответ:');
-            answer_div.style.display = isIncludeAnswer ? 'none' : 'block';
-            if(answer_is_already_visible.length > 0 && !answer_div.textContent.includes('ОТВЕТ:') ) {
-                answer_div.style.display = 'none';
+            const textContent = answer_p[i].textContent || '';
+            const innerHTML = answer_p[i].innerHTML || '';
+            // Проверяем и в тексте, и в HTML (для случаев с <strong>Ответ:</strong>)
+            const hasOtvetsInText = textContent.includes('ОТВЕТ:') || innerHTML.includes('ОТВЕТ:');
+            const hasAnswerInText = textContent.includes('Ответ:') || innerHTML.includes('Ответ:');
+
+            if (hasOtvetsInText) {
+                lastAnswerIndex = i;
+                hasOtvets = true;
+            } else if (hasAnswerInText && !hasOtvets) {
+                lastAnswerIndex = i;
             }
-            if(isIncludeAnswer) {
-                answer_is_already_visible.push(answer_div);
-            }
-            // Заменяем "ОТВЕТ:" на "Ответ:" в тексте после проверки
-            if(answer_div.innerHTML.includes('ОТВЕТ:')) {
-                answer_div.innerHTML = answer_div.innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
+        }
+
+        // Если нашли блок с ответом, обрабатываем все параграфы
+        if (lastAnswerIndex >= 0) {
+            let hidingContinuation = false;
+
+            for (let i = 0; i < answer_p.length; i++) {
+                const answer_div = answer_p[i];
+                const textContent = answer_div.textContent || '';
+                const innerHTML = answer_div.innerHTML || '';
+                const hasAnswer = textContent.includes('Ответ:') || textContent.includes('ОТВЕТ:') ||
+                                 innerHTML.includes('Ответ:') || innerHTML.includes('ОТВЕТ:');
+
+                // Если мы скрываем продолжение ответа
+                if (hidingContinuation) {
+                    // Если это продолжение ответа, скрываем его
+                    if (isAnswerContinuation(textContent)) {
+                        answer_div.style.display = 'none';
+                        continue;
+                    } else if (hasAnswer && i === lastAnswerIndex) {
+                        // Встретили последний блок с ответом - прекращаем скрывать продолжения
+                        hidingContinuation = false;
+                    } else if (hasAnswer) {
+                        // Встретили другой блок с ответом - продолжаем скрывать
+                        answer_div.style.display = 'none';
+                        hidingContinuation = true;
+                        continue;
+                    } else {
+                        // Встретили обычный текст - прекращаем скрывать продолжения
+                        hidingContinuation = false;
+                    }
+                }
+
+                // Если это параграф с ответом
+                if (hasAnswer) {
+                    if (i === lastAnswerIndex) {
+                        // Последний блок с ответом - показываем и заменяем "ОТВЕТ:" на "Ответ:"
+                        answer_div.style.display = 'block';
+                        if(innerHTML.includes('ОТВЕТ:')) {
+                            answer_div.innerHTML = innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
+                        }
+                        // Сбрасываем флаг, чтобы показать продолжения после последнего блока
+                        hidingContinuation = false;
+                    } else {
+                        // Предыдущие блоки с ответом - скрываем
+                        answer_div.style.display = 'none';
+                        // Устанавливаем флаг для скрытия следующих параграфов-продолжений ответа
+                        hidingContinuation = true;
+                    }
+                } else {
+                    // Параграф без ответа - показываем всегда
+                    answer_div.style.display = 'block';
+                }
             }
         }
 
@@ -472,7 +537,7 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
                     div.textContent = text.trim();
                 } else {
                     // Если есть другой текст, просто удаляем "ОТВЕТ:" или "Ответ:"
-                    div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
+                    // div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
                 }
             });
         }
