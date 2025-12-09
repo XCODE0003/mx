@@ -543,7 +543,16 @@ style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
         }
     });
 </script>
-
+<script>
+    // Удаляем &nbsp; из контента задач
+    document.addEventListener('DOMContentLoaded', function() {
+        const taskContents = document.querySelectorAll('.task-content');
+        taskContents.forEach(function(content) {
+            // Заменяем &nbsp; на обычный пробел
+            content.innerHTML = content.innerHTML.replace(/&nbsp;/g, ' ');
+        });
+    });
+</script>
 
 </div>
 </body>

@@ -55481,7 +55481,9 @@ button.swiper-pagination-bullet {
         text-align: right;
     }
 }
-
+#group_133 td[width="0"]{
+    width: 200px !important;
+}
 .d-lg-none img {
     max-width: 250px;
 }
