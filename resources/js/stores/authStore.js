@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
                 if (response.status === 200) {
                     const userStore = useUserStore();
                     userStore.setUser(response.data.user);
-                    router.visit('/profile');
+                    window.location.href = '/profile';
                 }
 
                 return response;
