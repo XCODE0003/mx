@@ -75,6 +75,7 @@ class GenerateTaskBundle implements ShouldQueue
         // PDF без ответов
         $htmlNo = view('pdf.task', [
             'task' => $baseTask,
+            'subject' => $baseTask->subject,
             'tasks' => $tasks,
             'questionHtmlMap' => $questionHtmlMap,
             'withAnswers' => false,
@@ -85,6 +86,7 @@ class GenerateTaskBundle implements ShouldQueue
         $htmlAns = view('pdf.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
+            'subject' => $baseTask->subject,
             'questionHtmlMap' => $questionHtmlMap,
             'withAnswers' => true,
         ])->render();
@@ -95,6 +97,7 @@ class GenerateTaskBundle implements ShouldQueue
         $wordHtmlNo = view('word.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
+            'subject' => $baseTask->subject,
             'questionHtmlMap' => $questionHtmlMap,
             'withAnswers' => false,
         ])->render();
@@ -108,6 +111,7 @@ class GenerateTaskBundle implements ShouldQueue
         $wordHtmlAns = view('word.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
+            'subject' => $baseTask->subject,
             'questionHtmlMap' => $questionHtmlMap,
             'withAnswers' => true,
         ])->render();

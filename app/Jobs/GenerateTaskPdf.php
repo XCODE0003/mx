@@ -65,6 +65,7 @@ class GenerateTaskPdf implements ShouldQueue
         $html = view('pdf.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
+            'subject' => $baseTask->subject,
             'questionHtmlMap' => $questionHtmlMap,
             'withAnswers' => $withAnswers,
         ])->render();
