@@ -166,8 +166,35 @@
         }
 
         .instruction {
-            text-wrap: wrap;
+            /* вместо text-wrap: wrap; */
             text-align: justify;
+            text-justify: inter-word;
+
+            line-height: 1.4;
+            -webkit-hyphens: auto;
+            hyphens: auto;
+
+            overflow-wrap: break-word;
+            word-break: normal;
+        }
+
+        .instruction p {
+            margin: 0 0;
+            text-indent: 2em;
+            /* "красная строка" */
+        }
+
+        .instruction p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Обертка задания для предотвращения разрыва */
+        .task-block {
+            display: table;
+            width: 100%;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            margin-bottom: 20px;
         }
 
         .task-content {
@@ -231,7 +258,6 @@
                 right: 15mm;
             }
         }
-
     </style>
 
     <!-- Image display functions (must be loaded before body content) -->
@@ -298,120 +324,72 @@
         };
     </script>
 </head>
+
 <body id="group_{{ $group->id ?? 'unknown' }}">
     <div class="container preview-page">
-        <div class="header">
-            <b>Тренировочная работа в формате ОГЭ по МАТЕМАТИКЕ</b>
-            <br>
-            <br>
-            9 КЛАСС
-            <br>
-            <br>
-            Дата: ___ ___ 2023 г.
-            <br>
-            Вариант №: ___
-            <br>
-            Выполнена: ФИО_________________________________
-            <br><br>
-            <b>Инструкция по выполнению работы</b>
-            <br>
-            <div class="instruction">
-                Работа состоит из двух частей, включающих в себя 25 заданий. Часть 1 содержит
-                19 заданий, часть 2 содержит 6 заданий с развёрнутым ответом.
-                На выполнение работы по математике отводится 3 часа 55 минут (235 минут).
-                Ответы к заданиям 7 и 13 запишите в виде одной цифры, которая соответствует
-                номеру правильного ответа.
-                Для остальных заданий части 1 ответом является число или последовательность
-                цифр. Если получилась обыкновенная дробь, ответ запишите в виде десятичной.
-                Решения заданий части 2 и ответы к ним запишите на отдельном листе бумаги.
-                Задания можно выполнять в любом порядке. Текст задания переписывать не надо,
-                необходимо только указать его номер.
-                Сначала выполняйте задания части 1. Начать советуем с тех заданий, которые
-                вызывают у вас меньше затруднений, затем переходите к другим заданиям. Для
-                экономии времени пропускайте задание, которое не удаётся выполнить сразу, и
-                переходите к следующему. Если у вас останется время, вы сможете вернуться к
-                пропущенным заданиям.
-                При выполнении части 1 все необходимые вычисления, преобразования
-                выполняйте в черновике. <b>Записи в черновике, а также в тексте контрольных
-                    измерительных материалов не учитываются при оценивании работы.</b>
-                Если задание содержит рисунок, то на нём непосредственно в тексте работы
-                можно выполнять необходимые вам построения. Рекомендуем внимательно читать
-                условие и проводить проверку полученного ответа.
-                При выполнении работы вы можете воспользоваться справочными материалами,
-                выданными вместе с вариантом КИМ, и линейкой.
-                Баллы, полученные вами за выполненные задания, суммируются. Постарайтесь
-                выполнить как можно больше заданий и набрать наибольшее количество баллов.
-                После завершения работы проверьте, чтобы ответ на каждое задание был записан
-                под правильным номером.
-
-            </div>
-            <br><br>
-            Желаем успеха!
-        </div>
+       {!! $subject->text_header ?? '' !!}
         <div class="page-break"></div>
         @foreach ($tasks as $t)
-                    <div class="task-content">
+            <div class="task-block">
+                <div class="task-content">
 
-                        <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
+                    <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
 
-                        <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
-                            <div class="task-content">
-                                <div style="width: 100%;">
-                                    {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
-                                    @if(isset($group) && ($group->id == 68 || $group->id == 54))
-                                        <div style="display: flex; gap: 5px; align-items: center;">
-                                            <span>Ответ:</span>
-                                            <div style="width: 32px; height: 32px; border: 1px solid #000; margin-top: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
+                        <div class="task-content">
+                            <div style="width: 100%;">
+                                {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
+                                @if(isset($group) && ($group->id == 68 || $group->id == 54))
+                                    <div style="display: flex; gap: 5px; align-items: center;">
+                                        <span>Ответ:</span>
+                                        <div style="width: 32px; height: 32px; border: 1px solid #000; margin-top: 10px;">
 
-                                            </div>
                                         </div>
-                                    @endif
-                                </div>
-
+                                    </div>
+                                @endif
                             </div>
-                            <div class="flex
+
+                        </div>
+                        <div class="flex
                             @if($withAnswers)
-                            flex-col
+                                flex-col
                             @endif
                              gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
-                                <p>
-                                    Ответ:
-                                </p>
-                                <div id="answer_kim" style="display: inline-flex; gap: 5px; width: 100%">
+                            <p>
+                                Ответ:
+                            </p>
+                            <div id="answer_kim" style="display: inline-flex; gap: 5px; width: 100%">
 
-                                    @if ($withAnswers)
-                                        @php
-                                            $ans = $t->response ?? '';
-                                            // Для группы 132 удаляем "ОТВЕТ:" из ответа
-                                            if (($group->id ?? null) == 132 && $ans !== '') {
-                                                $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
-                                                $ans = preg_replace('/Ответ:\s*/i', '', $ans);
-                                                $ans = trim($ans);
-                                            }
-                                        @endphp
-                                        @if($ans !== '')
-                                            <div style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
-                                                {!! $ans !!}
-                                            </div>
-                                        @else
-                                            ___________________________
-                                        @endif
+                                @if ($withAnswers)
+                                    @php
+                                        $ans = $t->response ?? '';
+                                        // Для группы 132 удаляем "ОТВЕТ:" из ответа
+                                        if (($group->id ?? null) == 132 && $ans !== '') {
+                                            $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
+                                            $ans = preg_replace('/Ответ:\s*/i', '', $ans);
+                                            $ans = trim($ans);
+                                        }
+                                    @endphp
+                                    @if($ans !== '')
+                                        <div style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
+                                            {!! $ans !!}
+                                        </div>
                                     @else
                                         ___________________________
                                     @endif
-                                </div>
+                                @else
+                                    ___________________________
+                                @endif
                             </div>
                         </div>
-
                     </div>
-                    <br><br>
+
+                </div>
+            </div>
 
         @endforeach
 
-        <div class="page-footer">
-            <div>© 2025 год. Вариант сгенерирован на сайте kim365.mı</div>
-            <div>Публикация в интернете или печатных изданиях без письменного согласия запрещена</div>
-        </div>
+
 
 
         <script>

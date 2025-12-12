@@ -11,7 +11,8 @@ class Subject extends Model
         'subject_id',
         'name',
         'exam_type',
-        'class_name'
+        'class_name',
+        'text_header'
     ];
 
     protected $casts = [

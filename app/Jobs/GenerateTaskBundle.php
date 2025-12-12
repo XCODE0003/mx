@@ -152,10 +152,13 @@ private function savePdf(string $html, string $fullPath): void
         Публикация в интернете или печатных изданиях без письменного согласия запрещена
     </div>';
 
+    $headerHtml = '<div style="height:0; overflow:hidden;"></div>';
+
     $browser = Browsershot::html($html)
         ->format('A4')
         ->margins(15, 15, 35, 15)              // большее нижнее поле под футер
         ->showBrowserHeaderAndFooter()         // включает header/footer
+        ->headerHtml($headerHtml)              // HTML заголовка
         ->footerHtml($footerHtml)              // HTML футера
         ->waitUntilNetworkIdle()
         ->setDelay(1000)
