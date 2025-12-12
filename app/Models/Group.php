@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Group extends Model
 {
-    protected $fillable = ['title', 'subject_id', 'question', 'image'];
-
+    protected $fillable = ['title', 'subject_id', 'question', 'image', 'is_forming'];
+    protected $appends = ['formatted_title'];
     public function subject()
     {
         return $this->belongsTo(Subject::class, 'subject_id', 'subject_id');

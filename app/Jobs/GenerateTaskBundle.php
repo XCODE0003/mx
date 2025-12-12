@@ -44,9 +44,15 @@ class GenerateTaskBundle implements ShouldQueue
         if ($ids->isEmpty()) {
             $ids = collect([$this->baseTaskId]);
         }
-        $tasks = Task::with('group')->whereIn('id', $ids->all())->get()->filter()->sortBy(function ($task) {
-            return (int) $task->group->formatted_title;
-        });
+        $tasks = Task::with('group')->whereIn('id', $ids->all())->get()
+            ->filter(function ($task) {
+                // Фильтруем задачи, у которых есть группа
+                return $task->group !== null;
+            })
+            ->sortBy(function ($task) {
+                // Теперь можем безопасно обращаться к formatted_title
+                return (int) ($task->group->formatted_title ?? 999999);
+            });
 
         $questionHtmlMap = [];
         foreach ($tasks as $t) {
@@ -113,30 +119,56 @@ class GenerateTaskBundle implements ShouldQueue
 
         // ZIP
         $zip = new ZipArchive();
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE)) {
-            if (is_file($pdfNoAns)) { $zip->addFile($pdfNoAns, basename($pdfNoAns)); }
-            if (is_file($pdfAns))   { $zip->addFile($pdfAns, basename($pdfAns)); }
-            if (is_file($docNoAns)) { $zip->addFile($docNoAns, basename($docNoAns)); }
-            if (is_file($docAns))   { $zip->addFile($docAns, basename($docAns)); }
-            $zip->close();
+        $result = $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+        if ($result === true) {
+            try {
+                if (is_file($pdfNoAns)) { $zip->addFile($pdfNoAns, basename($pdfNoAns)); }
+                if (is_file($pdfAns))   { $zip->addFile($pdfAns, basename($pdfAns)); }
+                if (is_file($docNoAns)) { $zip->addFile($docNoAns, basename($docNoAns)); }
+                if (is_file($docAns))   { $zip->addFile($docAns, basename($docAns)); }
+                $zip->close();
+            } catch (\Throwable $e) {
+                Log::error('Error while creating ZIP archive', [
+                    'path' => $zipPath,
+                    'error' => $e->getMessage()
+                ]);
+                // Пытаемся закрыть архив, если он был открыт
+                if ($zip->status === ZipArchive::ER_OK) {
+                    @$zip->close();
+                }
+            }
+        } else {
+            Log::error('Failed to open ZIP archive', [
+                'path' => $zipPath,
+                'error_code' => $result
+            ]);
         }
     }
 
-    private function savePdf(string $html, string $fullPath): void
-    {
-        $browser = Browsershot::html($html)
-            ->format('A4')
-            ->margins(15, 15, 20, 15)
-            ->setDelay(1000)
-            ->waitUntilNetworkIdle()
-            ->timeout(600)
-            ->noSandbox();
-        $browser->setOption('args', [
-            '--allow-file-access-from-files',
-            '--disable-web-security',
-        ]);
-        $browser->savePdf($fullPath);
-    }
+private function savePdf(string $html, string $fullPath): void
+{
+    $footerHtml = '<div style="width:100%; font-size:10px; text-align:center; color:#000; padding-top:6px; border-top:1px solid #000;">
+        © 2025 год. Вариант сгенерирован на сайте kim365.mı<br>
+        Публикация в интернете или печатных изданиях без письменного согласия запрещена
+    </div>';
+
+    $browser = Browsershot::html($html)
+        ->format('A4')
+        ->margins(15, 15, 35, 15)              // большее нижнее поле под футер
+        ->showBrowserHeaderAndFooter()         // включает header/footer
+        ->footerHtml($footerHtml)              // HTML футера
+        ->waitUntilNetworkIdle()
+        ->setDelay(1000)
+        ->timeout(600)
+        ->noSandbox();
+
+    $browser->setOption('args', [
+        '--allow-file-access-from-files',
+        '--disable-web-security',
+    ]);
+
+    $browser->savePdf($fullPath);
+}
 
     /**
      * Попытка сгенерировать DOCX напрямую из HTML через LibreOffice (soffice)
@@ -278,7 +310,9 @@ class GenerateTaskBundle implements ShouldQueue
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
         foreach ($tasks as $t) {
-            $section->addText('Задание '.$t->group->formatted_title, ['bold' => true, 'size' => 12]);
+            // Безопасное получение formatted_title
+            $taskTitle = $t->group?->formatted_title ?? '?';
+            $section->addText('Задание '.$taskTitle, ['bold' => true, 'size' => 12]);
             $html = $questionHtmlMap[$t->id] ?? ($t->question ?? '');
             // Текстовая часть
             $text = $this->htmlToPlainText($html);
@@ -425,6 +459,38 @@ class GenerateTaskBundle implements ShouldQueue
             return 'data:'.$mime.';base64,'.base64_encode($httpData);
         }
         return $abs;
+    }
+
+    private function getZipErrorMessage(int $code): string
+    {
+        $messages = [
+            ZipArchive::ER_OK => 'No error',
+            ZipArchive::ER_MULTIDISK => 'Multi-disk zip archives not supported',
+            ZipArchive::ER_RENAME => 'Renaming temporary file failed',
+            ZipArchive::ER_CLOSE => 'Closing zip archive failed',
+            ZipArchive::ER_SEEK => 'Seek error',
+            ZipArchive::ER_READ => 'Read error',
+            ZipArchive::ER_WRITE => 'Write error',
+            ZipArchive::ER_CRC => 'CRC error',
+            ZipArchive::ER_ZIPCLOSED => 'Containing zip archive was closed',
+            ZipArchive::ER_NOENT => 'No such file',
+            ZipArchive::ER_EXISTS => 'File already exists',
+            ZipArchive::ER_OPEN => 'Can\'t open file',
+            ZipArchive::ER_TMPOPEN => 'Failure to create temporary file',
+            ZipArchive::ER_ZLIB => 'Zlib error',
+            ZipArchive::ER_MEMORY => 'Memory allocation failure',
+            ZipArchive::ER_CHANGED => 'Entry has been changed',
+            ZipArchive::ER_COMPNOTSUPP => 'Compression method not supported',
+            ZipArchive::ER_EOF => 'Premature EOF',
+            ZipArchive::ER_INVAL => 'Invalid argument',
+            ZipArchive::ER_NOZIP => 'Not a zip archive',
+            ZipArchive::ER_INTERNAL => 'Internal error',
+            ZipArchive::ER_INCONS => 'Zip archive inconsistent',
+            ZipArchive::ER_REMOVE => 'Can\'t remove file',
+            ZipArchive::ER_DELETED => 'Entry has been deleted',
+        ];
+
+        return $messages[$code] ?? "Unknown error (code: {$code})";
     }
 }
 

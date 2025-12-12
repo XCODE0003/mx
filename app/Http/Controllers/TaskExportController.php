@@ -14,8 +14,8 @@ class TaskExportController extends Controller
     {
         $groups = $task->subject->groups;
         $randomTasks = $groups->map(function ($group) use ($task) {
-            return $group->tasks()->where('id', $task->id)->first();
-            // return $group->tasks()->inRandomOrder()->first();
+            // return $group->tasks()->where('id', $task->id)->first();
+            return $group->tasks()->inRandomOrder()->first();
         })->filter();
 
         // If no tasks found in groups, use the original task
@@ -31,7 +31,7 @@ class TaskExportController extends Controller
             'tasks'    => $randomTasks,
             'group'    => $task->group,
             'subject'  => $task->subject,
-            'withAnswers' => true,
+            'withAnswers' => false,
         ]);
     }
     public function viewTasks(Task $task)
@@ -44,7 +44,7 @@ class TaskExportController extends Controller
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
         });
-        return response()->view('pdf.view_task', [
+        return response()->view('pdf.task', [
             'task'    => $task,
             'group'    => $task->group,
             'subject'  => $task->subject,
@@ -93,7 +93,11 @@ class TaskExportController extends Controller
         $tasks = $tasks->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
         });
-        $zipName = 'bundle-' . $baseTask->id . '-' . time() . '.zip';
+
+        // Используем хеш вместо перечисления всех ID
+        $taskIdsHash = substr(md5(implode('-', $taskIds)), 0, 8);
+        $zipName = 'bundle-' . $baseTask->id . '-' . $taskIdsHash . '-' . time() . '.zip';
+
         $order = Order::create([
             'subject_id' => $baseTask->id,
             'task_ids' => json_encode($tasks->pluck('id')->all()),
@@ -176,6 +180,10 @@ class TaskExportController extends Controller
         $tasks = Task::where('subject_id', $subject->subject_id)
             ->whereNotNull('mark')
             ->whereNotNull('response')
+            ->whereHas('group', function ($query) {
+                $query->where('is_forming', true);
+            })
+            ->with('group')
             ->get()
             ->groupBy('mark')
             ->map(function ($group) {
@@ -184,9 +192,22 @@ class TaskExportController extends Controller
             ->values();
 
         $tasks = $tasks->sortBy(function ($task) {
-            return (int) $task->group->formatted_title;
+            // Добавить проверку на null
+            return $task->group ? (int) $task->group->formatted_title : 999999;
         });
-        $zipName = 'bundle-' . $tasks->pluck('id')->implode('-') . '-' . time() . '.zip';
+
+        // Проверить, что коллекция не пустая перед использованием first()
+        if ($tasks->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Не найдено задач для экспорта.',
+            ], 404);
+        }
+
+        // Используем хеш вместо перечисления всех ID
+        $taskIdsHash = substr(md5(implode('-', $tasks->pluck('id')->all())), 0, 8);
+        $zipName = 'bundle-' . $tasks->first()->id . '-' . $taskIdsHash . '-' . time() . '.zip';
+
         GenerateTaskBundle::dispatch($tasks->first()->id, $tasks->pluck('id')->all(), $zipName);
         $order = Order::create([
             'subject_id' => $subject->id,

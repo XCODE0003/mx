@@ -77,10 +77,12 @@
             min-height: 297mm;
             margin: 5mm auto;
             padding: 15mm;
+            padding-bottom: 50mm;
             /* padding: 15mm; */
             background: #fff;
             box-shadow: 0 0 6mm rgba(0, 0, 0, .15);
             box-sizing: border-box;
+            position: relative;
         }
 
         @media print {
@@ -88,6 +90,8 @@
                 box-shadow: none;
                 margin: 0;
                 padding: 0;
+                padding: 15mm;
+                padding-bottom: 50mm;
             }
         }
 
@@ -205,6 +209,29 @@
         .Distractor {
             margin: 0 !important;
         }
+
+        .page-footer {
+            font-size: 12px;
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 8px;
+            border-top: 1px solid #000;
+            line-height: 1.4;
+            position: absolute;
+            left: 15mm;
+            right: 15mm;
+            bottom: 5mm;
+        }
+
+        @media print {
+            .page-footer {
+                position: fixed;
+                bottom: 12mm;
+                left: 15mm;
+                right: 15mm;
+            }
+        }
+
     </style>
 
     <!-- Image display functions (must be loaded before body content) -->
@@ -271,14 +298,12 @@
         };
     </script>
 </head>
-
 <body id="group_{{ $group->id ?? 'unknown' }}">
     <div class="container preview-page">
         <div class="header">
             <b>Тренировочная работа в формате ОГЭ по МАТЕМАТИКЕ</b>
             <br>
             <br>
-
             9 КЛАСС
             <br>
             <br>
@@ -344,9 +369,11 @@
                                 </div>
 
                             </div>
-                            <div class="flex flex-col gap-1 border border-1 border-solid" style="display: flex; flex-direction: column; gap: 5px; border: 1px solid;
-
-             width: 100%">
+                            <div class="flex
+                            @if($withAnswers)
+                            flex-col
+                            @endif
+                             gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
                                 <p>
                                     Ответ:
                                 </p>
@@ -380,6 +407,11 @@
                     <br><br>
 
         @endforeach
+
+        <div class="page-footer">
+            <div>© 2025 год. Вариант сгенерирован на сайте kim365.mı</div>
+            <div>Публикация в интернете или печатных изданиях без письменного согласия запрещена</div>
+        </div>
 
 
         <script>
