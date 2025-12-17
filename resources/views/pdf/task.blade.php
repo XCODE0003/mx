@@ -325,12 +325,12 @@
     </script>
 </head>
 
-<body id="group_{{ $group->id ?? 'unknown' }}">
+<body>
     <div class="container preview-page">
-       {!! $subject->text_header ?? '' !!}
+        {!! $subject->text_header ?? '' !!}
         <div class="page-break"></div>
         @foreach ($tasks as $t)
-            <div class="task-block">
+            <div id="group_{{ $t->mark }}" class="task-block">
                 <div class="task-content">
 
                     <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
@@ -350,15 +350,15 @@
                             </div>
 
                         </div>
-                        <div class="flex
-                            @if($withAnswers)
-                                flex-col
-                            @endif
-                             gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
+                        <div id="answer_block" class="flex
+                                @if($withAnswers)
+                                    flex-col
+                                @endif
+                                 gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
                             <p>
                                 Ответ:
                             </p>
-                            <div id="answer_kim" style="display: inline-flex; gap: 5px; width: 100%">
+                            <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
 
                                 @if ($withAnswers)
                                     @php
@@ -378,7 +378,8 @@
                                         ___________________________
                                     @endif
                                 @else
-                                    ___________________________
+                                <div style="border: 0px solid #000; max-height: 35px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
+                                        </div>
                                 @endif
                             </div>
                         </div>
@@ -568,6 +569,15 @@
                 taskContents.forEach(function (content) {
                     // Заменяем &nbsp; на обычный пробел
                     content.innerHTML = content.innerHTML.replace(/&nbsp;/g, ' ');
+                });
+            });
+        </script>
+        <script>
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const hints = document.getElementsByClassName('hint');
+                Array.from(hints).forEach(function (h) {
+                    h.remove();
                 });
             });
         </script>

@@ -81,6 +81,7 @@ class GenerateTaskPdf implements ShouldQueue
             ->margins(15, 15, 20, 15)
             ->setDelay(1000)
             ->waitUntilNetworkIdle()
+            ->setDelay(5000)
             ->timeout(300)
             ->noSandbox();
 

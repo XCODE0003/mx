@@ -58737,6 +58737,9 @@ tr select {
 #hint {
     display: none !important;
 }
+.hint{
+    display: none !important;
+}
 
 .mjx-math>.mjx-mrow:first-child {
     white-space: normal !important;
@@ -58805,6 +58808,23 @@ td[bgcolor]{
 }
 .task-content p:first-child{
     margin-top: 0 !important;
+}
+
+
+#group_25 #answer_block,
+#group_139 #answer_block,
+#group_26 #answer_block,
+#group_27 #answer_block,
+#group_138 #answer_block,
+#group_28 #answer_block,
+#group_29 #answer_block,
+#group_61 #answer_block,
+#group_62 #answer_block,
+#group_63 #answer_block,
+#group_64 #answer_block,
+#group_65 #answer_block,
+#group_66 #answer_block{
+    display: none !important;
 }
 
 table:first-child:not(img) > .MsoTableGrid tbody td:not(:has(img)):not([width]):first-child,
