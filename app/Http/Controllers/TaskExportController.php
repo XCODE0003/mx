@@ -26,7 +26,6 @@ class TaskExportController extends Controller
                 return (int) $task->group->formatted_title;
             });
         }
-
         return response()->view('pdf.task', [
             'tasks'    => $randomTasks,
             'group'    => $task->group,

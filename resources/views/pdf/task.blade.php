@@ -30,7 +30,7 @@
 
         .task-content {
             line-height: 1.5;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         img {
@@ -339,22 +339,15 @@
                         <div class="task-content">
                             <div style="width: 100%;">
                                 {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
-                                @if(isset($group) && ($group->id == 68 || $group->id == 54))
-                                    <div style="display: flex; gap: 5px; align-items: center;">
-                                        <span>Ответ:</span>
-                                        <div style="width: 32px; height: 32px; border: 1px solid #000; margin-top: 10px;">
 
-                                        </div>
-                                    </div>
-                                @endif
                             </div>
 
                         </div>
                         <div id="answer_block" class="flex
-                                @if($withAnswers)
-                                    flex-col
-                                @endif
-                                 gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
+                                    @if($withAnswers)
+                                        flex-col
+                                    @endif
+                                     gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
                             <p>
                                 Ответ:
                             </p>
@@ -378,8 +371,17 @@
                                         ___________________________
                                     @endif
                                 @else
-                                <div style="border: 0px solid #000; max-height: 35px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
+                                    @if(isset($t->mark) && ($t->mark == 68 || $t->mark == 54))
+                                        <div style="display: flex; gap: 5px; align-items: center;">
+                                            <div style="width: 32px; height: 32px; border: 1px solid #000; margin-top: 10px;">
+
+                                            </div>
                                         </div>
+                                    @else
+                                        <div style="border: 0px solid #000; max-height: 35px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
+                                        </div>
+                                    @endif
+
                                 @endif
                             </div>
                         </div>
