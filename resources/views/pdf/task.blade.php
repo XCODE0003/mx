@@ -349,15 +349,6 @@
                 Ответы и решения
             </div>
         @endif
-        <div style="display: flex; flex-direction: column;  text-align: center;">
-            <p style="font-weight: 700; font-size:18px;">Часть 1</p>
-            <div style="padding: 15px; border: 1px solid #000; font-weight: 700; text-align: center; font-style: italic; font-size:18px;">
-                Для записи решений и ответов на задания 13-19 используйте отдельный
-                лист. Запишите сначала номер выполняемого задания (13, 14 и т. д.), а
-                затем полное обоснованное решение и ответ. Ответы записывайте
-                чётко и разборчиво.
-            </div>
-        </div>
         @foreach ($tasks as $t)
             <div style="display: flex; flex-direction: column; gap: 10px;">
 
@@ -379,7 +370,7 @@
                                 </div>
                             @endif
                             <div id="answer_block" class="flex gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
-                                @if(!$withAnswers)
+                                @if(!$withAnswers && $t->mark != 25 && $t->mark != 139 && $t->mark != 26 && $t->mark != 27 && $t->mark != 138 && $t->mark != 28 && $t->mark != 29)
                                     <p>
                                         Ответ:
                                     </p>
@@ -409,6 +400,8 @@
 
                                                 </div>
                                             </div>
+                                        @elseif (isset($t->mark) && ($t->mark == 25 || $t->mark == 139 || $t->mark == 26 || $t->mark == 27 || $t->mark == 138 || $t->mark == 28 || $t->mark == 29))
+
                                         @else
                                             <div style="border: 0px solid #000; max-height: 25px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
                                             </div>
