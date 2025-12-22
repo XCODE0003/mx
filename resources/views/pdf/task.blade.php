@@ -30,7 +30,16 @@
 
         .task-content {
             line-height: 1.5;
-            font-size: 18px;
+            font-size: 18px !important;
+        }
+
+
+        .header p {
+            font-size: 18px !important;
+        }
+
+        .task-content p>span[style*="font-size: 16px"] {
+            font-size: 18px !important;
         }
 
         img {
@@ -151,6 +160,10 @@
 
         :root {
             --math-width: 550px;
+        }
+
+        .task-content p>span[style*="font-size: 14pt"]:not(:has(.math)) {
+            font-size: 18px !important;
         }
 
         .MathJax_Display {
@@ -326,69 +339,90 @@
 </head>
 
 <body>
+
     <div class="container preview-page">
-        {!! $subject->text_header ?? '' !!}
-        <div class="page-break"></div>
+        @if(!$withAnswers)
+            {!! $subject->text_header ?? '' !!}
+            <div class="page-break"></div>
+        @else
+            <div class=" font-bold text-center w-full">
+                Ответы и решения
+            </div>
+        @endif
+        <div style="display: flex; flex-direction: column;  text-align: center;">
+            <p style="font-weight: 700; font-size:18px;">Часть 1</p>
+            <div style="padding: 15px; border: 1px solid #000; font-weight: 700; text-align: center; font-style: italic; font-size:18px;">
+                Для записи решений и ответов на задания 13-19 используйте отдельный
+                лист. Запишите сначала номер выполняемого задания (13, 14 и т. д.), а
+                затем полное обоснованное решение и ответ. Ответы записывайте
+                чётко и разборчиво.
+            </div>
+        </div>
         @foreach ($tasks as $t)
-            <div id="group_{{ $t->mark }}" class="task-block">
-                <div class="task-content">
+            <div style="display: flex; flex-direction: column; gap: 10px;">
 
-                    <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
+                {!! optional($t->group)->text_title ?? '' !!}
+                <div id="group_{{ $t->mark }}" class="task-block">
 
-                    <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
-                        <div class="task-content">
-                            <div style="width: 100%;">
-                                {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
+                    <div class="task-content">
 
-                            </div>
+                        <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
 
-                        </div>
-                        <div id="answer_block" class="flex
-                                    @if($withAnswers)
-                                        flex-col
-                                    @endif
-                                     gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
-                            <p>
-                                Ответ:
-                            </p>
-                            <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
+                        <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
+                            @if(!$withAnswers)
+                                <div class="task-content">
+                                    <div style="width: 100%;">
+                                        {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
-                                @if ($withAnswers)
-                                    @php
-                                        $ans = $t->response ?? '';
-                                        // Для группы 132 удаляем "ОТВЕТ:" из ответа
-                                        if (($group->id ?? null) == 132 && $ans !== '') {
-                                            $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
-                                            $ans = preg_replace('/Ответ:\s*/i', '', $ans);
-                                            $ans = trim($ans);
-                                        }
-                                    @endphp
-                                    @if($ans !== '')
-                                        <div style="border: 0px solid #000; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 1.5;">
-                                            {!! $ans !!}
-                                        </div>
-                                    @else
-                                        ___________________________
-                                    @endif
-                                @else
-                                    @if(isset($t->mark) && ($t->mark == 68 || $t->mark == 54))
-                                        <div style="display: flex; gap: 5px; align-items: center;">
-                                            <div style="width: 32px; height: 32px; border: 1px solid #000; margin-top: 10px;">
+                                    </div>
 
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div style="border: 0px solid #000; max-height: 35px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
-                                        </div>
-                                    @endif
-
+                                </div>
+                            @endif
+                            <div id="answer_block" class="flex gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
+                                @if(!$withAnswers)
+                                    <p>
+                                        Ответ:
+                                    </p>
                                 @endif
+                                <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
+                                    @if ($withAnswers)
+                                        @php
+                                            $ans = $t->response ?? '';
+                                            // Для группы 132 удаляем "ОТВЕТ:" из ответа
+                                            if (($group->id ?? null) == 132 && $ans !== '') {
+                                                $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
+                                                $ans = preg_replace('/Ответ:\s*/i', '', $ans);
+                                                $ans = trim($ans);
+                                            }
+                                         @endphp
+                                        @if($ans !== '')
+                                            <div style="min-width: 150px;  line-height: 1.5;">
+                                                {!! $ans !!}
+                                            </div>
+                                        @else
+                                            ___________________________
+                                        @endif
+                                    @else
+                                        @if(isset($t->mark) && ($t->mark == 68 || $t->mark == 54))
+                                            <div style="display: flex; gap: 5px; align-items: center;">
+                                                <div style="width: 32px; height: 32px; border: 1px solid #000;">
+
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div style="border: 0px solid #000; max-height: 25px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
+                                            </div>
+                                        @endif
+
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
             </div>
+
 
         @endforeach
 
@@ -462,106 +496,108 @@
                 const bodyId = document.body.id;
                 const isGroup132 = bodyId === 'group_132' || bodyId === 'group_133' || bodyId === 'group_134' || bodyId === 'group_26' || bodyId === 'group_28' || bodyId === 'group_29';
 
-                const answer = document.getElementById('answer_kim');
-                const answer_p = answer.getElementsByTagName('p');
+                // Получаем все элементы с id="answer_kim"
+                const answers = document.querySelectorAll('[id="answer_kim"]');
 
-                // Функция для проверки, является ли параграф продолжением ответа
-                function isAnswerContinuation(text) {
-                    const trimmed = text.trim();
-                    // Проверяем, начинается ли с буквы ответа (б), в), г) и т.д.)
-                    return /^[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed) ||
-                        /^\s*[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed);
-                }
+                answers.forEach(function (answer) {
+                    const answer_p = answer.getElementsByTagName('p');
 
-                // Находим индекс последнего блока с "ОТВЕТ:" (приоритет) или "Ответ:"
-                let lastAnswerIndex = -1;
-                let hasOtvets = false;
-
-                for (let i = 0; i < answer_p.length; i++) {
-                    const textContent = answer_p[i].textContent || '';
-                    const innerHTML = answer_p[i].innerHTML || '';
-                    // Проверяем и в тексте, и в HTML (для случаев с <strong>Ответ:</strong>)
-                    const hasOtvetsInText = textContent.includes('ОТВЕТ:') || innerHTML.includes('ОТВЕТ:');
-                    const hasAnswerInText = textContent.includes('Ответ:') || innerHTML.includes('Ответ:');
-
-                    if (hasOtvetsInText) {
-                        lastAnswerIndex = i;
-                        hasOtvets = true;
-                    } else if (hasAnswerInText && !hasOtvets) {
-                        lastAnswerIndex = i;
+                    // Функция для проверки, является ли параграф продолжением ответа
+                    function isAnswerContinuation(text) {
+                        const trimmed = text.trim();
+                        // Проверяем, начинается ли с буквы ответа (б), в), г) и т.д.)
+                        return /^[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed) ||
+                            /^\s*[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed);
                     }
-                }
 
-                // Если нашли блок с ответом, обрабатываем все параграфы
-                if (lastAnswerIndex >= 0) {
-                    let hidingContinuation = false;
+                    // Находим индекс последнего блока с "ОТВЕТ:" (приоритет) или "Ответ:"
+                    let lastAnswerIndex = -1;
+                    let hasOtvets = false;
 
                     for (let i = 0; i < answer_p.length; i++) {
-                        const answer_div = answer_p[i];
-                        const textContent = answer_div.textContent || '';
-                        const innerHTML = answer_div.innerHTML || '';
-                        const hasAnswer = textContent.includes('Ответ:') || textContent.includes('ОТВЕТ:') ||
-                            innerHTML.includes('Ответ:') || innerHTML.includes('ОТВЕТ:');
+                        const textContent = answer_p[i].textContent || '';
+                        const innerHTML = answer_p[i].innerHTML || '';
+                        // Проверяем и в тексте, и в HTML (для случаев с <strong>Ответ:</strong>)
+                        const hasOtvetsInText = textContent.includes('ОТВЕТ:') || innerHTML.includes('ОТВЕТ:');
+                        const hasAnswerInText = textContent.includes('Ответ:') || innerHTML.includes('Ответ:');
 
-                        // Если мы скрываем продолжение ответа
-                        if (hidingContinuation) {
-                            // Если это продолжение ответа, скрываем его
-                            if (isAnswerContinuation(textContent)) {
-                                answer_div.style.display = 'none';
-                                continue;
-                            } else if (hasAnswer && i === lastAnswerIndex) {
-                                // Встретили последний блок с ответом - прекращаем скрывать продолжения
-                                hidingContinuation = false;
-                            } else if (hasAnswer) {
-                                // Встретили другой блок с ответом - продолжаем скрывать
-                                answer_div.style.display = 'none';
-                                hidingContinuation = true;
-                                continue;
-                            } else {
-                                // Встретили обычный текст - прекращаем скрывать продолжения
-                                hidingContinuation = false;
-                            }
-                        }
-
-                        // Если это параграф с ответом
-                        if (hasAnswer) {
-                            if (i === lastAnswerIndex) {
-                                // Последний блок с ответом - показываем и заменяем "ОТВЕТ:" на "Ответ:"
-                                answer_div.style.display = 'block';
-                                if (innerHTML.includes('ОТВЕТ:')) {
-                                    answer_div.innerHTML = innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
-                                }
-                                // Сбрасываем флаг, чтобы показать продолжения после последнего блока
-                                hidingContinuation = false;
-                            } else {
-                                // Предыдущие блоки с ответом - скрываем
-                                answer_div.style.display = 'none';
-                                // Устанавливаем флаг для скрытия следующих параграфов-продолжений ответа
-                                hidingContinuation = true;
-                            }
-                        } else {
-                            // Параграф без ответа - показываем всегда
-                            answer_div.style.display = 'block';
+                        if (hasOtvetsInText) {
+                            lastAnswerIndex = i;
+                            hasOtvets = true;
+                        } else if (hasAnswerInText && !hasOtvets) {
+                            lastAnswerIndex = i;
                         }
                     }
-                }
 
-                // Для группы 132 удаляем "ОТВЕТ:" из ответов, оставляя только число
-                if (isGroup132) {
-                    const answerDivs = answer.querySelectorAll('div');
-                    answerDivs.forEach(function (div) {
-                        let text = div.textContent || div.innerText || '';
-                        // Удаляем "ОТВЕТ:" или "Ответ:" и оставляем только число
-                        text = text.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '').trim();
-                        // Если остался только число, заменяем содержимое
-                        if (/^\d+$/.test(text.trim())) {
-                            div.textContent = text.trim();
-                        } else {
-                            // Если есть другой текст, просто удаляем "ОТВЕТ:" или "Ответ:"
-                            // div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
+                    // Если нашли блок с ответом, обрабатываем все параграфы
+                    if (lastAnswerIndex >= 0) {
+                        let hidingContinuation = false;
+                        for (let i = 0; i < answer_p.length; i++) {
+                            const answer_div = answer_p[i];
+                            const textContent = answer_div.textContent || '';
+                            const innerHTML = answer_div.innerHTML || '';
+                            const hasAnswer = textContent.includes('Ответ:') || textContent.includes('ОТВЕТ:') ||
+                                innerHTML.includes('Ответ:') || innerHTML.includes('ОТВЕТ:');
+                            // Если мы скрываем продолжение ответа
+                            if (hidingContinuation) {
+                                // Если это продолжение ответа, скрываем его
+                                if (isAnswerContinuation(textContent)) {
+                                    answer_div.style.display = 'none';
+                                    continue;
+                                } else if (hasAnswer && i === lastAnswerIndex) {
+                                    // Встретили последний блок с ответом - прекращаем скрывать продолжения
+                                    hidingContinuation = false;
+                                } else if (hasAnswer) {
+                                    // Встретили другой блок с ответом - продолжаем скрывать
+                                    answer_div.style.display = 'none';
+                                    hidingContinuation = true;
+                                    continue;
+                                } else {
+                                    // Встретили обычный текст - прекращаем скрывать продолжения
+                                    hidingContinuation = false;
+                                }
+                            }
+
+                            // Если это параграф с ответом
+                            if (hasAnswer) {
+                                if (i === lastAnswerIndex) {
+                                    // Последний блок с ответом - показываем и заменяем "ОТВЕТ:" на "Ответ:"
+                                    answer_div.style.display = 'block';
+                                    if (innerHTML.includes('ОТВЕТ:')) {
+                                        answer_div.innerHTML = innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
+                                    }
+                                    // Сбрасываем флаг, чтобы показать продолжения после последнего блока
+                                    hidingContinuation = false;
+                                } else {
+                                    // Предыдущие блоки с ответом - скрываем
+                                    answer_div.style.display = 'none';
+                                    // Устанавливаем флаг для скрытия следующих параграфов-продолжений ответа
+                                    hidingContinuation = true;
+                                }
+                            } else {
+                                // Параграф без ответа - показываем всегда
+                                answer_div.style.display = 'block';
+                            }
                         }
-                    });
-                }
+                    }
+
+                    // Для группы 132 удаляем "ОТВЕТ:" из ответов, оставляя только число
+                    if (isGroup132) {
+                        const answerDivs = answer.querySelectorAll('div');
+                        answerDivs.forEach(function (div) {
+                            let text = div.textContent || div.innerText || '';
+                            // Удаляем "ОТВЕТ:" или "Ответ:" и оставляем только число
+                            text = text.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '').trim();
+                            // Если остался только число, заменяем содержимое
+                            if (/^\d+$/.test(text.trim())) {
+                                div.textContent = text.trim();
+                            } else {
+                                // Если есть другой текст, просто удаляем "ОТВЕТ:" или "Ответ:"
+                                // div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
+                            }
+                        });
+                    }
+                });
             });
         </script>
         <script>
@@ -580,6 +616,36 @@
                 const hints = document.getElementsByClassName('hint');
                 Array.from(hints).forEach(function (h) {
                     h.remove();
+                });
+            });
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Находим все блоки задач
+                const taskBlocks = document.querySelectorAll('.task-block');
+
+                taskBlocks.forEach(function (taskBlock) {
+                    const taskContent = taskBlock.querySelector('.task-content');
+                    if (!taskContent) return;
+
+                    // Проверяем, есть ли в variants-block таблица
+                    const variantsBlock = taskContent.querySelector('.varinats-block');
+                    if (variantsBlock) {
+                        const hasTable = variantsBlock.querySelector('table.answer-table');
+                        if (hasTable) {
+                            // Скрываем answer_block
+                            const answerBlock = taskContent.querySelector('#answer_block');
+                            if (answerBlock) {
+                                answerBlock.style.display = 'none';
+                            }
+
+                            // Добавляем "Ответ:" в variants-block
+                            const answerLabel = document.createElement('p');
+                            answerLabel.textContent = 'Ответ: ';
+                            variantsBlock.insertBefore(answerLabel, variantsBlock.firstChild);
+                        }
+                    }
                 });
             });
         </script>

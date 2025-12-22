@@ -2322,6 +2322,9 @@ input[type=image] {
     border: none
 }
 
+.header{
+    font-size: 18px;
+}
 body {
     margin: 0;
     min-width: 320px;
@@ -55507,7 +55510,7 @@ button.swiper-pagination-bullet {
 
 [style*="font-size:14pt"]:not(.mjx-mn):not(.mjx-char),
 [style*="font-size: 14pt"]:not(.mjx-mn):not(.mjx-char) {
-    font-size: 16px !important;
+    font-size: 18px !important;
 }
 
 
@@ -55630,6 +55633,9 @@ button.swiper-pagination-bullet {
 /* Font weight and style */
 .font-weight-light {
     font-weight: 300 !important;
+}
+.font-bold{
+    font-weight: 800;
 }
 
 .font-weight-normal {
@@ -58811,21 +58817,7 @@ td[bgcolor]{
 }
 
 
-#group_25 #answer_block,
-#group_139 #answer_block,
-#group_26 #answer_block,
-#group_27 #answer_block,
-#group_138 #answer_block,
-#group_28 #answer_block,
-#group_29 #answer_block,
-#group_61 #answer_block,
-#group_62 #answer_block,
-#group_63 #answer_block,
-#group_64 #answer_block,
-#group_65 #answer_block,
-#group_66 #answer_block{
-    display: none !important;
-}
+
 
 table:first-child:not(img) > .MsoTableGrid tbody td:not(:has(img)):not([width]):first-child,
 table:first-child:not(img) > .MsoTableGrid tbody td:not(:has(.MsoNormal img)):not([width]):first-child,
@@ -58844,7 +58836,10 @@ table:first-child:not(img) > .MsoNormalTable tbody td:not(:has(.MsoNormal img)):
     min-width: 500px !important;
 
 }
-
+.varinats-block{
+    display: flex;
+    gap: 4px;
+}
 .active-distractor b {
     font-weight: normal;
 }
