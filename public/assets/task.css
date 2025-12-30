@@ -55637,7 +55637,9 @@ button.swiper-pagination-bullet {
 .font-bold{
     font-weight: 800;
 }
-
+.attachment__caption{
+    display: none;
+}
 .font-weight-normal {
     font-weight: 400 !important;
 }

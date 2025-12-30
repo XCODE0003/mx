@@ -351,8 +351,10 @@
         @endif
         @foreach ($tasks as $t)
             <div style="display: flex; flex-direction: column; gap: 10px;">
-
                 {!! optional($t->group)->text_title ?? '' !!}
+                <div style="font-size: 18px;">
+                {!! optional($t->group)->formatted_title  == 1 ? optional($t->group)->question : '' !!}
+                </div>
                 <div id="group_{{ $t->mark }}" class="task-block">
 
                     <div class="task-content">

@@ -12,8 +12,11 @@ class TaskExportController extends Controller
 {
     public function view(Task $task)
     {
-        $groups = $task->subject->groups;
-        $randomTasks = $groups->map(function ($group) use ($task) {
+
+        $groups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
+        $groups_tasks_1_5 = $task->subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question')->random();
+        $groups = $groups->concat(collect($groups_tasks_1_5));
+        $randomTasks = $groups->map(function ($group) use ($groups, $task) {
             // return $group->tasks()->where('id', $task->id)->first();
             return $group->tasks()->inRandomOrder()->first();
         })->filter();
@@ -27,9 +30,9 @@ class TaskExportController extends Controller
             });
         }
         return response()->view('pdf.task', [
-            'tasks'    => $randomTasks,
-            'group'    => $task->group,
-            'subject'  => $task->subject,
+            'tasks' => $randomTasks,
+            'group' => $task->group,
+            'subject' => $task->subject,
             'withAnswers' => false,
         ]);
     }
@@ -44,9 +47,9 @@ class TaskExportController extends Controller
             return (int) $task->group->formatted_title;
         });
         return response()->view('pdf.task', [
-            'task'    => $task,
-            'group'    => $task->group,
-            'subject'  => $task->subject,
+            'task' => $task,
+            'group' => $task->group,
+            'subject' => $task->subject,
             'withAnswers' => true,
         ]);
     }
@@ -68,7 +71,7 @@ class TaskExportController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Генерация запущена. Скачайте файл, когда он будет готов.',
-            'data'    => [
+            'data' => [
                 'download_url' => url('exports/tasks/' . $task->id . '/' . $fileName),
             ],
         ]);
@@ -108,7 +111,7 @@ class TaskExportController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Генерация запущена. Скачайте архив, когда он будет готов.',
-            'data'    => [
+            'data' => [
                 'download_url' => url('exports/tasks/' . $baseTask->id . '/' . $zipName),
                 'task_id' => $baseTask->id,
                 'file' => $zipName,
@@ -124,7 +127,7 @@ class TaskExportController extends Controller
         $exists = is_file($path) && filesize($path) > 0;
         return response()->json([
             'success' => true,
-            'data' => [ 'ready' => $exists ]
+            'data' => ['ready' => $exists]
         ]);
     }
     public function viewTasksWord(Task $task)
@@ -132,14 +135,15 @@ class TaskExportController extends Controller
         // Предпросмотр: показываем текущую задачу в Word-верстке
         $task->load('group');
         $inline = function (?string $html) {
-            if (!$html) return '';
+            if (!$html)
+                return '';
             return preg_replace_callback('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i', function ($m) {
                 $src = $m[1] ?? '';
                 $resolved = $this->resolvePreviewImageSrc($src);
                 return str_replace($src, $resolved, $m[0]);
             }, $html);
         };
-        $questionHtmlMap = [ $task->id => $inline($task->question) ];
+        $questionHtmlMap = [$task->id => $inline($task->question)];
         return response()->view('word.task', [
             'tasks' => collect([$task]),
             'withAnswers' => true,
@@ -161,14 +165,14 @@ class TaskExportController extends Controller
         $full = public_path($path);
         if (is_file($full)) {
             $ext = strtolower(pathinfo($full, PATHINFO_EXTENSION));
-            $map = [ 'jpg'=>'image/jpeg','jpeg'=>'image/jpeg','png'=>'image/png','gif'=>'image/gif','webp'=>'image/webp','svg'=>'image/svg+xml' ];
+            $map = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'webp' => 'image/webp', 'svg' => 'image/svg+xml'];
             $mime = $map[$ext] ?? (@mime_content_type($full) ?: 'image/jpeg');
             $data = @file_get_contents($full);
             if ($data !== false) {
-                return 'data:'.$mime.';base64,'.base64_encode($data);
+                return 'data:' . $mime . ';base64,' . base64_encode($data);
             }
         }
-        return url('/'.ltrim($path, '/'));
+        return url('/' . ltrim($path, '/'));
     }
 
     public function exportPdfAuto(Request $request)
@@ -217,7 +221,7 @@ class TaskExportController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Генерация запущена. Скачайте архив, когда он будет готов.',
-            'data'    => [
+            'data' => [
                 'download_url' => url('exports/tasks/' . $tasks->first()->id . '/' . $zipName),
                 'task_id' => $tasks->first()->id,
                 'file' => $zipName,
@@ -233,7 +237,7 @@ class TaskExportController extends Controller
         $exists = is_file($path) && filesize($path) > 0;
         return response()->json([
             'success' => true,
-            'data' => [ 'ready' => $exists ]
+            'data' => ['ready' => $exists]
         ]);
     }
 }
