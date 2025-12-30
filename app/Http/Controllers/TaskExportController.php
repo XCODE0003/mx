@@ -58,9 +58,11 @@ class TaskExportController extends Controller
     {
         $fileName = 'task-' . $task->id . '-' . time() . '.pdf';
         // Запускаем генерацию в очереди, кладём итог в public/exports/tasks/{id}/
-        $tasks = $task->subject->groups->map(function ($group) use ($task) {
+        $groups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
+        $groups_tasks_1_5 = $task->subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question')->random();
+        $groups = $groups->concat(collect($groups_tasks_1_5));
+        $tasks = $groups->map(function ($group) use ($groups, $task) {
             return $group->tasks()->where('id', $task->id)->first();
-            // return $group->tasks()->inRandomOrder()->first();
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
         });
