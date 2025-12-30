@@ -182,25 +182,14 @@ class TaskExportController extends Controller
         $subjectId = $request->input('subject_id') ?? $request->input('task_subject_id');
         $subject = Subject::findOrFail($subjectId);
         $user = $request->user();
-        $tasks = Task::where('subject_id', $subject->subject_id)
-            ->whereNotNull('mark')
-            ->whereNotNull('response')
-            ->whereHas('group', function ($query) {
-                $query->where('is_forming', true);
-            })
-            ->with('group')
-            ->get()
-            ->groupBy('mark')
-            ->map(function ($group) {
-                return $group->first();
-            })
-            ->values();
-
-        $tasks = $tasks->sortBy(function ($task) {
-            // Добавить проверку на null
-            return $task->group ? (int) $task->group->formatted_title : 999999;
+        $groups = $subject->groups->where('is_forming', true)->where('question', '=', null);
+        $groups_tasks_1_5 = $subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question')->random();
+        $groups = $groups->concat(collect($groups_tasks_1_5));
+        $tasks = $groups->map(function ($group) use ($groups, $subject) {
+            return $group->tasks()->where('subject_id', $subject->subject_id)->first();
+        })->filter()->sortBy(function ($task) {
+            return (int) $task->group->formatted_title;
         });
-
         // Проверить, что коллекция не пустая перед использованием first()
         if ($tasks->isEmpty()) {
             return response()->json([
