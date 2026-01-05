@@ -373,7 +373,7 @@
                                 </div>
                             @endif
                             <div id="answer_block" class="flex gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
-                                @if(!$withAnswers && $t->mark != 25 && $t->mark != 139 && $t->mark != 26 && $t->mark != 27 && $t->mark != 138 && $t->mark != 28 && $t->mark != 29)
+                                @if(!$withAnswers && $t->type_answer != 'hide_line')
                                     <p>
                                         Ответ:
                                     </p>
@@ -403,7 +403,7 @@
 
                                                 </div>
                                             </div>
-                                        @elseif (isset($t->mark) && ($t->mark == 25 || $t->mark == 139 || $t->mark == 26 || $t->mark == 27 || $t->mark == 138 || $t->mark == 28 || $t->mark == 29))
+                                        @elseif (isset($t->mark) && $t->type_answer == 'hide_line')
 
                                         @else
                                             <div style="border: 0px solid #000; max-height: 25px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">

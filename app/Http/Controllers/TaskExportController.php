@@ -14,7 +14,10 @@ class TaskExportController extends Controller
     {
 
         $groups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
-        $groups_tasks_1_5 = $task->subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question')->random();
+        $groups_tasks_1_5 = $task->subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question');
+        if ($groups_tasks_1_5->isNotEmpty()) {
+            $groups_tasks_1_5 = $groups_tasks_1_5->random();
+        }
         $groups = $groups->concat(collect($groups_tasks_1_5));
         $randomTasks = $groups->map(function ($group) use ($groups, $task) {
             // return $group->tasks()->where('id', $task->id)->first();
