@@ -189,7 +189,7 @@ class TaskExportController extends Controller
         $groups_tasks_1_5 = $subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question')->random();
         $groups = $groups->concat(collect($groups_tasks_1_5));
         $tasks = $groups->map(function ($group) use ($groups, $subject) {
-            return $group->tasks()->where('subject_id', $subject->subject_id)->first();
+            return $group->tasks()->where('subject_id', $subject->subject_id)->inRandomOrder()->first();
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
         });
