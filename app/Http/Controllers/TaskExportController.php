@@ -20,7 +20,7 @@ class TaskExportController extends Controller
         }
         $groups = $groups->concat(collect($groups_tasks_1_5));
         $randomTasks = $groups->map(function ($group) use ($groups, $task) {
-            // return $group->tasks()->where('id', $task->id)->first();
+            return $group->tasks()->where('id', $task->id)->first();
             return $group->tasks()->inRandomOrder()->first();
         })->filter();
 
@@ -199,6 +199,7 @@ class TaskExportController extends Controller
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
         });
+
         // Проверить, что коллекция не пустая перед использованием first()
         if ($tasks->isEmpty()) {
             return response()->json([
