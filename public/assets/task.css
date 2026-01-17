@@ -55640,6 +55640,9 @@ button.swiper-pagination-bullet {
 .attachment__caption{
     display: none;
 }
+.MsoNormal b{
+    font-weight: 800 !important;
+}
 .font-weight-normal {
     font-weight: 400 !important;
 }
