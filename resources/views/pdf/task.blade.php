@@ -351,7 +351,6 @@
         @endif
         @foreach ($tasks as $t)
             <div style="display: flex; flex-direction: column; gap: 10px;">
-
                 @if(!$withAnswers)
                     {!! optional($t->group)->text_title ?? '' !!}
                     <div style="font-size: 18px;">
@@ -368,6 +367,7 @@
                             @if(!$withAnswers)
                                 <div class="task-content">
                                     <div style="width: 100%;">
+                                        {!! $t->blank_text ?? '' !!}
                                         {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
                                     </div>
