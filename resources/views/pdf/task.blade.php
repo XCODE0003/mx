@@ -359,7 +359,15 @@
                 @endif
                 <div id="group_{{ $t->mark }}" class="task-block">
 
+                    @if($t->border)
+                        <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
+                            {!! $t->blank_text ?? '' !!}
+                        </div>
+                    @else
+                        {!! $t->blank_text ?? '' !!}
+                    @endif
                     <div class="task-content">
+
 
                         <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
 
@@ -367,7 +375,7 @@
                             @if(!$withAnswers)
                                 <div class="task-content">
                                     <div style="width: 100%;">
-                                        {!! $t->blank_text ?? '' !!}
+
                                         {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
                                     </div>

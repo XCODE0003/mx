@@ -42,7 +42,7 @@ class Task extends Model
         return $this->belongsTo(Subject::class, 'subject_id', 'subject_id');
     }
 
-    protected $appends = ['blank_text'];
+    protected $appends = ['blank_text', 'border'];
 
     public function getBlankTextAttribute()
     {
@@ -54,6 +54,11 @@ class Task extends Model
             return $this->getRelation('blankText')?->text;
         }
         return null;
+    }
+
+    public function getBorderAttribute()
+    {
+        return $this->blankText()->first()->border ?? false;
     }
 
 }
