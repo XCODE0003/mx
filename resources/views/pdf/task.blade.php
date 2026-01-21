@@ -418,7 +418,6 @@
                                                 </div>
                                             </div>
                                         @elseif (isset($t->mark) && $t->type_answer == 'hide_line')
-                                            {{ $t->type_answer }}
                                         @else
                                             <div style="border: 0px solid #000; max-height: 25px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
                                             </div>
