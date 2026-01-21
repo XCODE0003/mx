@@ -361,7 +361,7 @@
 
                     @if (!$withAnswers)
                        <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
-                       @if($t->border && $t->blank_text !== '')
+                       @if($t->border && $t->blank_text !== '' && $t->type_answer !== null)
                             <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
                                 {!! $t->blank_text ?? '' !!}
                             </div>
