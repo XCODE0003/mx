@@ -360,7 +360,7 @@
                 <div id="group_{{ $t->mark }}" class="task-block">
 
                     @if (!$withAnswers)
-                       <div style="margin-bottom: 24px; font-size: 18px !important;">
+                       <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
                        @if($t->border && $t->blank_text !== '')
                             <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
                                 {!! $t->blank_text ?? '' !!}
