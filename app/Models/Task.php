@@ -19,7 +19,8 @@ class Task extends Model
         'mark',
         'table_answer',
         'count_columns',
-        'question_id'
+        'question_id',
+        'additional_files'
     ];
 
     protected $casts = [

@@ -130,6 +130,10 @@ class GenerateTaskBundle implements ShouldQueue
                 if (is_file($pdfAns))   { $zip->addFile($pdfAns, basename($pdfAns)); }
                 if (is_file($docNoAns)) { $zip->addFile($docNoAns, basename($docNoAns)); }
                 if (is_file($docAns))   { $zip->addFile($docAns, basename($docAns)); }
+
+                // Добавляем MP3 файлы из additional_files
+                $this->addAdditionalFilesToZip($zip, $tasks);
+
                 $zip->close();
             } catch (\Throwable $e) {
                 Log::error('Error while creating ZIP archive', [
@@ -478,6 +482,67 @@ private function savePdf(string $html, string $fullPath): void
             return 'data:'.$mime.';base64,'.base64_encode($httpData);
         }
         return $abs;
+    }
+
+    /**
+     * Добавляет файлы из additional_files задач в ZIP архив
+     */
+    private function addAdditionalFilesToZip(ZipArchive $zip, Collection $tasks): void
+    {
+        $addedFiles = []; // Для предотвращения дубликатов
+
+        foreach ($tasks as $task) {
+            if (!$task->additional_files) {
+                continue;
+            }
+
+            try {
+                $files = json_decode($task->additional_files, true);
+                if (!is_array($files)) {
+                    continue;
+                }
+
+                foreach ($files as $filePath) {
+                    // Пропускаем если уже добавлен
+                    if (in_array($filePath, $addedFiles)) {
+                        continue;
+                    }
+
+                    // Убираем ведущий слэш и проверяем формат пути
+                    $path = ltrim($filePath, '/');
+
+                    // Проверяем, что путь начинается с files/
+                    if (!str_starts_with($path, 'files/')) {
+                        continue;
+                    }
+
+                    // Получаем полный путь к файлу
+                    $fullPath = public_path($path);
+
+                    // Проверяем существование файла
+                    if (is_file($fullPath)) {
+                        $fileName = basename($path);
+                        $zip->addFile($fullPath, 'files/' . $fileName);
+                        $addedFiles[] = $filePath;
+                        Log::info('Added additional file to ZIP', [
+                            'file' => $filePath,
+                            'task_id' => $task->id
+                        ]);
+                    } else {
+                        Log::warning('Additional file not found', [
+                            'file' => $filePath,
+                            'full_path' => $fullPath,
+                            'task_id' => $task->id
+                        ]);
+                    }
+                }
+            } catch (\Throwable $e) {
+                Log::error('Error processing additional_files', [
+                    'task_id' => $task->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
     }
 
     private function getZipErrorMessage(int $code): string
