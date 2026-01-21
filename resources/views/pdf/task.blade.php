@@ -359,12 +359,16 @@
                 @endif
                 <div id="group_{{ $t->mark }}" class="task-block">
 
-                    @if($t->border)
-                        <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
+                    @if (!$withAnswers)
+                       <div style="margin-bottom: 24px;">
+                       @if($t->border)
+                            <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
+                                {!! $t->blank_text ?? '' !!}
+                            </div>
+                        @else
                             {!! $t->blank_text ?? '' !!}
-                        </div>
-                    @else
-                        {!! $t->blank_text ?? '' !!}
+                        @endif
+                       </div>
                     @endif
                     <div class="task-content">
 
