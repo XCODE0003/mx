@@ -350,89 +350,90 @@
             </div>
         @endif
         @foreach ($tasks as $t)
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                @if(!$withAnswers)
-
-                    <div style="font-size: 18px;">
-                        {!! optional($t->group)->formatted_title == 1 ? optional($t->group)->question : '' !!}
-                    </div>
-                @endif
-                <div id="group_{{ $t->mark }}" class="task-block">
-                    @if (!$withAnswers)
-{!! optional($t->group)->text_title ?? '' !!}
-                       <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
-                       @if(!empty($t->border) && !empty($t->blank_text) && !is_null($t->type_answer))
-                            <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
-                                {!! $t->blank_text ?? '' !!}
-                            </div>
-                        @else
-                            {!! $t->blank_text ?? '' !!}
-                        @endif
-                       </div>
-                    @endif
-                    <div class="task-content">
-
-
-                        <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
-
-                        <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
                             @if(!$withAnswers)
+
+                                <div style="font-size: 18px;">
+                                    {!! optional($t->group)->formatted_title == 1 ? optional($t->group)->question : '' !!}
+                                </div>
+                            @endif
+                            <div id="group_{{ $t->mark }}" class="task-block">
+                                @if (!$withAnswers)
+            {!! optional($t->group)->text_title ?? '' !!}
+                                   <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
+                                   @if(!empty($t->border) && !empty($t->blank_text) && !is_null($t->type_answer))
+                                        <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
+                                            {!! $t->blank_text ?? '' !!}
+                                        </div>
+                                    @else
+                                        {!! $t->blank_text ?? '' !!}
+                                    @endif
+                                   </div>
+                                @endif
                                 <div class="task-content">
-                                    <div style="width: 100%;">
 
-                                        {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
 
+                                    <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
+
+                                    <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
+                                        @if(!$withAnswers)
+                                            <div class="task-content">
+                                                <div style="width: 100%;">
+
+                                                    {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
+
+                                                </div>
+
+                                            </div>
+                                        @endif
+                                        <div id="answer_block" class="flex gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
+                                            @if(!$withAnswers && $t->type_answer != 'hide_line')
+                                                <p>
+                                                    Ответ:
+                                                </p>
+                                            @endif
+                                            <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
+                                                @if ($withAnswers)
+                                                    @php
+                    $ans = $t->response ?? '';
+                    // Для группы 132 удаляем "ОТВЕТ:" из ответа
+                    if (($group->id ?? null) == 132 && $ans !== '') {
+                        $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
+                        $ans = preg_replace('/Ответ:\s*/i', '', $ans);
+                        $ans = trim($ans);
+                    }
+                                                     @endphp
+                                                    @if($ans !== '')
+                                                        <div style="min-width: 150px;  line-height: 1.5;">
+                                                            {!! $ans !!}
+                                                        </div>
+                                                    @else
+
+                                                    @endif
+                                                @else
+                                                    @if(isset($t->mark) && ($t->mark == 68 || $t->mark == 54))
+                                                        <div style="display: flex; gap: 5px; align-items: center;">
+                                                            <div style="width: 32px; height: 32px; border: 1px solid #000;">
+
+                                                            </div>
+                                                        </div>
+                                                    @elseif (isset($t->mark) && $t->type_answer == 'hide_line')
+                                                    @else
+                                                           @if ($t->response !== null)
+                                                            <div style="border: 0px solid #000; max-height: 25px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
+
+                                                            </div>
+                                                        @endif
+                                                    @endif
+
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
-                            @endif
-                            <div id="answer_block" class="flex gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
-                                @if(!$withAnswers && $t->type_answer != 'hide_line')
-                                    <p>
-                                        Ответ:
-                                    </p>
-                                @endif
-                                <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
-                                    @if ($withAnswers)
-                                        @php
-                                            $ans = $t->response ?? '';
-                                            // Для группы 132 удаляем "ОТВЕТ:" из ответа
-                                            if (($group->id ?? null) == 132 && $ans !== '') {
-                                                $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
-                                                $ans = preg_replace('/Ответ:\s*/i', '', $ans);
-                                                $ans = trim($ans);
-                                            }
-                                         @endphp
-                                        @if($ans !== '')
-                                            <div style="min-width: 150px;  line-height: 1.5;">
-                                                {!! $ans !!}
-                                            </div>
-                                        @else
-                                            ___________________________
-                                        @endif
-                                    @else
-                                        @if(isset($t->mark) && ($t->mark == 68 || $t->mark == 54))
-                                            <div style="display: flex; gap: 5px; align-items: center;">
-                                                <div style="width: 32px; height: 32px; border: 1px solid #000;">
-
-                                                </div>
-                                            </div>
-                                        @elseif (isset($t->mark) && $t->type_answer == 'hide_line')
-                                        @else
-                                           @if ($t->response !== null)
-                                           <div style="border: 0px solid #000; max-height: 25px; min-width: 150px; padding-bottom: 0px; border-bottom: 1px solid #000; line-height: 0;">
-                                           </div>
-                                           @endif
-                                        @endif
-
-                                    @endif
-                                </div>
                             </div>
                         </div>
-
-                    </div>
-                </div>
-            </div>
 
 
         @endforeach
