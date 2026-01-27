@@ -168,7 +168,7 @@ private function savePdf(string $html, string $fullPath): void
     }
 
     $footerHtml = '<div style="width:100%; font-size:10px; text-align:center; color:#000;font-family: "Times New Roman", serif; padding-top:6px; border-top:1px solid #000;">
-        © 2025 год. Вариант сгенерирован на сайте kim365.ru<br>
+        © '.date('Y').' год. Вариант сгенерирован на сайте kim365.ru<br>
         Публикация в интернете или печатных изданиях без письменного согласия запрещена
     </div>';
 
