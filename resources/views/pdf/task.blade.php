@@ -372,9 +372,9 @@
                                 @endif
                                 <div class="task-content">
 
-
+                                @if($t->response !== null)
                                     <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
-
+                                @endif
                                     <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
                                         @if(!$withAnswers)
                                             <div class="task-content">
