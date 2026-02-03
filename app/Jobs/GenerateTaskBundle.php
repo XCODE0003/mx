@@ -183,7 +183,8 @@ private function savePdf(string $html, string $fullPath): void
         ->waitUntilNetworkIdle()
         ->setDelay(2000)                       // Увеличиваем задержку для применения стилей
         ->timeout(600)
-        ->noSandbox();
+        ->noSandbox()
+        ->emulateMedia('print');               // Эмулируем print media для корректных page-break
 
     $browser->setOption('args', [
         '--allow-file-access-from-files',

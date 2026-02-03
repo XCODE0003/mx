@@ -203,16 +203,39 @@
 
         /* Обертка задания для предотвращения разрыва */
         .task-block {
-            display: table;
+            display: block;
             width: 100%;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+            -webkit-column-break-inside: avoid !important;
             margin-bottom: 20px;
+            /* Для Chrome/Puppeteer */
+            overflow: hidden;
+        }
+
+        @media print {
+            .task-block {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                -webkit-column-break-inside: avoid !important;
+                page-break-before: auto;
+                page-break-after: auto;
+            }
         }
 
         .task-content {
             display: flex;
             gap: 10px;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        /* Предотвращаем разрыв внутри вариантов ответов */
+        .varinats-block,
+        .distractors-table,
+        #answer_block {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
         }
 
         .task-title {
@@ -351,15 +374,16 @@
         @endif
         @foreach ($tasks as $t)
                         <div style="display: flex; flex-direction: column; gap: 10px;">
-                            @if(!$withAnswers)
 
-                                <div style="font-size: 18px;">
-                                    {!! optional($t->group)->formatted_title == 1 ? optional($t->group)->question : '' !!}
-                                </div>
-                            @endif
                             <div id="group_{{ $t->mark }}" class="task-block">
                                 @if (!$withAnswers)
-            {!! optional($t->group)->text_title ?? '' !!}
+                                    {!! optional($t->group)->text_title ?? '' !!}
+                                    @if(!$withAnswers)
+
+<div style="font-size: 18px;">
+    {!! optional($t->group)->formatted_title == 1 ? optional($t->group)->question : '' !!}
+</div>
+@endif
                                    <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
                                    @if(!empty($t->border) && !empty($t->blank_text) && !is_null($t->type_answer))
                                         <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">

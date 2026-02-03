@@ -48,4 +48,16 @@ class Subject extends Model
     {
         return 'subject_id';
     }
+
+    /**
+     * Accessor для text_header - заменяет %YEAR% на текущий год
+     */
+    public function getTextHeaderAttribute($value): ?string
+    {
+        if (!$value) {
+            return $value;
+        }
+
+        return str_replace('%YEAR%', date('Y'), $value);
+    }
 }
