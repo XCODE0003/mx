@@ -82,12 +82,10 @@
 
         .preview-page {
             width: 240mm;
-            /* width: 210mm; */
-            min-height: 297mm;
+            min-height: auto;
             margin: 5mm auto;
             padding: 15mm;
-            padding-bottom: 50mm;
-            /* padding: 15mm; */
+            padding-bottom: 20mm;
             background: #fff;
             box-shadow: 0 0 6mm rgba(0, 0, 0, .15);
             box-sizing: border-box;
@@ -98,9 +96,9 @@
             .preview-page {
                 box-shadow: none;
                 margin: 0;
-                padding: 0;
                 padding: 15mm;
-                padding-bottom: 50mm;
+                padding-bottom: 20mm;
+                min-height: auto;
             }
         }
 
@@ -461,230 +459,170 @@
 
 
         @endforeach
+    </div>
 
-
-
-
-        <script>
-            // (function () {
-            //     function hideEmptyMsoParagraphs() {
-            //         document.querySelectorAll('p.MsoNormal').forEach(function (p) {
-            //             var text = (p.textContent || '')
-            //                 .replace(/\u00A0/g, '') // убрать &nbsp;
-            //                 .trim();
-            //             if (text.length === 0) {
-            //                 p.style.display = 'none';
-            //             }
-            //         });
-            //     }
-            //     if (document.readyState !== 'loading') hideEmptyMsoParagraphs();
-            //     else document.addEventListener('DOMContentLoaded', hideEmptyMsoParagraphs);
-            //     if (window.MathJax && MathJax.Hub && MathJax.Hub.Queue) {
-            //         MathJax.Hub.Queue(hideEmptyMsoParagraphs);
-            //     }
-            // })();
-
-            (function () {
-                function hideEmptyElements() {
-                    // Скрываем пустые параграфы MsoNormal
-                    document.querySelectorAll('p.MsoNormal').forEach(function (p) {
-                        // Не скрывать элементы, содержащие изображения или другие медиа/MathML
-                        if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
-
-                        var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
-                        if (text.length === 0) {
-                            // Клонируем и удаляем пустые вложенные теги (например пустые span с &nbsp;)
-                            var temp = p.cloneNode(true);
-                            temp.querySelectorAll('*').forEach(function (el) {
-                                if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
-                                    el.parentNode.removeChild(el);
-                                }
-                            });
-                            var remaining = (temp.textContent || '').replace(/\u00A0/g, '').trim();
-                            if (remaining.length === 0) {
-                                p.style.display = 'none';
-                            }
-                        }
-                    });
-                    // Скрываем пустые strong элементы
-                    document.querySelectorAll('strong').forEach(function (strong) {
-                        var text = (strong.textContent || '')
-                            .replace(/\u00A0/g, '') // убрать &nbsp;
-                            .replace(/\s/g, '')     // убрать все пробелы
-                            .trim();
-                        if (text.length === 0) {
-                            strong.style.display = 'none';
-                        }
-                    });
-                }
-
-                if (document.readyState !== 'loading') hideEmptyElements();
-                else document.addEventListener('DOMContentLoaded', hideEmptyElements);
-                if (MathJax && MathJax.Hub && MathJax.Hub.Queue) {
-                    MathJax.Hub.Queue(hideEmptyElements);
-                }
-            })();
-        </script>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Проверяем, что это группа 132
-                const bodyId = document.body.id;
-                const isGroup132 = bodyId === 'group_132' || bodyId === 'group_133' || bodyId === 'group_134' || bodyId === 'group_26' || bodyId === 'group_28' || bodyId === 'group_29';
-
-                // Получаем все элементы с id="answer_kim"
-                const answers = document.querySelectorAll('[id="answer_kim"]');
-
-                answers.forEach(function (answer) {
-                    const answer_p = answer.getElementsByTagName('p');
-
-                    // Функция для проверки, является ли параграф продолжением ответа
-                    function isAnswerContinuation(text) {
-                        const trimmed = text.trim();
-                        // Проверяем, начинается ли с буквы ответа (б), в), г) и т.д.)
-                        return /^[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed) ||
-                            /^\s*[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed);
-                    }
-
-                    // Находим индекс последнего блока с "ОТВЕТ:" (приоритет) или "Ответ:"
-                    let lastAnswerIndex = -1;
-                    let hasOtvets = false;
-
-                    for (let i = 0; i < answer_p.length; i++) {
-                        const textContent = answer_p[i].textContent || '';
-                        const innerHTML = answer_p[i].innerHTML || '';
-                        // Проверяем и в тексте, и в HTML (для случаев с <strong>Ответ:</strong>)
-                        const hasOtvetsInText = textContent.includes('ОТВЕТ:') || innerHTML.includes('ОТВЕТ:');
-                        const hasAnswerInText = textContent.includes('Ответ:') || innerHTML.includes('Ответ:');
-
-                        if (hasOtvetsInText) {
-                            lastAnswerIndex = i;
-                            hasOtvets = true;
-                        } else if (hasAnswerInText && !hasOtvets) {
-                            lastAnswerIndex = i;
-                        }
-                    }
-
-                    // Если нашли блок с ответом, обрабатываем все параграфы
-                    if (lastAnswerIndex >= 0) {
-                        let hidingContinuation = false;
-                        for (let i = 0; i < answer_p.length; i++) {
-                            const answer_div = answer_p[i];
-                            const textContent = answer_div.textContent || '';
-                            const innerHTML = answer_div.innerHTML || '';
-                            const hasAnswer = textContent.includes('Ответ:') || textContent.includes('ОТВЕТ:') ||
-                                innerHTML.includes('Ответ:') || innerHTML.includes('ОТВЕТ:');
-                            // Если мы скрываем продолжение ответа
-                            if (hidingContinuation) {
-                                // Если это продолжение ответа, скрываем его
-                                if (isAnswerContinuation(textContent)) {
-                                    answer_div.style.display = 'none';
-                                    continue;
-                                } else if (hasAnswer && i === lastAnswerIndex) {
-                                    // Встретили последний блок с ответом - прекращаем скрывать продолжения
-                                    hidingContinuation = false;
-                                } else if (hasAnswer) {
-                                    // Встретили другой блок с ответом - продолжаем скрывать
-                                    answer_div.style.display = 'none';
-                                    hidingContinuation = true;
-                                    continue;
-                                } else {
-                                    // Встретили обычный текст - прекращаем скрывать продолжения
-                                    hidingContinuation = false;
-                                }
-                            }
-
-                            // Если это параграф с ответом
-                            if (hasAnswer) {
-                                if (i === lastAnswerIndex) {
-                                    // Последний блок с ответом - показываем и заменяем "ОТВЕТ:" на "Ответ:"
-                                    answer_div.style.display = 'block';
-                                    if (innerHTML.includes('ОТВЕТ:')) {
-                                        answer_div.innerHTML = innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
-                                    }
-                                    // Сбрасываем флаг, чтобы показать продолжения после последнего блока
-                                    hidingContinuation = false;
-                                } else {
-                                    // Предыдущие блоки с ответом - скрываем
-                                    answer_div.style.display = 'none';
-                                    // Устанавливаем флаг для скрытия следующих параграфов-продолжений ответа
-                                    hidingContinuation = true;
-                                }
-                            } else {
-                                // Параграф без ответа - показываем всегда
-                                answer_div.style.display = 'block';
-                            }
-                        }
-                    }
-
-                    // Для группы 132 удаляем "ОТВЕТ:" из ответов, оставляя только число
-                    if (isGroup132) {
-                        const answerDivs = answer.querySelectorAll('div');
-                        answerDivs.forEach(function (div) {
-                            let text = div.textContent || div.innerText || '';
-                            // Удаляем "ОТВЕТ:" или "Ответ:" и оставляем только число
-                            text = text.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '').trim();
-                            // Если остался только число, заменяем содержимое
-                            if (/^\d+$/.test(text.trim())) {
-                                div.textContent = text.trim();
-                            } else {
-                                // Если есть другой текст, просто удаляем "ОТВЕТ:" или "Ответ:"
-                                // div.innerHTML = div.innerHTML.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '');
+    <script>
+        (function () {
+            function hideEmptyElements() {
+                document.querySelectorAll('p.MsoNormal').forEach(function (p) {
+                    if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
+                    var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
+                    if (text.length === 0) {
+                        var temp = p.cloneNode(true);
+                        temp.querySelectorAll('*').forEach(function (el) {
+                            if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
+                                el.parentNode.removeChild(el);
                             }
                         });
-                    }
-                });
-            });
-        </script>
-        <script>
-            // Удаляем &nbsp; из контента задач
-            document.addEventListener('DOMContentLoaded', function () {
-                const taskContents = document.querySelectorAll('.task-content');
-                taskContents.forEach(function (content) {
-                    // Заменяем &nbsp; на обычный пробел
-                    content.innerHTML = content.innerHTML.replace(/&nbsp;/g, ' ');
-                });
-            });
-        </script>
-        <script>
-
-            document.addEventListener('DOMContentLoaded', function () {
-                const hints = document.getElementsByClassName('hint');
-                Array.from(hints).forEach(function (h) {
-                    h.remove();
-                });
-            });
-        </script>
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Находим все блоки задач
-                const taskBlocks = document.querySelectorAll('.task-block');
-
-                taskBlocks.forEach(function (taskBlock) {
-                    const taskContent = taskBlock.querySelector('.task-content');
-                    if (!taskContent) return;
-
-                    // Проверяем, есть ли в variants-block таблица
-                    const variantsBlock = taskContent.querySelector('.varinats-block');
-                    if (variantsBlock) {
-                        const hasTable = variantsBlock.querySelector('table.answer-table');
-                        if (hasTable) {
-                            // Скрываем answer_block
-                            const answerBlock = taskContent.querySelector('#answer_block');
-                            if (answerBlock) {
-                                answerBlock.style.display = 'none';
-                            }
-
-                            // Добавляем "Ответ:" в variants-block
-                            const answerLabel = document.createElement('p');
-                            answerLabel.textContent = 'Ответ: ';
-                            variantsBlock.insertBefore(answerLabel, variantsBlock.firstChild);
+                        var remaining = (temp.textContent || '').replace(/\u00A0/g, '').trim();
+                        if (remaining.length === 0) {
+                            p.style.display = 'none';
                         }
                     }
                 });
-            });
-        </script>
+                document.querySelectorAll('strong').forEach(function (strong) {
+                    var text = (strong.textContent || '').replace(/\u00A0/g, '').replace(/\s/g, '').trim();
+                    if (text.length === 0) {
+                        strong.style.display = 'none';
+                    }
+                });
+            }
+            if (document.readyState !== 'loading') hideEmptyElements();
+            else document.addEventListener('DOMContentLoaded', hideEmptyElements);
+            if (typeof MathJax !== 'undefined' && MathJax.Hub && MathJax.Hub.Queue) {
+                MathJax.Hub.Queue(hideEmptyElements);
+            }
+        })();
+    </script>
 
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const bodyId = document.body.id;
+            const isGroup132 = bodyId === 'group_132' || bodyId === 'group_133' || bodyId === 'group_134' || bodyId === 'group_26' || bodyId === 'group_28' || bodyId === 'group_29';
+            const answers = document.querySelectorAll('[id="answer_kim"]');
+
+            answers.forEach(function (answer) {
+                const answer_p = answer.getElementsByTagName('p');
+
+                function isAnswerContinuation(text) {
+                    const trimmed = text.trim();
+                    return /^[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed) ||
+                        /^\s*[бвгдежзийклмнопрстуфхцчшщъыьэюя]\s*\)/i.test(trimmed);
+                }
+
+                let lastAnswerIndex = -1;
+                let hasOtvets = false;
+
+                for (let i = 0; i < answer_p.length; i++) {
+                    const textContent = answer_p[i].textContent || '';
+                    const innerHTML = answer_p[i].innerHTML || '';
+                    const hasOtvetsInText = textContent.includes('ОТВЕТ:') || innerHTML.includes('ОТВЕТ:');
+                    const hasAnswerInText = textContent.includes('Ответ:') || innerHTML.includes('Ответ:');
+
+                    if (hasOtvetsInText) {
+                        lastAnswerIndex = i;
+                        hasOtvets = true;
+                    } else if (hasAnswerInText && !hasOtvets) {
+                        lastAnswerIndex = i;
+                    }
+                }
+
+                if (lastAnswerIndex >= 0) {
+                    let hidingContinuation = false;
+                    for (let i = 0; i < answer_p.length; i++) {
+                        const answer_div = answer_p[i];
+                        const textContent = answer_div.textContent || '';
+                        const innerHTML = answer_div.innerHTML || '';
+                        const hasAnswer = textContent.includes('Ответ:') || textContent.includes('ОТВЕТ:') ||
+                            innerHTML.includes('Ответ:') || innerHTML.includes('ОТВЕТ:');
+
+                        if (hidingContinuation) {
+                            if (isAnswerContinuation(textContent)) {
+                                answer_div.style.display = 'none';
+                                continue;
+                            } else if (hasAnswer && i === lastAnswerIndex) {
+                                hidingContinuation = false;
+                            } else if (hasAnswer) {
+                                answer_div.style.display = 'none';
+                                hidingContinuation = true;
+                                continue;
+                            } else {
+                                hidingContinuation = false;
+                            }
+                        }
+
+                        if (hasAnswer) {
+                            if (i === lastAnswerIndex) {
+                                answer_div.style.display = 'block';
+                                if (innerHTML.includes('ОТВЕТ:')) {
+                                    answer_div.innerHTML = innerHTML.replace(/ОТВЕТ:/g, 'Ответ:');
+                                }
+                                hidingContinuation = false;
+                            } else {
+                                answer_div.style.display = 'none';
+                                hidingContinuation = true;
+                            }
+                        } else {
+                            answer_div.style.display = 'block';
+                        }
+                    }
+                }
+
+                if (isGroup132) {
+                    const answerDivs = answer.querySelectorAll('div');
+                    answerDivs.forEach(function (div) {
+                        let text = div.textContent || div.innerText || '';
+                        text = text.replace(/ОТВЕТ:\s*/gi, '').replace(/Ответ:\s*/gi, '').trim();
+                        if (/^\d+$/.test(text.trim())) {
+                            div.textContent = text.trim();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const taskContents = document.querySelectorAll('.task-content');
+            taskContents.forEach(function (content) {
+                content.innerHTML = content.innerHTML.replace(/&nbsp;/g, ' ');
+            });
+            const hints = document.getElementsByClassName('hint');
+            Array.from(hints).forEach(function (h) {
+                h.remove();
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Находим все блоки задач
+            const taskBlocks = document.querySelectorAll('.task-block');
+
+            taskBlocks.forEach(function (taskBlock) {
+                const taskContent = taskBlock.querySelector('.task-content');
+                if (!taskContent) return;
+
+                // Проверяем, есть ли в variants-block таблица
+                const variantsBlock = taskContent.querySelector('.varinats-block');
+                if (variantsBlock) {
+                    const hasTable = variantsBlock.querySelector('table.answer-table');
+                    if (hasTable) {
+                        // Скрываем answer_block
+                        const answerBlock = taskContent.querySelector('#answer_block');
+                        if (answerBlock) {
+                            answerBlock.style.display = 'none';
+                        }
+
+                        // Добавляем "Ответ:" в variants-block
+                        const answerLabel = document.createElement('p');
+                        answerLabel.textContent = 'Ответ: ';
+                        variantsBlock.insertBefore(answerLabel, variantsBlock.firstChild);
+                    }
+                }
+            });
+        });
+    </script>
 </body>
+</html>
