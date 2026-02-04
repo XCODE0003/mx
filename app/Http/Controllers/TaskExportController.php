@@ -36,7 +36,7 @@ class TaskExportController extends Controller
             'tasks' => $randomTasks,
             'group' => $task->group,
             'subject' => $task->subject,
-            'withAnswers' => true,
+            'withAnswers' => false,
         ]);
     }
     public function viewTasks(Task $task)
