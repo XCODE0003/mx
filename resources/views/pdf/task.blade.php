@@ -370,18 +370,29 @@
                 Ответы и решения
             </div>
         @endif
+        @php
+            $printedQuestionHashes = [];
+        @endphp
         @foreach ($tasks as $t)
                         <div style="display: flex; flex-direction: column; gap: 10px;">
 
                             <div id="group_{{ $t->mark }}" class="task-block">
                                 @if (!$withAnswers)
                                     {!! optional($t->group)->text_title ?? '' !!}
-                                    @if(!$withAnswers)
+                                    @php
+                                        $groupQuestion = (string) (optional($t->group)->question ?? '');
+                                        $questionHash = $groupQuestion !== '' ? md5($groupQuestion) : null;
+                                        $shouldRenderGroupQuestion = $questionHash && !in_array($questionHash, $printedQuestionHashes, true);
+                                        if ($shouldRenderGroupQuestion) {
+                                            $printedQuestionHashes[] = $questionHash;
+                                        }
+                                    @endphp
 
-<div style="font-size: 18px;">
-    {!! optional($t->group)->formatted_title == 1 ? optional($t->group)->question : '' !!}
-</div>
-@endif
+                                    @if($shouldRenderGroupQuestion)
+                                        <div style="font-size: 18px;">
+                                            {!! $groupQuestion !!}
+                                        </div>
+                                    @endif
                                    <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
                                    @if(!empty($t->border) && !empty($t->blank_text) && !is_null($t->type_answer))
                                         <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">

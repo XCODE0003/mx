@@ -10,21 +10,88 @@ use App\Models\User;
 use App\Models\Order;
 class TaskExportController extends Controller
 {
+    /**
+     * Берем по одной случайной "пачке" для каждого набора номеров заданий.
+     * Если для одного стартового номера есть несколько вариантов пачек,
+     * выбираем самую длинную (например, 23-27 вместо одиночной 23).
+     * При равной длине берется случайная.
+     */
+    private function pickGroupedPacks($groupsWithQuestion)
+    {
+        if ($groupsWithQuestion->isEmpty()) {
+            return collect();
+        }
+
+        $packsByQuestion = $groupsWithQuestion->groupBy('question');
+
+        // Ключ пачки: стартовый номер задания (formatted_title).
+        // Так мы выбираем одну случайную пачку на каждый "старт" (например, 1 и 23),
+        // и не набираем несколько пересекающихся пачек вида 23-26 и 23-27 одновременно.
+        $packsByRangeSignature = $packsByQuestion->groupBy(function ($pack) {
+            $titles = $pack
+                ->map(function ($group) {
+                    return (string) $group->formatted_title;
+                })
+                ->filter()
+                ->unique()
+                ->sort(function ($a, $b) {
+                    return (int) $a <=> (int) $b;
+                })
+                ->values()
+                ->all();
+
+            return $titles[0] ?? 'unknown';
+        });
+
+        return $packsByRangeSignature->map(function ($sameRangePacks) {
+            $packsWithSize = $sameRangePacks->map(function ($pack) {
+                $size = $pack
+                    ->map(function ($group) {
+                        return (string) $group->formatted_title;
+                    })
+                    ->filter()
+                    ->unique()
+                    ->count();
+
+                return [
+                    'pack' => $pack,
+                    'size' => $size,
+                ];
+            });
+
+            $maxSize = $packsWithSize->max('size');
+            $candidates = $packsWithSize
+                ->filter(function ($item) use ($maxSize) {
+                    return $item['size'] === $maxSize;
+                })
+                ->pluck('pack');
+
+            return $candidates->random();
+        })->flatten(1)->values();
+    }
+
     public function view(Task $task)
     {
 
-        $groups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
-        $groups_tasks_1_5 = $task->subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question');
-        if ($groups_tasks_1_5->isNotEmpty()) {
-            $groups_tasks_1_5 = $groups_tasks_1_5->random();
-        }
+        $baseGroups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
+        $groupedPacks = $this->pickGroupedPacks(
+            $task->subject->groups->where('is_forming', true)->where('question', '!=', null)
+        );
+        $packTitles = $groupedPacks->map(function ($group) {
+            return (string) $group->formatted_title;
+        })->filter()->unique();
 
+        // Не подмешиваем обычные группы в те номера, которые уже заняла выбранная пачка.
+        $groups = $baseGroups->reject(function ($group) use ($packTitles) {
+            return $packTitles->contains((string) $group->formatted_title);
+        })->concat($groupedPacks);
 
-        $groups = $groups->concat(collect($groups_tasks_1_5));
         $randomTasks = $groups->map(function ($group) use ($groups, $task) {
             // return $group->tasks()->where('id', $task->id)->first();
             return $group->tasks()->inRandomOrder()->first();
-        })->filter();
+        })->filter()->unique(function ($task) {
+            return (string) $task->group->formatted_title;
+        })->values();
 
         // If no tasks found in groups, use the original task
         if ($randomTasks->isEmpty()) {
@@ -63,14 +130,24 @@ class TaskExportController extends Controller
     {
         $fileName = 'task-' . $task->id . '-' . time() . '.pdf';
         // Запускаем генерацию в очереди, кладём итог в public/exports/tasks/{id}/
-        $groups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
-        $groups_tasks_1_5 = $task->subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question')->random();
-        $groups = $groups->concat(collect($groups_tasks_1_5));
+        $baseGroups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
+        $groupedPacks = $this->pickGroupedPacks(
+            $task->subject->groups->where('is_forming', true)->where('question', '!=', null)
+        );
+        $packTitles = $groupedPacks->map(function ($group) {
+            return (string) $group->formatted_title;
+        })->filter()->unique();
+
+        $groups = $baseGroups->reject(function ($group) use ($packTitles) {
+            return $packTitles->contains((string) $group->formatted_title);
+        })->concat($groupedPacks);
         $tasks = $groups->map(function ($group) use ($groups, $task) {
             return $group->tasks()->where('id', $task->id)->first();
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
-        });
+        })->unique(function ($task) {
+            return (string) $task->group->formatted_title;
+        })->values();
 
         // Передаём базовый $task, имя файла и массив id заданий
         GenerateTaskPdf::dispatch($task->id, $fileName, $tasks->pluck('id')->all());
@@ -187,20 +264,24 @@ class TaskExportController extends Controller
         $subjectId = $request->input('subject_id') ?? $request->input('task_subject_id');
         $subject = Subject::findOrFail($subjectId);
         $user = $request->user();
-        $groups = $subject->groups->where('is_forming', true)->where('question', '=', null);
-        $groups_tasks_1_5 = $subject->groups->where('is_forming', true)->where('question', '!=', null)->groupBy('question');
+        $baseGroups = $subject->groups->where('is_forming', true)->where('question', '=', null);
+        $groupedPacks = $this->pickGroupedPacks(
+            $subject->groups->where('is_forming', true)->where('question', '!=', null)
+        );
+        $packTitles = $groupedPacks->map(function ($group) {
+            return (string) $group->formatted_title;
+        })->filter()->unique();
 
-        // Проверяем, что есть группы перед вызовом random()
-        if (!$groups_tasks_1_5->isEmpty()) {
-            $groups_tasks_1_5 = $groups_tasks_1_5->random();
-        }
-
-        $groups = $groups->concat(collect($groups_tasks_1_5));
+        $groups = $baseGroups->reject(function ($group) use ($packTitles) {
+            return $packTitles->contains((string) $group->formatted_title);
+        })->concat($groupedPacks);
         $tasks = $groups->map(function ($group) use ($groups, $subject) {
             return $group->tasks()->where('subject_id', $subject->subject_id)->inRandomOrder()->first();
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
-        });
+        })->unique(function ($task) {
+            return (string) $task->group->formatted_title;
+        })->values();
 
         // Проверить, что коллекция не пустая перед использованием first()
         if ($tasks->isEmpty()) {
