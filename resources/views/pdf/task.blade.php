@@ -390,6 +390,9 @@
                                     @else
                                         {!! $t->blank_text ?? '' !!}
                                     @endif
+                                     @if(!empty($t->additional_text))
+                                        {!! $t->additional_text !!}
+                                     @endif
                                    </div>
                                 @endif
                                 <div class="task-content">
