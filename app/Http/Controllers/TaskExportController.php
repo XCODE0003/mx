@@ -87,7 +87,7 @@ class TaskExportController extends Controller
         })->concat($groupedPacks);
 
         $randomTasks = $groups->map(function ($group) use ($groups, $task) {
-            // return $group->tasks()->where('id', $task->id)->first();
+            return $group->tasks()->where('id', $task->id)->first();
             return $group->tasks()->inRandomOrder()->first();
         })->filter()->unique(function ($task) {
             return (string) $task->group->formatted_title;
