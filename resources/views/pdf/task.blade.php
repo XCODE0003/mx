@@ -363,8 +363,8 @@
 
     <div class="container preview-page">
         @if(!$withAnswers)
-            {!! $subject->text_header ?? '' !!}
-            <div class="page-break"></div>
+            <!-- {!! $subject->text_header ?? '' !!}
+            <div class="page-break"></div> -->
         @else
             <div class=" font-bold text-center w-full">
                 Ответы и решения
