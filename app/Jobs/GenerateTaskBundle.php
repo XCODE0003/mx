@@ -486,11 +486,13 @@ private function savePdf(string $html, string $fullPath): void
     }
 
     /**
-     * Добавляет файлы из additional_files задач в ZIP архив
+     * Добавляет файлы из additional_files задач в ZIP архив.
+     * MP3-файлы переименовываются в «Аудио изложения 1.mp3», «Аудио изложения 2.mp3» и т.д.
      */
     private function addAdditionalFilesToZip(ZipArchive $zip, Collection $tasks): void
     {
         $addedFiles = []; // Для предотвращения дубликатов
+        $audioIndex = 0;
 
         foreach ($tasks as $task) {
             if (!$task->additional_files) {
@@ -522,11 +524,18 @@ private function savePdf(string $html, string $fullPath): void
 
                     // Проверяем существование файла
                     if (is_file($fullPath)) {
-                        $fileName = basename($path);
-                        $zip->addFile($fullPath, 'files/' . $fileName);
+                        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                        if ($ext === 'mp3') {
+                            $audioIndex++;
+                            $zipFileName = 'Аудио изложения ' . $audioIndex . '.mp3';
+                        } else {
+                            $zipFileName = basename($path);
+                        }
+                        $zip->addFile($fullPath, 'files/' . $zipFileName);
                         $addedFiles[] = $filePath;
                         Log::info('Added additional file to ZIP', [
                             'file' => $filePath,
+                            'zip_name' => $zipFileName,
                             'task_id' => $task->id
                         ]);
                     } else {
