@@ -47,7 +47,7 @@ class ExportImages extends Command
             if (!$imagePath) continue;
 
 
-            $imagePath = str_replace('https:
+            $imagePath = str_replace('https://oge.fipi.ru/', '', $imagePath);
 
             $source = public_path($imagePath);
             $destination = $exportRoot . '/' . $imagePath;
