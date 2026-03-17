@@ -296,11 +296,11 @@
 
     <!-- Image display functions (must be loaded before body content) -->
     <script>
-        // глобальные настройки
+
         window.qguid = '';
         window.qfiles_location = '../../'; // при необходимости поправьте путь к папке с файлами
 
-        // Вспомог: убираем вхождения ". " внутри имени
+
         function cleanName(s) {
             var p;
             while ((p = s.indexOf('. ')) > 0) {
@@ -309,7 +309,7 @@
             return s;
         }
 
-        // Показывает картинку внутри контента
+
         window.ShowPictureQ = function (s, hint) {
             s = cleanName(s);
             document.write('<img src="' + window.qfiles_location + s + '" align="absmiddle" alt="' + (hint || '') + '" border="0"> ');
@@ -432,7 +432,7 @@
                                                 @if ($withAnswers)
                                                     @php
                     $ans = $t->response ?? '';
-                    // Для группы 132 удаляем "ОТВЕТ:" из ответа
+
                     if (($group->id ?? null) == 132 && $ans !== '') {
                         $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
                         $ans = preg_replace('/Ответ:\s*/i', '', $ans);
@@ -611,25 +611,25 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Находим все блоки задач
+
             const taskBlocks = document.querySelectorAll('.task-block');
 
             taskBlocks.forEach(function (taskBlock) {
                 const taskContent = taskBlock.querySelector('.task-content');
                 if (!taskContent) return;
 
-                // Проверяем, есть ли в variants-block таблица
+
                 const variantsBlock = taskContent.querySelector('.varinats-block');
                 if (variantsBlock) {
                     const hasTable = variantsBlock.querySelector('table.answer-table');
                     if (hasTable) {
-                        // Скрываем answer_block
+
                         const answerBlock = taskContent.querySelector('#answer_block');
                         if (answerBlock) {
                             answerBlock.style.display = 'none';
                         }
 
-                        // Добавляем "Ответ:" в variants-block
+
                         const answerLabel = document.createElement('p');
                         answerLabel.textContent = 'Ответ: ';
                         variantsBlock.insertBefore(answerLabel, variantsBlock.firstChild);

@@ -18,14 +18,14 @@ function updateVisibility() {
 const handleScroll = () => updateVisibility();
 
 const scrollToTop = () => {
-  // 1) Основной документ
+
   try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
   const se = document.scrollingElement || document.documentElement;
   if (se) {
     try { se.scrollTo({ top: 0, behavior: 'smooth' }); } catch { se.scrollTop = 0; }
   }
 
-  // 2) Известные контейнеры
+
   const known = [mainContainer, document.querySelector('main.account')].filter(Boolean);
   known.forEach(el => {
     if (el && el.scrollTop > 0) {
@@ -33,7 +33,7 @@ const scrollToTop = () => {
     }
   });
 
-  // 3) Любые прокручиваемые элементы на странице (overflow:auto/scroll)
+
   const all = Array.from(document.querySelectorAll('*'));
   all.forEach(el => {
     try {
@@ -52,9 +52,9 @@ onMounted(() => {
   if (mainContainer) {
     mainContainer.addEventListener('scroll', handleScroll);
   }
-  // Инициализация видимости при загрузке
+
   updateVisibility();
-  // Всегда показываем кнопку по требованию
+
   showScrollToTop.value = true;
 });
 

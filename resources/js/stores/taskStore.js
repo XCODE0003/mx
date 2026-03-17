@@ -13,24 +13,24 @@ export const useTaskStore = defineStore("task", {
             { key: 'ege', value: 'ЕГЭ' }
         ],
         groups: [],
-        // Текущее выбранное группа для просмотра задач
+
         selectedGroup: null,
-        // Задачи текущей группы
+
         tasks: [],
-        // Выбранное задание по каждой группе: { [groupId]: taskId }
+
         selectedTaskByGroup: {}
     }),
 
     getters: {
         isLoading: (state) => state.loading,
-        // Проверка выбранности задания в своей группе
+
         isTaskSelected: (state) => (task) => {
             const groupId = (state.selectedGroup && state.selectedGroup.id)
                 || task?.mark || task?.group?.id || task?.group_id || null;
             if (!groupId) return false;
             return state.selectedTaskByGroup[groupId] === task.id;
         },
-        // Есть ли выбранное задание у конкретной группы
+
         groupHasSelection: (state) => (groupId) => {
             return Boolean(state.selectedTaskByGroup[groupId]);
         },
@@ -93,7 +93,7 @@ export const useTaskStore = defineStore("task", {
             return response.data;
         },
 
-        // Переключить выбор задания в пределах своей группы (ровно одно на группу)
+
         toggleTaskSelection(task) {
             const groupId = (this.selectedGroup && this.selectedGroup.id)
                 || task?.mark || task?.group?.id || task?.group_id || null;

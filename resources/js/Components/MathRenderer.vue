@@ -9,13 +9,13 @@ const props = defineProps({
 const rendered = computed(() => {
   let html = props.content ?? '';
 
-  // Блочные $$...$$
+
   html = html.replace(/\$\$([\s\S]*?)\$\$/g, (_, f) => {
     try { return katex.renderToString(f, { displayMode: true }); }
     catch { return _; }
   });
 
-  // Inline $...$
+
   html = html.replace(/\$([^$]+)\$/g, (_, f) => {
     try { return katex.renderToString(f, { displayMode: false }); }
     catch { return _; }

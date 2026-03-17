@@ -19,7 +19,7 @@ class GenerateTaskPdf implements ShouldQueue
     public string $fileName;
     /** @var array<int> */
     public array $taskIds;
-    // Backward compatibility for previously queued jobs
+
     public ?Task $task = null;
     public ?Collection $tasks = null;
 
@@ -38,13 +38,13 @@ class GenerateTaskPdf implements ShouldQueue
         @ini_set('max_execution_time', '300');
         @set_time_limit(300);
 
-        // Получаем базовое задание и список задач (поддержка старых payload'ов)
+
         if (empty($this->baseTaskId) && $this->task instanceof Task) {
             $this->baseTaskId = (int) $this->task->id;
         }
         $baseTask = Task::with('group', 'subject')->findOrFail($this->baseTaskId);
 
-        // Если были переданы модели в старом формате — используем их
+
         if ($this->tasks instanceof Collection && $this->tasks->isNotEmpty()) {
             $tasks = $this->tasks->load('group');
         } else {
@@ -59,8 +59,8 @@ class GenerateTaskPdf implements ShouldQueue
             $questionHtmlMap[$t->id] = $this->inlineImages($t->question);
         }
 
-        // Ensure $withAnswers is defined and passed to the view
-        $withAnswers = true;
+
+        $withAnswers = false;
 
         $html = view('pdf.task', [
             'task' => $baseTask,
@@ -85,7 +85,7 @@ class GenerateTaskPdf implements ShouldQueue
             ->timeout(300)
             ->noSandbox();
 
-        // Разрешаем доступ к локальным ресурсам public/
+
         $browser->setOption('args', [
             '--allow-file-access-from-files',
             '--disable-web-security',
@@ -112,16 +112,16 @@ class GenerateTaskPdf implements ShouldQueue
         if (preg_match('#^https?://#i', $src)) {
             return $src;
         }
-        // Убираем ведущий слэш
+
         $path = ltrim($src, '/');
-        // Случайно передан путь с public/
+
         if (str_starts_with($path, 'public/')) {
             $path = substr($path, 7);
         }
-        // Абсолютный путь к файлу в public
+
         $full = public_path($path);
         if (!is_file($full)) {
-            // пробуем добавить префикс docs/
+
             $try = public_path('docs/'.ltrim($path, '/'));
             if (is_file($try)) {
                 $full = $try;
@@ -143,7 +143,7 @@ class GenerateTaskPdf implements ShouldQueue
                 return 'data:'.$mime.';base64,'.base64_encode($data);
             }
         }
-        // Фоллбек — пробуем скачать по HTTP и инлайнить
+
         $abs = url('/'.ltrim($path, '/'));
         $httpData = @file_get_contents($abs);
         if ($httpData !== false) {
@@ -159,7 +159,7 @@ class GenerateTaskPdf implements ShouldQueue
             $mime = $map[$ext] ?? 'image/jpeg';
             return 'data:'.$mime.';base64,'.base64_encode($httpData);
         }
-        // Последний фоллбек — отдать абсолютный URL
+
         return $abs;
     }
 }

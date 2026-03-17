@@ -32,7 +32,7 @@ watch(() => selectedSubject.value, async () => {
 watch(() => selectedGroup.value, async () => {
     tasks.value = JSON.parse(JSON.stringify(await taskStore.getTasks(selectedGroup.value))).tasks;
     console.log(tasks.value);
-    // reset answers/results when tasks change
+
     Object.keys(answers).forEach((k) => delete answers[k]);
     Object.keys(results).forEach((k) => delete results[k]);
 });

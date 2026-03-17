@@ -24,9 +24,9 @@ class TaskExportController extends Controller
 
         $packsByQuestion = $groupsWithQuestion->groupBy('question');
 
-        // Ключ пачки: стартовый номер задания (formatted_title).
-        // Так мы выбираем одну случайную пачку на каждый "старт" (например, 1 и 23),
-        // и не набираем несколько пересекающихся пачек вида 23-26 и 23-27 одновременно.
+
+
+
         $packsByRangeSignature = $packsByQuestion->groupBy(function ($pack) {
             $titles = $pack
                 ->map(function ($group) {
@@ -81,7 +81,7 @@ class TaskExportController extends Controller
             return (string) $group->formatted_title;
         })->filter()->unique();
 
-        // Не подмешиваем обычные группы в те номера, которые уже заняла выбранная пачка.
+
         $groups = $baseGroups->reject(function ($group) use ($packTitles) {
             return $packTitles->contains((string) $group->formatted_title);
         })->concat($groupedPacks);
@@ -93,7 +93,7 @@ class TaskExportController extends Controller
             return (string) $task->group->formatted_title;
         })->values();
 
-        // If no tasks found in groups, use the original task
+
         if ($randomTasks->isEmpty()) {
             $randomTasks = collect([$task]);
         } else {
@@ -114,7 +114,7 @@ class TaskExportController extends Controller
 
         $randomTasks = $groups->map(function ($group) use ($task) {
             return $group->tasks()->where('id', $task->id)->first();
-            // return $group->tasks()->inRandomOrder()->first();
+
         })->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
         });
@@ -129,7 +129,7 @@ class TaskExportController extends Controller
     public function exportPdf(Request $request, Task $task)
     {
         $fileName = 'task-' . $task->id . '-' . time() . '.pdf';
-        // Запускаем генерацию в очереди, кладём итог в public/exports/tasks/{id}/
+
         $baseGroups = $task->subject->groups->where('is_forming', true)->where('question', '=', null);
         $groupedPacks = $this->pickGroupedPacks(
             $task->subject->groups->where('is_forming', true)->where('question', '!=', null)
@@ -149,7 +149,7 @@ class TaskExportController extends Controller
             return (string) $task->group->formatted_title;
         })->values();
 
-        // Передаём базовый $task, имя файла и массив id заданий
+
         GenerateTaskPdf::dispatch($task->id, $fileName, $tasks->pluck('id')->all());
 
         return response()->json([
@@ -180,7 +180,7 @@ class TaskExportController extends Controller
             return (int) $task->group->formatted_title;
         });
 
-        // Используем хеш вместо перечисления всех ID
+
         $taskIdsHash = substr(md5(implode('-', $taskIds)), 0, 8);
         $zipName = 'bundle-' . $baseTask->id . '-' . $taskIdsHash . '-' . time() . '.zip';
 
@@ -216,7 +216,7 @@ class TaskExportController extends Controller
     }
     public function viewTasksWord(Task $task)
     {
-        // Предпросмотр: показываем текущую задачу в Word-верстке
+
         $task->load('group');
         $inline = function (?string $html) {
             if (!$html)
@@ -283,7 +283,7 @@ class TaskExportController extends Controller
             return (string) $task->group->formatted_title;
         })->values();
 
-        // Проверить, что коллекция не пустая перед использованием first()
+
         if ($tasks->isEmpty()) {
             return response()->json([
                 'success' => false,
@@ -291,7 +291,7 @@ class TaskExportController extends Controller
             ], 404);
         }
 
-        // Используем хеш вместо перечисления всех ID
+
         $taskIdsHash = substr(md5(implode('-', $tasks->pluck('id')->all())), 0, 8);
         $zipName = 'bundle-' . $tasks->first()->id . '-' . $taskIdsHash . '-' . time() . '.zip';
 

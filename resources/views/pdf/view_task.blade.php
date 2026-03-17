@@ -181,11 +181,11 @@
 
     <!-- Image display functions (must be loaded before body content) -->
     <script>
-        // глобальные настройки
+
         window.qguid = '';
         window.qfiles_location = '../../'; // при необходимости поправьте путь к папке с файлами
 
-        // Вспомог: убираем вхождения ". " внутри имени
+
         function cleanName(s) {
             var p;
             while ((p = s.indexOf('. ')) > 0) {
@@ -194,7 +194,7 @@
             return s;
         }
 
-        // Показывает картинку внутри контента
+
         window.ShowPictureQ = function (s, hint) {
             s = cleanName(s);
             document.write('<img src="' + window.qfiles_location + s + '" align="absmiddle" alt="' + (hint || '') + '" border="0"> ');
@@ -301,14 +301,14 @@
         <script>
             (function () {
                 function hideEmptyElements() {
-                    // Скрываем пустые параграфы MsoNormal
+
                     document.querySelectorAll('p.MsoNormal').forEach(function (p) {
-                        // Не скрывать элементы, содержащие изображения или другие медиа/MathML
+
                         if (p.querySelector('img, picture, svg, math, video, iframe, object, embed')) return;
 
                         var text = (p.textContent || '').replace(/\u00A0/g, '').trim();
                         if (text.length === 0) {
-                            // Клонируем и удаляем пустые вложенные теги (например пустые span с &nbsp;)
+
                             var temp = p.cloneNode(true);
                             temp.querySelectorAll('*').forEach(function (el) {
                                 if ((el.textContent || '').replace(/\u00A0/g, '').trim().length === 0 && el.querySelectorAll('*').length === 0) {
@@ -321,7 +321,7 @@
                             }
                         }
                     });
-                    // Скрываем пустые strong элементы
+
                     document.querySelectorAll('strong').forEach(function (strong) {
                         var text = (strong.textContent || '')
                             .replace(/\u00A0/g, '') // убрать &nbsp;

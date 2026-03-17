@@ -25,7 +25,7 @@ const selectedGroup = computed({
     set: (val) => taskStore.setSelectedGroup(val)
 });
 const tasks = computed(() => taskStore.tasks || []);
-// Пагинация
+
 const perPage = ref(5);
 const currentPage = ref(1);
 const totalPages = computed(() => {
@@ -71,7 +71,7 @@ function handleExportPdfManual() {
                 file: data.data.file,
                 url: data.data.download_url
             };
-            // Опрос статуса
+
             const poll = async () => {
                 try {
                     const res = await taskStore.getManualStatus(downloadMeta.value.taskId, downloadMeta.value.file);
@@ -116,7 +116,7 @@ watch(paginatedTasks, (list) => {
     iframeLoading.value = map;
 }, { immediate: true });
 
-// Автонастройка высоты iframe по содержимому (postMessage)
+
 function handleIframeResizeMessage(event) {
     var data = event && event.data;
     if (!data || data.type !== 'TASK_IFRAME_HEIGHT') return;
@@ -126,7 +126,7 @@ function handleIframeResizeMessage(event) {
     const selector = `iframe[data-task-id="${taskId}"]`;
     const iframe = document.querySelector(selector);
     if (!iframe) return;
-    // Минимальная высота для визуальной стабильности
+
     const minHeight = 120;
     iframe.style.height = Math.max(minHeight, height) + 'px';
 }

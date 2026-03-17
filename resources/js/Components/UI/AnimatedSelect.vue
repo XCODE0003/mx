@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 
 const props = defineProps({
-    // Accepts either Array (['A','B'] or [{label, value}]) OR Object ({ key: label })
+
     options: { type: [Array, Object], default: () => [] },
     modelValue: { type: [String, Number, Boolean, Object, null], default: null },
     placeholder: { type: String, default: 'Выберите' },
@@ -14,15 +14,15 @@ const isOpen = ref(false);
 const root = ref(null);
 
 const normalizedOptions = computed(() => {
-    // Always return array of { value, label }
+
     if (Array.isArray(props.options)) {
         return props.options.map((o) => {
             if (o && typeof o === 'object') {
-                // Support { key, value } shape → store key, show value
+
                 if ('key' in o && 'value' in o) {
                     return { value: o.key, label: String(o.value) };
                 }
-                // Fallbacks for { value, label } or mixed shapes
+
                 const normalizedValue = o.value ?? o.label ?? o.key;
                 const normalizedLabel = o.label ?? o.value ?? String(o.key ?? '');
                 return { value: normalizedValue, label: normalizedLabel };
@@ -30,7 +30,7 @@ const normalizedOptions = computed(() => {
             return { value: o, label: String(o) };
         });
     }
-    // Object map: { key: label }
+
     return Object.entries(props.options).map(([key, label]) => ({ value: key, label }));
 });
 
@@ -57,13 +57,13 @@ const onDocClick = (e) => {
     isOpen.value = false;
 };
 
-// React to dynamic changes in options
+
 watch(
     () => props.options,
     () => {
-        // Close dropdown to avoid visual glitches when options update
+
         isOpen.value = false;
-        // If current modelValue no longer exists in options, reset selection
+
         const hasCurrent = normalizedOptions.value.some((o) => String(o.value) === String(props.modelValue));
         if (!hasCurrent && props.modelValue !== null && props.modelValue !== undefined && props.modelValue !== '') {
             emit('update:modelValue', null);

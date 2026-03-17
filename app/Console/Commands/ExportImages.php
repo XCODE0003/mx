@@ -36,7 +36,7 @@ class ExportImages extends Command
         foreach ($rows as $row) {
             $imageValue = $row->image;
 
-            // Извлекаем из JSON-массива ["..."]
+
             if (str_starts_with(trim($imageValue), '["')) {
                 $decoded = json_decode($imageValue, true);
                 $imagePath = $decoded[0] ?? null;
@@ -46,13 +46,13 @@ class ExportImages extends Command
 
             if (!$imagePath) continue;
 
-            // Убираем домен https://oge.fipi.ru/
-            $imagePath = str_replace('https://oge.fipi.ru/', '', $imagePath);
+
+            $imagePath = str_replace('https:
 
             $source = public_path($imagePath);
             $destination = $exportRoot . '/' . $imagePath;
 
-            // Создаём директорию перед копированием
+
             $destDir = dirname($destination);
             if (!is_dir($destDir)) mkdir($destDir, 0777, true);
 

@@ -38,7 +38,7 @@ Route::get('/banks', function () {
     return Inertia::render('Banks');
 })->name('banks');
 
-// Экспорт одного задания в PDF
+
 Route::get('/tasks/{task}/view', [TaskExportController::class, 'view'])->name('tasks.view');
 Route::get('/tasks/{task}/view_tasks', [TaskExportController::class, 'viewTasks'])->name('tasks.view_tasks');
 Route::get('/tasks/{task}/view_tasks_word', [TaskExportController::class, 'viewTasksWord'])->name('tasks.view_tasks_word');

@@ -46,11 +46,11 @@ class GenerateTaskBundle implements ShouldQueue
         }
         $tasks = Task::with('group')->whereIn('id', $ids->all())->get()
             ->filter(function ($task) {
-                // Фильтруем задачи, у которых есть группа
+
                 return $task->group !== null;
             })
             ->sortBy(function ($task) {
-                // Теперь можем безопасно обращаться к formatted_title
+
                 return (int) ($task->group->formatted_title ?? 999999);
             });
 
@@ -64,7 +64,7 @@ class GenerateTaskBundle implements ShouldQueue
             @mkdir($dir, 0775, true);
         }
 
-        // Файлы к упаковке
+
         $ts = time();
         $pdfNoAns = $dir.DIRECTORY_SEPARATOR.'variant-'.$ts.'.pdf';
         $pdfAns   = $dir.DIRECTORY_SEPARATOR.'variant-answers-'.$ts.'.pdf';
@@ -72,7 +72,7 @@ class GenerateTaskBundle implements ShouldQueue
         $docAns   = $dir.DIRECTORY_SEPARATOR.'variant-answers-'.$ts.'.docx';
         $zipPath  = $dir.DIRECTORY_SEPARATOR.$this->zipFileName;
 
-        // PDF без ответов
+
         $htmlNo = view('pdf.task', [
             'task' => $baseTask,
             'subject' => $baseTask->subject,
@@ -82,7 +82,7 @@ class GenerateTaskBundle implements ShouldQueue
         ])->render();
         $this->savePdf($htmlNo, $pdfNoAns);
 
-        // PDF с ответами
+
         $htmlAns = view('pdf.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
@@ -92,8 +92,8 @@ class GenerateTaskBundle implements ShouldQueue
         ])->render();
         $this->savePdf($htmlAns, $pdfAns);
 
-        // DOCX без ответов: только Pandoc из отдельного Word-шаблона
-        // Word-HTML без ответов по отдельному шаблону
+
+
         $wordHtmlNo = view('word.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
@@ -107,7 +107,7 @@ class GenerateTaskBundle implements ShouldQueue
             Log::error('Pandoc failed to generate DOCX (no answers)', ['target' => $docNoAns]);
         }
 
-        // DOCX с ответами: только Pandoc из отдельного Word-шаблона
+
         $wordHtmlAns = view('word.task', [
             'task' => $baseTask,
             'tasks' => $tasks,
@@ -121,7 +121,7 @@ class GenerateTaskBundle implements ShouldQueue
             Log::error('Pandoc failed to generate DOCX (with answers)', ['target' => $docAns]);
         }
 
-        // ZIP
+
         $zip = new ZipArchive();
         $result = $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         if ($result === true) {
@@ -131,7 +131,7 @@ class GenerateTaskBundle implements ShouldQueue
                 if (is_file($docNoAns)) { $zip->addFile($docNoAns, basename($docNoAns)); }
                 if (is_file($docAns))   { $zip->addFile($docAns, basename($docAns)); }
 
-                // Добавляем MP3 файлы из additional_files
+
                 $this->addAdditionalFilesToZip($zip, $tasks);
 
                 $zip->close();
@@ -140,7 +140,7 @@ class GenerateTaskBundle implements ShouldQueue
                     'path' => $zipPath,
                     'error' => $e->getMessage()
                 ]);
-                // Пытаемся закрыть архив, если он был открыт
+
                 if ($zip->status === ZipArchive::ER_OK) {
                     @$zip->close();
                 }
@@ -155,11 +155,11 @@ class GenerateTaskBundle implements ShouldQueue
 
 private function savePdf(string $html, string $fullPath): void
 {
-    // Инлайним CSS из внешнего файла
+
     $cssPath = public_path('assets/task.css');
     if (is_file($cssPath)) {
         $cssContent = file_get_contents($cssPath);
-        // Заменяем <link rel="stylesheet" href="/assets/task.css?v=..."> на <style>
+
         $html = preg_replace(
             '/<link\s+rel=["\']stylesheet["\']\s+href=["\'][^"\']*task\.css[^"\']*["\'][^>]*>/i',
             '<style>' . $cssContent . '</style>',
@@ -204,7 +204,7 @@ private function savePdf(string $html, string $fullPath): void
             $tmpDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'docx_'.uniqid();
             @mkdir($tmpDir, 0775, true);
             $htmlFile = $tmpDir.DIRECTORY_SEPARATOR.'index.html';
-            // Оборачиваем в минимальный HTML, если пришёл фрагмент
+
             if (stripos($html, '<html') === false) {
                 $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>'.$html.'</body></html>';
             }
@@ -223,7 +223,7 @@ private function savePdf(string $html, string $fullPath): void
                 return true;
             }
         } catch (\Throwable $e) {
-            // ignore
+
         }
         return false;
     }
@@ -247,7 +247,7 @@ private function savePdf(string $html, string $fullPath): void
                 return true;
             }
         } catch (\Throwable $e) {
-            // ignore
+
         }
         return false;
     }
@@ -259,7 +259,7 @@ private function savePdf(string $html, string $fullPath): void
             $path = trim(@shell_exec('command -v '.escapeshellarg($bin)) ?: '');
             if ($path !== '' && is_executable($path)) return $path;
         }
-        // MacOS typical path
+
         $mac = '/Applications/LibreOffice.app/Contents/MacOS/soffice';
         if (is_executable($mac)) return $mac;
         return null;
@@ -334,18 +334,18 @@ private function savePdf(string $html, string $fullPath): void
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
         foreach ($tasks as $t) {
-            // Безопасное получение formatted_title
+
             $taskTitle = $t->group?->formatted_title ?? '?';
             $section->addText('Задание '.$taskTitle, ['bold' => true, 'size' => 12]);
             $html = $questionHtmlMap[$t->id] ?? ($t->question ?? '');
-            // Текстовая часть
+
             $text = $this->htmlToPlainText($html);
             foreach (explode("\n", $text) as $line) {
                 if (trim($line) !== '') {
                     $section->addText($line, ['size' => 11]);
                 }
             }
-            // Картинки
+
             foreach ($this->extractImages($html) as $imgPath) {
                 try { $section->addImage($imgPath, ['width' => 400]); } catch (\Throwable $e) {}
             }
@@ -506,23 +506,23 @@ private function savePdf(string $html, string $fullPath): void
                 }
 
                 foreach ($files as $filePath) {
-                    // Пропускаем если уже добавлен
+
                     if (in_array($filePath, $addedFiles)) {
                         continue;
                     }
 
-                    // Убираем ведущий слэш и проверяем формат пути
+
                     $path = ltrim($filePath, '/');
 
-                    // Проверяем, что путь начинается с files/
+
                     if (!str_starts_with($path, 'files/')) {
                         continue;
                     }
 
-                    // Получаем полный путь к файлу
+
                     $fullPath = public_path($path);
 
-                    // Проверяем существование файла
+
                     if (is_file($fullPath)) {
                         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
                         if ($ext === 'mp3') {
