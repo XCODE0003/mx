@@ -531,7 +531,7 @@ private function savePdf(string $html, string $fullPath): void
                         } else {
                             $zipFileName = basename($path);
                         }
-                        $zip->addFile($fullPath, 'files/' . $zipFileName);
+                        $zip->addFile($fullPath, 'Дополнительные файлы/' . $zipFileName);
                         $addedFiles[] = $filePath;
                         Log::info('Added additional file to ZIP', [
                             'file' => $filePath,
