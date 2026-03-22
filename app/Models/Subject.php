@@ -12,11 +12,13 @@ class Subject extends Model
         'name',
         'exam_type',
         'class_name',
-        'text_header'
+        'text_header',
+        'additional_files',
     ];
 
     protected $casts = [
-        'exam_type' => 'string'
+        'exam_type' => 'string',
+        'additional_files' => 'array',
     ];
 
     public function tasks(): HasMany

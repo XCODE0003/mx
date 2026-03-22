@@ -134,6 +134,7 @@ class GenerateTaskBundle implements ShouldQueue
 
 
                 $this->addAdditionalFilesToZip($zip, $tasks);
+                $this->addSubjectAdditionalFilesToZip($zip, $baseTask->subject);
 
                 $zip->close();
             } catch (\Throwable $e) {
@@ -484,6 +485,36 @@ private function savePdf(string $html, string $fullPath): void
             return 'data:'.$mime.';base64,'.base64_encode($httpData);
         }
         return $abs;
+    }
+
+    /**
+     * Добавляет файлы из subject.additional_files в ZIP архив (критерии оценивания, справочные материалы).
+     */
+    private function addSubjectAdditionalFilesToZip(ZipArchive $zip, ?\App\Models\Subject $subject): void
+    {
+        if (!$subject?->additional_files) {
+            return;
+        }
+
+        $files = $subject->additional_files;
+        if (!is_array($files)) {
+            return;
+        }
+
+        foreach ($files as $filePath) {
+            $path = ltrim((string) $filePath, '/');
+            if (!str_starts_with($path, 'files/')) {
+                continue;
+            }
+
+            $fullPath = public_path($path);
+            if (is_file($fullPath)) {
+                $zip->addFile($fullPath, 'Дополнительные файлы/'.basename($path));
+                Log::info('Added subject additional file to ZIP', ['file' => $filePath]);
+            } else {
+                Log::warning('Subject additional file not found', ['file' => $filePath]);
+            }
+        }
     }
 
     /**
