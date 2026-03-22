@@ -64,12 +64,13 @@ class GenerateTaskBundle implements ShouldQueue
             @mkdir($dir, 0775, true);
         }
 
+        $baseName = $baseTask->subject?->class_name ?? ('subject_'.$baseTask->subject_id);
+        $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'variant';
 
-        $ts = time();
-        $pdfNoAns = $dir.DIRECTORY_SEPARATOR.'variant-'.$ts.'.pdf';
-        $pdfAns   = $dir.DIRECTORY_SEPARATOR.'variant-answers-'.$ts.'.pdf';
-        $docNoAns = $dir.DIRECTORY_SEPARATOR.'variant-'.$ts.'.docx';
-        $docAns   = $dir.DIRECTORY_SEPARATOR.'variant-answers-'.$ts.'.docx';
+        $pdfNoAns = $dir.DIRECTORY_SEPARATOR.'VARIANT_'.$baseName.'.pdf';
+        $pdfAns   = $dir.DIRECTORY_SEPARATOR.'ANSWER_'.$baseName.'.pdf';
+        $docNoAns = $dir.DIRECTORY_SEPARATOR.'VARIANT_'.$baseName.'.docx';
+        $docAns   = $dir.DIRECTORY_SEPARATOR.'ANSWER_'.$baseName.'.docx';
         $zipPath  = $dir.DIRECTORY_SEPARATOR.$this->zipFileName;
 
 

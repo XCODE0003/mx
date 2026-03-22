@@ -174,15 +174,16 @@ class TaskExportController extends Controller
             ]);
         }
         $taskIds = array_values($validated['tasks']);
-        $baseTask = Task::findOrFail($taskIds[0]);
+        $baseTask = Task::with('subject')->findOrFail($taskIds[0]);
         $tasks = Task::whereIn('id', $taskIds)->get();
         $tasks = $tasks->filter()->sortBy(function ($task) {
             return (int) $task->group->formatted_title;
         });
 
 
-        $taskIdsHash = substr(md5(implode('-', $taskIds)), 0, 8);
-        $zipName = 'bundle-' . $baseTask->id . '-' . $taskIdsHash . '-' . time() . '.zip';
+        $baseName = $baseTask->subject?->class_name ?? ('subject_'.$baseTask->subject_id);
+        $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'bundle';
+        $zipName = $baseName . '.zip';
 
         $order = Order::create([
             'subject_id' => $baseTask->id,
@@ -292,8 +293,10 @@ class TaskExportController extends Controller
         }
 
 
-        $taskIdsHash = substr(md5(implode('-', $tasks->pluck('id')->all())), 0, 8);
-        $zipName = 'bundle-' . $tasks->first()->id . '-' . $taskIdsHash . '-' . time() . '.zip';
+        $baseTask = $tasks->first();
+        $baseName = $baseTask->subject?->class_name ?? ('subject_'.$baseTask->subject_id);
+        $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'bundle';
+        $zipName = $baseName . '.zip';
 
         GenerateTaskBundle::dispatch($tasks->first()->id, $tasks->pluck('id')->all(), $zipName);
         $order = Order::create([
