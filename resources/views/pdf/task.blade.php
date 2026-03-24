@@ -432,7 +432,7 @@
                                                 </p>
                                             @endif
                                             <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
-                                                @if (!$withAnswers)
+                                                @if ($withAnswers)
                                                     @php
                     $ans = $t->response ?? '';
 
