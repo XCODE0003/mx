@@ -369,6 +369,9 @@
             <div class=" font-bold text-center w-full">
                 Ответы и решения
             </div>
+            @if(!empty($subject->additional_text_answer))
+                {!! $subject->additional_text_answer !!}
+            @endif
         @endif
         @php
             $printedQuestionHashes = [];
