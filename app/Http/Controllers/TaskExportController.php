@@ -86,9 +86,9 @@ class TaskExportController extends Controller
             return $packTitles->contains((string) $group->formatted_title);
         })->concat($groupedPacks);
 
-        $randomTasks = $groups->map(function ($group) use ($groups, $task) {
-            // return $group->tasks()->where('id', $task->id)->first();
-            return $group->tasks()->inRandomOrder()->first();
+        $ran.domTasks = $groups->map(function ($group) use ($groups, $task) {
+            return $group->tasks()->where('id', $task->id)->first();
+            //return $group->tasks()->inRandomOrder()->first();
         })->filter()->unique(function ($task) {
             return (string) $task->group->formatted_title;
         })->values();
@@ -105,7 +105,7 @@ class TaskExportController extends Controller
             'tasks' => $randomTasks,
             'group' => $task->group,
             'subject' => $task->subject,
-            'withAnswers' => false,
+            'withAnswers' => true,
         ]);
     }
     public function viewTasks(Task $task)
