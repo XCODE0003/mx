@@ -432,22 +432,7 @@
                                                 </p>
                                             @endif
                                             <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
-                                            @php
-                    $ans = $t->response ?? '';
-
-                    if (($group->id ?? null) == 132 && $ans !== '') {
-                        $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
-                        $ans = preg_replace('/Ответ:\s*/i', '', $ans);
-                        $ans = trim($ans);
-                    }
-                                                     @endphp
-                                                    @if($ans !== '')
-                                                        <div style="min-width: 150px;  line-height: 1.5;">
-                                                            {!! $ans !!}
-                                                        </div>
-
-                                                    @endif
-                                                @if ($withAnswers)
+                                                @if (!$withAnswers)
                                                     @php
                     $ans = $t->response ?? '';
 
@@ -481,24 +466,7 @@
                                                     @endif
 
                                                 @endif
-
                                             </div>
-                                            @php
-                    $ans = $t->response ?? '';
-
-                    if (($group->id ?? null) == 132 && $ans !== '') {
-                        $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
-                        $ans = preg_replace('/Ответ:\s*/i', '', $ans);
-                        $ans = trim($ans);
-                    }
-                                                     @endphp
-                                                    @if($ans !== '')
-                                                        <div style="min-width: 150px;  line-height: 1.5;">
-                                                            {!! $ans !!}
-                                                        </div>
-                                                    @else
-
-                                                    @endif
                                         </div>
                                     </div>
 
