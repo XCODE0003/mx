@@ -426,22 +426,12 @@
                                             </div>
                                         @endif
                                         <div id="answer_block" class="flex gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
-
+                                            @if(!$withAnswers && $t->type_answer != 'hide_line')
+                                                <p>
+                                                    Ответ:
+                                                </p>
+                                            @endif
                                             <div id="answer_kim" style="min-height: 10px;display: inline-flex; gap: 5px; width: 100%">
-                                            @php
-                    $ans = $t->response ?? '';
-
-                    if (($group->id ?? null) == 132 && $ans !== '') {
-                        $ans = preg_replace('/ОТВЕТ:\s*/i', '', $ans);
-                        $ans = preg_replace('/Ответ:\s*/i', '', $ans);
-                        $ans = trim($ans);
-                    }
-                                                     @endphp
-                                                    @if($ans !== '')
-                                                        <div style="min-width: 150px;  line-height: 1.5;">
-                                                            {!! $ans !!}
-                                                        </div>
-                                                    @else
 
                                                 @if ($withAnswers)
                                                     @php
