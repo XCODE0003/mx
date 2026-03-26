@@ -1,5 +1,6 @@
 <script setup>
 import MainLayout from '../../Layouts/MainLayout.vue';
+import PasswordInput from '../../Components/PasswordInput.vue';
 import { ref, computed } from 'vue';
 import axiosClient from '../../api/axios';
 import { useUserStore } from '../../stores/userStore';
@@ -123,15 +124,30 @@ const onChangePassword = async () => {
                                         <div class="profile_account_bottom_items">
                                             <div class="profile_account_bottom_item">
                                                 <p class="profile_account_up_item_tittle">Введите пароль</p>
-                                                <input type="password" placeholder="Введите текущий пароль" v-model="currentPassword" class="profile_account_up_item_input">
+                                                <PasswordInput
+                                                    v-model="currentPassword"
+                                                    placeholder="Введите текущий пароль"
+                                                    input-class="profile_account_up_item_input"
+                                                    autocomplete="current-password"
+                                                />
                                             </div>
                                             <div class="profile_account_bottom_item">
                                                 <p class="profile_account_up_item_tittle">Введите новый пароль</p>
-                                                <input type="password" placeholder="Введите новый пароль" v-model="newPassword" class="profile_account_up_item_input">
+                                                <PasswordInput
+                                                    v-model="newPassword"
+                                                    placeholder="Введите новый пароль"
+                                                    input-class="profile_account_up_item_input"
+                                                    autocomplete="new-password"
+                                                />
                                             </div>
                                             <div class="profile_account_bottom_item">
                                                 <p class="profile_account_up_item_tittle">Повторите новый пароль</p>
-                                                <input type="password" placeholder="Повторите новый пароль" v-model="newPasswordConfirm" class="profile_account_up_item_input">
+                                                <PasswordInput
+                                                    v-model="newPasswordConfirm"
+                                                    placeholder="Повторите новый пароль"
+                                                    input-class="profile_account_up_item_input"
+                                                    autocomplete="new-password"
+                                                />
                                             </div>
                                         </div>
                                     </div>

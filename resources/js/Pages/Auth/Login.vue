@@ -1,5 +1,6 @@
 <script setup>
 import MainLayout from '../../Layouts/MainLayout.vue';
+import PasswordInput from '../../Components/PasswordInput.vue';
 import { ref, computed } from 'vue';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -45,10 +46,15 @@ const errorMessages = computed(() => {
                             <div class="signin_main_rect_content">
                                 <h1 class="signin_main_rect_tittle">Вход</h1>
                                 <div class="signin_main_rect_inputs">
-                                    <input v-model="email" type="email" placeholder="Введите почту" class="signin_main_rect_input">
-                                    <input v-model="password" type="password" placeholder="Введите пароль" class="signin_main_rect_input">
+                                    <input v-model="email" type="email" placeholder="Введите почту" class="signin_main_rect_input" autocomplete="username">
+                                    <PasswordInput
+                                        v-model="password"
+                                        placeholder="Введите пароль"
+                                        input-class="signin_main_rect_input"
+                                        autocomplete="current-password"
+                                    />
                                 </div>
-                                <p class="signin_main_rect_help" id="openRecoveryMail">Забыли пароль?</p>
+                                <a href="/forgot-password" class="signin_main_rect_help">Забыли пароль?</a>
                                 <button class="signin_main_rect_button" @click="onLogin">Войти</button>
                                 <div v-if="errorMessages.length" class="signin_main_rect_errors" style="margin-top: 12px; color: #ff4d4f;">
                                     <ul>

@@ -20,11 +20,12 @@ class Task extends Model
         'table_answer',
         'count_columns',
         'question_id',
-        'additional_files'
+        'additional_files',
     ];
 
     protected $casts = [
-        'image' => 'array'
+        'image' => 'array',
+        'additional_files' => 'array',
     ];
 
     public function group(): BelongsTo
@@ -47,12 +48,13 @@ class Task extends Model
     public function getBlankTextAttribute()
     {
         if ($this->question_id == 1) {
-            if (!$this->relationLoaded('blankText')) {
+            if (! $this->relationLoaded('blankText')) {
                 $this->load('blankText');
             }
 
             return $this->getRelation('blankText')?->text;
         }
+
         return null;
     }
 
@@ -60,5 +62,4 @@ class Task extends Model
     {
         return $this->blankText()->first()->border ?? false;
     }
-
 }

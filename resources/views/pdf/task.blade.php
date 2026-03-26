@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:m="http://www.w3.org/1998/Math/MathML">
+<html lang="ru" xmlns:m="http://www.w3.org/1998/Math/MathML" @if($embedConstructorPreview ?? false) class="constructor-task-embed-html" @endif>
 
 <head>
     <meta charset="UTF-8">
@@ -100,6 +100,30 @@
                 padding-bottom: 20mm;
                 min-height: auto;
             }
+        }
+
+        /* Превью в iframe: перебить Avada/task.css (html/body — var(--bg_color)) */
+        html.constructor-task-embed-html {
+            background-color: #fff !important;
+            background-image: none !important;
+            background-blend-mode: normal !important;
+        }
+
+        html.constructor-task-embed-html body.constructor-task-embed {
+            margin: 0;
+            background-color: #fff !important;
+            background-image: none !important;
+            background-blend-mode: normal !important;
+        }
+
+        .preview-page--embed {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 12px 14px !important;
+            box-shadow: none !important;
+            min-height: 0 !important;
+            background-color: #fff !important;
         }
 
         /* Явный разрыв страницы */
@@ -359,10 +383,12 @@
     </script>
 </head>
 
-<body>
+<body @if($embedConstructorPreview ?? false) class="constructor-task-embed" @endif>
 
-    <div class="container preview-page">
-        @if(!$withAnswers)
+    <div class="container preview-page @if($embedConstructorPreview ?? false) preview-page--embed @endif">
+        @if($embedConstructorPreview ?? false)
+            {{-- Только тело задания: без шапки варианта и текста части из subject/group --}}
+        @elseif(!$withAnswers)
             {!! $subject->text_header ?? '' !!}
             <div class="page-break"></div>
         @else
@@ -380,51 +406,54 @@
                         <div style="display: flex; flex-direction: column; gap: 10px;">
 
                             <div id="group_{{ $t->mark }}" class="task-block">
-                                @if (!$withAnswers)
-                                    {!! optional($t->group)->text_title ?? '' !!}
-                                    @php
-                                        $groupQuestion = (string) (optional($t->group)->question ?? '');
-                                        $questionHash = $groupQuestion !== '' ? md5($groupQuestion) : null;
-                                        $shouldRenderGroupQuestion = $questionHash && !in_array($questionHash, $printedQuestionHashes, true);
-                                        if ($shouldRenderGroupQuestion) {
-                                            $printedQuestionHashes[] = $questionHash;
-                                        }
-                                    @endphp
+                                @if (!$withAnswers || ($embedConstructorPreview ?? false))
+                                    @unless($embedConstructorPreview ?? false)
+                                        {!! optional($t->group)->text_title ?? '' !!}
+                                        @php
+                                            $groupQuestion = (string) (optional($t->group)->question ?? '');
+                                            $questionHash = $groupQuestion !== '' ? md5($groupQuestion) : null;
+                                            $shouldRenderGroupQuestion = $questionHash && !in_array($questionHash, $printedQuestionHashes, true);
+                                            if ($shouldRenderGroupQuestion) {
+                                                $printedQuestionHashes[] = $questionHash;
+                                            }
+                                        @endphp
 
-                                    @if($shouldRenderGroupQuestion)
-                                        <div style="font-size: 18px;">
-                                            {!! $groupQuestion !!}
-                                        </div>
-                                    @endif
-                                   <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
-                                   @if(!empty($t->border) && !empty($t->blank_text) && !is_null($t->type_answer))
-                                        <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
+                                        @if($shouldRenderGroupQuestion)
+                                            <div style="font-size: 18px;">
+                                                {!! $groupQuestion !!}
+                                            </div>
+                                        @endif
+                                       <div style="margin-bottom: 24px; padding-left: 40px; font-size: 18px !important;">
+                                       @if(!empty($t->border) && !empty($t->blank_text) && !is_null($t->type_answer))
+                                            <div class="task-title-border" style="border: 1px solid #000; padding: 5px; margin-bottom: 10px;">
+                                                {!! $t->blank_text ?? '' !!}
+                                            </div>
+                                        @else
                                             {!! $t->blank_text ?? '' !!}
-                                        </div>
-                                    @else
-                                        {!! $t->blank_text ?? '' !!}
-                                    @endif
-                                     @if(!empty($t->additional_text))
-                                        {!! $t->additional_text !!}
-                                     @endif
-                                   </div>
+                                        @endif
+                                         @if(!empty($t->additional_text))
+                                            {!! $t->additional_text !!}
+                                         @endif
+                                       </div>
+                                    @endunless
                                 @endif
                                 <div class="task-content">
 
-                                @if($t->response !== null)
+                                @if($t->response !== null && !($embedConstructorPreview ?? false))
                                     <div class="task-title">{{ optional($t->group)->formatted_title ?? '№' }}</div>
                                 @endif
                                     <div style="display: flex; flex-direction: column; gap: 5px; width:100%">
-                                        @if(!$withAnswers)
+                                        @if(!$withAnswers || ($embedConstructorPreview ?? false))
                                             <div class="task-content">
                                                 <div style="width: 100%;">
 
-                                                    {!! ($questionHtmlMap[$t->id] ?? $t->question) !!}
+                                                    {!! (($questionHtmlMap ?? [])[$t->id] ?? $t->question) !!}
 
                                                 </div>
 
                                             </div>
                                         @endif
+                                        @unless($embedBankPreview ?? false)
                                         <div id="answer_block" class="flex gap-1 border border-1 border-solid" style="display: flex; gap: 5px; width: 100%">
                                             @if(!$withAnswers && $t->type_answer != 'hide_line')
                                                 <p>
@@ -468,6 +497,7 @@
                                                 @endif
                                             </div>
                                         </div>
+                                        @endunless
                                     </div>
 
                                 </div>
@@ -641,5 +671,39 @@
             });
         });
     </script>
+
+    @if(!empty($embedConstructorPreview))
+    <script>
+        (function () {
+            var taskId = {{ (int) ($embedTaskId ?? 0) }};
+            function sendHeight() {
+                if (!taskId || window.parent === window) return;
+                var doc = document.documentElement;
+                var h = Math.max(
+                    document.body.scrollHeight,
+                    doc.scrollHeight,
+                    document.body.offsetHeight,
+                    doc.offsetHeight
+                );
+                window.parent.postMessage({
+                    type: 'TASK_IFRAME_HEIGHT',
+                    taskId: taskId,
+                    height: h
+                }, '*');
+            }
+            function scheduleSend() {
+                sendHeight();
+                setTimeout(sendHeight, 200);
+                setTimeout(sendHeight, 800);
+                setTimeout(sendHeight, 2000);
+            }
+            window.addEventListener('load', scheduleSend);
+            document.addEventListener('DOMContentLoaded', scheduleSend);
+            if (typeof MathJax !== 'undefined' && MathJax.Hub && MathJax.Hub.Queue) {
+                MathJax.Hub.Queue(function () { setTimeout(sendHeight, 100); });
+            }
+        })();
+    </script>
+    @endif
 </body>
 </html>

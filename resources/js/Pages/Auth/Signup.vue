@@ -1,6 +1,7 @@
 
 <script setup>
 import MainLayout from '../../Layouts/MainLayout.vue';
+import PasswordInput from '../../Components/PasswordInput.vue';
 import { ref, computed } from 'vue';
 import { useAuthStore } from '../../stores/authStore';
 
@@ -9,7 +10,14 @@ const email = ref('');
 const password = ref('');
 const passwordConfirm = ref('');
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const onRegister = async () => {
+    if (!emailRegex.test(email.value)) {
+        authStore.errors = { email: ['Введите корректный адрес электронной почты'] };
+        return;
+    }
+
     if (password.value !== passwordConfirm.value) {
         authStore.errors = { password: ['Пароли не совпадают'] };
         return;
@@ -49,9 +57,19 @@ const errorMessages = computed(() => {
                     <div class="signin_main_rect_content">
                         <h1 class="signin_main_rect_tittle">Регистация</h1>
                         <div class="signin_main_rect_inputs">
-                            <input v-model="email" type="email" placeholder="Введите почту" class="signin_main_rect_input">
-                            <input v-model="password" type="password" placeholder="Введите пароль" class="signin_main_rect_input">
-                            <input v-model="passwordConfirm" type="password" placeholder="Повторите пароль" class="signin_main_rect_input">
+                            <input v-model="email" type="email" placeholder="Введите почту" class="signin_main_rect_input" autocomplete="username">
+                            <PasswordInput
+                                v-model="password"
+                                placeholder="Введите пароль"
+                                input-class="signin_main_rect_input"
+                                autocomplete="new-password"
+                            />
+                            <PasswordInput
+                                v-model="passwordConfirm"
+                                placeholder="Повторите пароль"
+                                input-class="signin_main_rect_input"
+                                autocomplete="new-password"
+                            />
                         </div>
                         <button class="signin_main_rect_button" id="registerBtn" @click="onRegister">Зарегистрироваться</button>
                         <div v-if="errorMessages.length" class="signin_main_rect_errors" style="margin-top: 12px; color: #ff4d4f;">

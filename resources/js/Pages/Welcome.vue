@@ -1,15 +1,27 @@
 <script setup>
 import MainLayout from '../Layouts/MainLayout.vue';
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import AnimatedSelect from '../Components/UI/AnimatedSelect.vue';
 import Faq from '../Components/Faq.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import axiosClient from '../api/axios';
 
+const VARIANT_UI_TTL_MS = 30 * 60 * 1000;
+
 const grade = ref('');
 const subject = ref('');
 const step = ref('start');
-const downloadMeta = ref({ taskId: null, file: null, url: null });
+const downloadMeta = ref({ variantUuid: null, url: null });
+let uiExpiryTimer = null;
+
+function clearUiExpiryTimer() {
+    if (uiExpiryTimer) {
+        clearTimeout(uiExpiryTimer);
+        uiExpiryTimer = null;
+    }
+}
+
+onUnmounted(() => clearUiExpiryTimer());
 const grades = [
     { key: 'oge', value: 'ОГЭ' },
     { key: 'ege', value: 'ЕГЭ' },
@@ -49,26 +61,42 @@ function handleCreateClick() {
     if (!subject.value) {
         return;
     }
+    clearUiExpiryTimer();
     step.value = 'forming';
     axiosClient.post('/auto/tasks/download', { subject_id: subject.value })
         .then((response) => {
             const data = response.data && response.data.data ? response.data.data : {};
             downloadMeta.value = {
-                taskId: data.task_id,
-                file: data.file,
+                variantUuid: data.variant_uuid,
                 url: data.download_url,
             };
             const poll = () => {
-                axiosClient.get(`/auto/tasks/status/${downloadMeta.value.taskId}/${encodeURIComponent(downloadMeta.value.file)}`)
+                if (!downloadMeta.value.variantUuid) {
+                    step.value = 'start';
+                    return;
+                }
+                axiosClient.get(`/variants/${downloadMeta.value.variantUuid}/status`)
                     .then((res) => {
                         const ready = !!(res && res.data && res.data.data && res.data.data.ready);
                         if (ready) {
                             step.value = 'ready';
+                            clearUiExpiryTimer();
+                            uiExpiryTimer = setTimeout(() => {
+                                step.value = 'start';
+                                downloadMeta.value = { variantUuid: null, url: null };
+                            }, VARIANT_UI_TTL_MS);
                             return;
                         }
                         setTimeout(poll, 3000);
                     })
-                    .catch(() => setTimeout(poll, 3000));
+                    .catch((err) => {
+                        if (err.response?.status === 410) {
+                            step.value = 'start';
+                            downloadMeta.value = { variantUuid: null, url: null };
+                            return;
+                        }
+                        setTimeout(poll, 3000);
+                    });
             };
             poll();
         })
@@ -301,11 +329,11 @@ init();
 
             </section>
 
-            <Faq
-                title="Остались вопросы?"
-                subtitle="Если в списке часто задаваемых вопросов вы не нашли ответ на свой — напишите нам на почту или в онлайн чат!"
-                :items="faqItems"
-            />
+            <Faq title="Остались вопросы?" :items="faqItems">
+                <template #subtitle>
+                    Если в списке часто задаваемых вопросов вы не нашли ответ на свой — напишите нам на <a href="mailto:test@mail.ru">почту</a> или в онлайн чат!
+                </template>
+            </Faq>
         </main>
     </MainLayout>
 </template>

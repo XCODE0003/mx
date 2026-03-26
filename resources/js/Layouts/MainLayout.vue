@@ -13,9 +13,11 @@ const props = defineProps({
 </script>
 
 <template>
-    <div :class="class">
+    <div :class="['layout-app', props.class].filter(Boolean)">
         <Header />
-        <slot />
+        <div class="layout-app__main">
+            <slot />
+        </div>
         <Footer />
         <ToastContainer />
     </div>

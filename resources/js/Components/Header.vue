@@ -37,7 +37,7 @@ onMounted(async () => {
                         <li class="header_item_nav"><a href="/reviews">Отзывы</a></li>
                         <li class="header_item_nav"><a href="/news">Новости</a></li>
                         <li class="header_item_nav"><a href="/faq">FAQ</a></li>
-                        <li class="header_item_nav"><a href="/banks">Банк заданий ФИПИ</a></li>
+                        <li class="header_item_nav"><a href="/banks">Банк заданий</a></li>
                     </ul>
                 </div>
                 <div class="header_item">
@@ -85,7 +85,7 @@ onMounted(async () => {
                                         <li class="header_item_nav"><a href="/reviews" @click="closeMobileMenu">Отзывы</a></li>
                                         <li class="header_item_nav"><a href="/news" @click="closeMobileMenu">Новости</a></li>
                                         <li class="header_item_nav"><a href="/faq" @click="closeMobileMenu">FAQ</a></li>
-                                        <li class="header_item_nav"><a href="/banks" @click="closeMobileMenu">Банк заданий ФИПИ</a></li>
+                                        <li class="header_item_nav"><a href="/banks" @click="closeMobileMenu">Банк заданий</a></li>
                                     </ul>
 
                                 </div>

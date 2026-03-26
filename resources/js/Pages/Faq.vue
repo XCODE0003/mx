@@ -46,7 +46,11 @@ const faqItems = [
             <section class="faq_main">
                 <div class="container">
                     <div class="home_faq_items">
-                        <Faq title="Faq" subtitle="Если в списке часто задаваемых вопросов вы не нашли ответ на свой — напишите нам на почту или в онлайн чат!" :items="faqItems" />
+                        <Faq title="Faq" :items="faqItems">
+                            <template #subtitle>
+                                Если в списке часто задаваемых вопросов вы не нашли ответ на свой — напишите нам на <a href="mailto:test@mail.ru">почту</a> или в онлайн чат!
+                            </template>
+                        </Faq>
                     </div>
                 </div>
             </section>

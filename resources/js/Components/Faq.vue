@@ -18,7 +18,9 @@ function toggle(index) {
     <section class="home_faq">
         <div class="container">
             <h4 class="home_faq_tittle">{{ title }}</h4>
-            <h5 v-if="subtitle" class="home_faq_subtittle">{{ subtitle }}</h5>
+            <h5 v-if="$slots.subtitle || subtitle" class="home_faq_subtittle">
+                <slot name="subtitle">{{ subtitle }}</slot>
+            </h5>
 
             <div class="home_faq_items">
                 <div

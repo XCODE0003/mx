@@ -26,6 +26,12 @@ const selectedGroup = computed({
 });
 const tasks = computed(() => taskStore.tasks || []);
 
+const variantCount = ref(1);
+const variantCountOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({
+    key: n,
+    value: String(n),
+}));
+
 const perPage = ref(5);
 const currentPage = ref(1);
 const totalPages = computed(() => {
@@ -49,32 +55,37 @@ const iframeLoading = ref({});
 function handleIframeLoad(taskId) {
     iframeLoading.value = { ...iframeLoading.value, [taskId]: false };
 }
-const downloadMeta = ref({ taskId: null, file: null, url: null });
+const downloadMeta = ref({ variantUuid: null, url: null });
 function handleExportPdfManual() {
     creating.value = true;
     const selectedCount = Object.keys(taskStore.selectedTaskByGroup || {}).length;
     const groupsCount = groups.value?.length || 0;
     if (selectedCount === 0) {
         toast.info('Выберите по одному заданию в каждой группе');
+        creating.value = false;
         return;
     }
     if (selectedCount !== groupsCount) {
         toast.info('Выбраны не все группы. Завершите выбор для каждой группы.');
+        creating.value = false;
         return;
     }
     const tasks = Object.values(taskStore.selectedTaskByGroup);
-    taskStore.exportPdfManual(tasks)
+    taskStore.exportPdfManual(tasks, variantCount.value)
         .then(async (data) => {
             toast.success('Формирование началось. Ожидайте готовности.');
             downloadMeta.value = {
-                taskId: data.data.task_id,
-                file: data.data.file,
-                url: data.data.download_url
+                variantUuid: data.data.variant_uuid,
+                url: data.data.download_url,
             };
 
             const poll = async () => {
                 try {
-                    const res = await taskStore.getManualStatus(downloadMeta.value.taskId, downloadMeta.value.file);
+                    if (!downloadMeta.value.variantUuid) {
+                        creating.value = false;
+                        return;
+                    }
+                    const res = await taskStore.getVariantStatus(downloadMeta.value.variantUuid);
                     const ready = !!(res && res.data && res.data.ready);
                     if (ready) {
                         creating.value = false;
@@ -186,11 +197,10 @@ onBeforeUnmount(() => {
                                                     <p class="home_create_setting_tittle">Выберите предмет</p>
                                                     <AnimatedSelect v-model="selectedSubject" :options="subjects" placeholder="Выберите предмет"></AnimatedSelect>
                                                 </div>
-                                                <!-- <div class="home_create_setting">
-                                                    <p class="home_create_setting_tittle">Кол-во вариантов</p>
-                                                    <input type="text" placeholder="2" class="signin_main_rect_input">
-
-                                                </div> -->
+                                                <div class="home_create_setting">
+                                                    <p class="home_create_setting_tittle">Количество вариантов (макс. 10)</p>
+                                                    <AnimatedSelect v-model="variantCount" :options="variantCountOptions" placeholder="1" />
+                                                </div>
 
                                             </div>
                                         </div>
@@ -404,12 +414,12 @@ onBeforeUnmount(() => {
 
 
                                 </div>
-                                <div v-if="!is_subscribe" class="overlay_no_subscribe">
+                                <!-- <div v-if="!is_subscribe" class="overlay_no_subscribe">
                                     <div class="overlay_no_subscribe_content">
                                         <h3 >Для создания вариантов в ручную, вам необходимо приобести платную подписку в которой будет доступен полный функционал</h3>
                                         <button class="profile_account_middle_change_button">Приобрести подписку</button>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
 
@@ -425,7 +435,14 @@ iframe {
     height: 100%;
     border: none;
 }
-.banks_main_rect_bottom_text { position: relative; }
+.banks_main_rect_bottom_text {
+    position: relative;
+    min-height: 200px;
+}
+.banks_main_rect_bottom_text iframe {
+    min-height: 240px;
+    display: block;
+}
 .iframe_loader {
     position: absolute;
     inset: 0;

@@ -14,7 +14,13 @@ const { grades, subjects, selectedGrade, selectedSubject } = storeToRefs(taskSto
 const creating = ref(false);
 const step = ref('start');
 const ready = ref(false);
-const downloadMeta = ref({ taskId: null, file: null, url: null });
+const downloadMeta = ref({ variantUuid: null, url: null });
+
+const variantCount = ref(1);
+const variantCountOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({
+    key: n,
+    value: String(n),
+}));
 
 onMounted(() => {
     taskStore.getSubjects();
@@ -23,21 +29,25 @@ onMounted(() => {
 function handleExportPdfAuto() {
     creating.value = true;
     step.value = 'forming';
-    taskStore.exportPdfAuto(selectedSubject.value)
+    taskStore.exportPdfAuto(selectedSubject.value, variantCount.value)
         .then(async (data) => {
             toast.success('Формирование началось. Ожидайте готовности.');
             downloadMeta.value = {
-                taskId: data.data.task_id,
-                file: data.data.file,
-                url: data.data.download_url
+                variantUuid: data.data.variant_uuid,
+                url: data.data.download_url,
             };
             const poll = async () => {
                 try {
-                    const res = await taskStore.getAutoStatus(downloadMeta.value.taskId, downloadMeta.value.file);
+                    if (!downloadMeta.value.variantUuid) {
+                        creating.value = false;
+                        step.value = 'start';
+                        return;
+                    }
+                    const res = await taskStore.getVariantStatus(downloadMeta.value.variantUuid);
                     const ready = !!(res && res.data && res.data.ready);
                     if (ready) {
                         step.value = 'ready';
-                        downloadMeta.value.url = downloadMeta.value.url;
+                        creating.value = false;
                         return;
                     }
                 } catch (e) { }
@@ -48,6 +58,7 @@ function handleExportPdfAuto() {
         .catch(() => {
             toast.error('Не удалось запустить формирование. Попробуйте позже.');
             step.value = 'start';
+            creating.value = false;
         });
 }
 
@@ -101,10 +112,10 @@ watch(() => selectedGrade.value, () => {
                                                 <AnimatedSelect v-model="selectedSubject" :options="subjects" placeholder="Выберите предмет" />
                                             </div>
 
-                                            <!-- <div class="home_create_setting">
-                                                <p class="home_create_setting_tittle">Кол-во вариантов</p>
-                                                <input type="text" placeholder="Введите кол-во вариантов" class="signin_main_rect_input">
-                                            </div> -->
+                                            <div class="home_create_setting">
+                                                <p class="home_create_setting_tittle">Количество вариантов (макс. 10)</p>
+                                                <AnimatedSelect v-model="variantCount" :options="variantCountOptions" placeholder="1" />
+                                            </div>
 
                                         </div>
 
@@ -161,7 +172,7 @@ watch(() => selectedGrade.value, () => {
                                             </svg>
                                         </div>
                                         <div class="home_create_forming_texts">
-                                            <p class="home_create_block_bottom_text">Дождитесь окончания формирования варианта или же сформируйте его самостаятельно. </p>
+                                            <p class="home_create_block_bottom_text">Дождитесь окончания формирования варианта или же сформируйте его самостоятельно. </p>
                                             <button class="home_create_block_button" disabled="">Дождитесь формирования варианта</button>
                                         </div>
                                     </div>
@@ -175,7 +186,7 @@ watch(() => selectedGrade.value, () => {
                                             </svg>
                                         </div>
                                         <div class="home_create_forming_texts">
-                                            <p class="home_create_block_bottom_text">Дождитесь окончания формирования варианта или же сформируйте его самостаятельно. </p>
+                                            <p class="home_create_block_bottom_text">Дождитесь окончания формирования варианта или же сформируйте его самостоятельно. </p>
                                             <div class="profile_constructor_auto_buttons">
                                                 <a :href="downloadMeta.url" class="home_create_block_button" id="createDownload">Скачать</a>
                                                 <button @click="step = 'start'" class="home_create_block_button">Назад</button>

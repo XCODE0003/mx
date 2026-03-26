@@ -51,15 +51,17 @@ export const useTaskStore = defineStore("task", {
             this.selectedSubject = this.subjects[0].key;
         },
 
-        async exportPdfManual(tasks) {
+        async exportPdfManual(tasks, variantCount = 1) {
             const response = await axiosClient.post(`/manual/tasks/download`, {
-                tasks: tasks
+                tasks: tasks,
+                variant_count: variantCount,
             });
             return response.data;
         },
-        async exportPdfAuto(subjectId) {
+        async exportPdfAuto(subjectId, variantCount = 1) {
             const response = await axiosClient.post(`/auto/tasks/download`, {
-                task_subject_id: subjectId
+                task_subject_id: subjectId,
+                variant_count: variantCount,
             });
             return response.data;
         },
@@ -69,6 +71,16 @@ export const useTaskStore = defineStore("task", {
         },
         async getManualStatus(taskId, file) {
             const response = await axiosClient.get(`/manual/tasks/status/${taskId}/${encodeURIComponent(file)}`);
+            return response.data;
+        },
+
+        async getVariantStatus(uuid) {
+            const response = await axiosClient.get(`/variants/${uuid}/status`);
+            return response.data;
+        },
+
+        async queueVariantGeneration(uuid) {
+            const response = await axiosClient.post(`/variants/${uuid}/queue`);
             return response.data;
         },
 

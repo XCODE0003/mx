@@ -9,29 +9,45 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
-use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Facades\Log;
-use ZipArchive;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Shared\Html;
+use Spatie\Browsershot\Browsershot;
+use ZipArchive;
 
 class GenerateTaskBundle implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $baseTaskId;
+
     /** @var array<int> */
     public array $taskIds;
+
     public string $zipFileName;
 
+    /** Папка exports/variants/{uuid} — изолированное хранение; null — старый путь exports/tasks/{id} */
+    public ?string $variantUuid = null;
+
+    /** Несколько вариантов: массив наборов id заданий; null — один вариант (как taskIds). */
+    public ?array $variantsTaskIds = null;
+
     public $timeout = 600;
+
     public $tries = 1;
 
-    public function __construct(int $baseTaskId, array $taskIds, string $zipFileName)
+    public function __construct(int $baseTaskId, array $taskIds, string $zipFileName, ?string $variantUuid = null, ?array $variantsTaskIds = null)
     {
         $this->baseTaskId = $baseTaskId;
         $this->taskIds = array_values(array_unique(array_map('intval', $taskIds)));
         $this->zipFileName = $zipFileName;
+        $this->variantUuid = $variantUuid;
+        $this->variantsTaskIds = $variantsTaskIds !== null
+            ? array_values(array_map(
+                fn ($row) => array_values(array_unique(array_map('intval', (array) $row))),
+                $variantsTaskIds
+            ))
+            : null;
     }
 
     public function handle(): void
@@ -40,26 +56,16 @@ class GenerateTaskBundle implements ShouldQueue
         @set_time_limit(600);
 
         $baseTask = Task::with('group', 'subject')->findOrFail($this->baseTaskId);
-        $ids = collect($this->taskIds);
-        if ($ids->isEmpty()) {
-            $ids = collect([$this->baseTaskId]);
+
+        $variants = $this->variantsTaskIds;
+        if (! is_array($variants) || count($variants) < 2) {
+            $variants = [$this->taskIds];
         }
-        $tasks = Task::with('group')->whereIn('id', $ids->all())->get()
-            ->filter(function ($task) {
+        $multi = count($variants) > 1;
 
-                return $task->group !== null;
-            })
-            ->sortBy(function ($task) {
-
-                return (int) ($task->group->formatted_title ?? 999999);
-            });
-
-        $questionHtmlMap = [];
-        foreach ($tasks as $t) {
-            $questionHtmlMap[$t->id] = $this->inlineImages($t->question);
-        }
-
-        $dir = public_path('exports/tasks/'.$this->baseTaskId);
+        $dir = $this->variantUuid
+            ? public_path('exports/variants/'.$this->variantUuid)
+            : public_path('exports/tasks/'.$this->baseTaskId);
         if (! is_dir($dir)) {
             @mkdir($dir, 0775, true);
         }
@@ -67,80 +73,123 @@ class GenerateTaskBundle implements ShouldQueue
         $baseName = $baseTask->subject?->class_name ?? ('subject_'.$baseTask->subject_id);
         $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'variant';
 
-        $pdfNoAns = $dir.DIRECTORY_SEPARATOR.'VARIANT_'.$baseName.'.pdf';
-        $pdfAns   = $dir.DIRECTORY_SEPARATOR.'ANSWER_'.$baseName.'.pdf';
-        $docNoAns = $dir.DIRECTORY_SEPARATOR.'VARIANT_'.$baseName.'.docx';
-        $docAns   = $dir.DIRECTORY_SEPARATOR.'ANSWER_'.$baseName.'.docx';
-        $zipPath  = $dir.DIRECTORY_SEPARATOR.$this->zipFileName;
+        $zipPath = $dir.DIRECTORY_SEPARATOR.$this->zipFileName;
 
+        /** @var list<array{full: string, zip: string}> $zipEntries */
+        $zipEntries = [];
 
-        $htmlNo = view('pdf.task', [
-            'task' => $baseTask,
-            'subject' => $baseTask->subject,
-            'tasks' => $tasks,
-            'questionHtmlMap' => $questionHtmlMap,
-            'withAnswers' => false,
-        ])->render();
-        $this->savePdf($htmlNo, $pdfNoAns);
+        foreach ($variants as $index => $idList) {
+            $ids = collect($idList);
+            if ($ids->isEmpty()) {
+                $ids = collect([$this->baseTaskId]);
+            }
+            $tasks = Task::with('group')->whereIn('id', $ids->all())->get()
+                ->filter(fn ($task) => $task->group !== null)
+                ->sortBy(fn ($task) => (int) ($task->group->formatted_title ?? 999999));
 
+            if ($tasks->isEmpty()) {
+                continue;
+            }
 
-        $htmlAns = view('pdf.task', [
-            'task' => $baseTask,
-            'tasks' => $tasks,
-            'subject' => $baseTask->subject,
-            'questionHtmlMap' => $questionHtmlMap,
-            'withAnswers' => true,
-        ])->render();
-        $this->savePdf($htmlAns, $pdfAns);
+            $folderLabel = 'Вариант '.($index + 1);
+            $folderPrefix = $multi ? $folderLabel.'/' : '';
 
+            $questionHtmlMap = [];
+            foreach ($tasks as $t) {
+                $questionHtmlMap[$t->id] = $this->inlineImages($t->question);
+            }
 
+            $pdfNoAns = $dir.DIRECTORY_SEPARATOR.($multi ? $folderLabel.DIRECTORY_SEPARATOR : '').'VARIANT_'.$baseName.'.pdf';
+            $pdfAns = $dir.DIRECTORY_SEPARATOR.($multi ? $folderLabel.DIRECTORY_SEPARATOR : '').'ANSWER_'.$baseName.'.pdf';
+            $docNoAns = $dir.DIRECTORY_SEPARATOR.($multi ? $folderLabel.DIRECTORY_SEPARATOR : '').'VARIANT_'.$baseName.'.docx';
+            $docAns = $dir.DIRECTORY_SEPARATOR.($multi ? $folderLabel.DIRECTORY_SEPARATOR : '').'ANSWER_'.$baseName.'.docx';
 
-        $wordHtmlNo = view('word.task', [
-            'task' => $baseTask,
-            'tasks' => $tasks,
-            'subject' => $baseTask->subject,
-            'questionHtmlMap' => $questionHtmlMap,
-            'withAnswers' => false,
-        ])->render();
-        if ($this->saveDocxViaPandoc($wordHtmlNo, $docNoAns)) {
-            Log::info('DOCX (no answers) generated via pandoc', ['path' => $docNoAns]);
-        } else {
-            Log::error('Pandoc failed to generate DOCX (no answers)', ['target' => $docNoAns]);
+            if ($multi) {
+                $sub = dirname($pdfNoAns);
+                if (! is_dir($sub)) {
+                    @mkdir($sub, 0775, true);
+                }
+            }
+
+            $htmlNo = view('pdf.task', [
+                'task' => $baseTask,
+                'subject' => $baseTask->subject,
+                'tasks' => $tasks,
+                'questionHtmlMap' => $questionHtmlMap,
+                'withAnswers' => false,
+            ])->render();
+            $this->savePdf($htmlNo, $pdfNoAns);
+
+            $htmlAns = view('pdf.task', [
+                'task' => $baseTask,
+                'tasks' => $tasks,
+                'subject' => $baseTask->subject,
+                'questionHtmlMap' => $questionHtmlMap,
+                'withAnswers' => true,
+            ])->render();
+            $this->savePdf($htmlAns, $pdfAns);
+
+            $wordHtmlNo = view('word.task', [
+                'task' => $baseTask,
+                'tasks' => $tasks,
+                'subject' => $baseTask->subject,
+                'questionHtmlMap' => $questionHtmlMap,
+                'withAnswers' => false,
+            ])->render();
+            if ($this->saveDocxViaPandoc($wordHtmlNo, $docNoAns)) {
+                Log::info('DOCX (no answers) generated via pandoc', ['path' => $docNoAns]);
+            } else {
+                Log::error('Pandoc failed to generate DOCX (no answers)', ['target' => $docNoAns]);
+            }
+
+            $wordHtmlAns = view('word.task', [
+                'task' => $baseTask,
+                'tasks' => $tasks,
+                'subject' => $baseTask->subject,
+                'questionHtmlMap' => $questionHtmlMap,
+                'withAnswers' => true,
+            ])->render();
+            if ($this->saveDocxViaPandoc($wordHtmlAns, $docAns)) {
+                Log::info('DOCX (with answers) generated via pandoc', ['path' => $docAns]);
+            } else {
+                Log::error('Pandoc failed to generate DOCX (with answers)', ['target' => $docAns]);
+            }
+
+            $zipInner = fn (string $abs) => str_replace('\\', '/', $folderPrefix.basename($abs));
+
+            if (is_file($pdfNoAns)) {
+                $zipEntries[] = ['full' => $pdfNoAns, 'zip' => $zipInner($pdfNoAns)];
+            }
+            if (is_file($pdfAns)) {
+                $zipEntries[] = ['full' => $pdfAns, 'zip' => $zipInner($pdfAns)];
+            }
+            if (is_file($docNoAns)) {
+                $zipEntries[] = ['full' => $docNoAns, 'zip' => $zipInner($docNoAns)];
+            }
+            if (is_file($docAns)) {
+                $zipEntries[] = ['full' => $docAns, 'zip' => $zipInner($docAns)];
+            }
+
+            $this->collectAdditionalTaskFilesForZip($zipEntries, $tasks, $multi ? $folderLabel.'/Дополнительные файлы/' : 'Дополнительные файлы/');
         }
 
-
-        $wordHtmlAns = view('word.task', [
-            'task' => $baseTask,
-            'tasks' => $tasks,
-            'subject' => $baseTask->subject,
-            'questionHtmlMap' => $questionHtmlMap,
-            'withAnswers' => true,
-        ])->render();
-        if ($this->saveDocxViaPandoc($wordHtmlAns, $docAns)) {
-            Log::info('DOCX (with answers) generated via pandoc', ['path' => $docAns]);
-        } else {
-            Log::error('Pandoc failed to generate DOCX (with answers)', ['target' => $docAns]);
-        }
-
-
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         $result = $zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         if ($result === true) {
             try {
-                if (is_file($pdfNoAns)) { $zip->addFile($pdfNoAns, basename($pdfNoAns)); }
-                if (is_file($pdfAns))   { $zip->addFile($pdfAns, basename($pdfAns)); }
-                if (is_file($docNoAns)) { $zip->addFile($docNoAns, basename($docNoAns)); }
-                if (is_file($docAns))   { $zip->addFile($docAns, basename($docAns)); }
+                foreach ($zipEntries as $entry) {
+                    if (is_file($entry['full'])) {
+                        $zip->addFile($entry['full'], $entry['zip']);
+                    }
+                }
 
-
-                $this->addAdditionalFilesToZip($zip, $tasks);
                 $this->addSubjectAdditionalFilesToZip($zip, $baseTask->subject);
 
                 $zip->close();
             } catch (\Throwable $e) {
                 Log::error('Error while creating ZIP archive', [
                     'path' => $zipPath,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
 
                 if ($zip->status === ZipArchive::ER_OK) {
@@ -150,51 +199,105 @@ class GenerateTaskBundle implements ShouldQueue
         } else {
             Log::error('Failed to open ZIP archive', [
                 'path' => $zipPath,
-                'error_code' => $result
+                'error_code' => $result,
             ]);
         }
     }
 
-private function savePdf(string $html, string $fullPath): void
-{
+    /**
+     * @param  list<array{full: string, zip: string}>  $zipEntries
+     */
+    private function collectAdditionalTaskFilesForZip(array &$zipEntries, Collection $tasks, string $zipFolderPrefix): void
+    {
+        $addedPaths = [];
+        $audioIndex = 0;
 
-    $cssPath = public_path('assets/task.css');
-    if (is_file($cssPath)) {
-        $cssContent = file_get_contents($cssPath);
+        foreach ($tasks as $task) {
+            if (! $task->additional_files) {
+                continue;
+            }
 
-        $html = preg_replace(
-            '/<link\s+rel=["\']stylesheet["\']\s+href=["\'][^"\']*task\.css[^"\']*["\'][^>]*>/i',
-            '<style>' . $cssContent . '</style>',
-            $html
-        );
+            try {
+                $decoded = json_decode($task->additional_files, true);
+                if (! is_array($decoded)) {
+                    continue;
+                }
+
+                foreach ($decoded as $filePath) {
+                    if (in_array($filePath, $addedPaths, true)) {
+                        continue;
+                    }
+
+                    $path = ltrim((string) $filePath, '/');
+                    if (! str_starts_with($path, 'files/')) {
+                        continue;
+                    }
+
+                    $fullPath = public_path($path);
+                    if (! is_file($fullPath)) {
+                        continue;
+                    }
+
+                    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                    if ($ext === 'mp3') {
+                        $audioIndex++;
+                        $zipName = $zipFolderPrefix.'Аудио изложения '.$audioIndex.'.mp3';
+                    } else {
+                        $zipName = $zipFolderPrefix.basename($path);
+                    }
+
+                    $zipEntries[] = ['full' => $fullPath, 'zip' => str_replace('\\', '/', $zipName)];
+                    $addedPaths[] = $filePath;
+                }
+            } catch (\Throwable $e) {
+                Log::error('Error processing additional_files', [
+                    'task_id' => $task->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
-    $footerHtml = '<div style="width:100%; font-size:10px; text-align:center; color:#000;font-family: "Times New Roman", serif; padding-top:6px; border-top:1px solid #000;">
+    private function savePdf(string $html, string $fullPath): void
+    {
+
+        $cssPath = public_path('assets/task.css');
+        if (is_file($cssPath)) {
+            $cssContent = file_get_contents($cssPath);
+
+            $html = preg_replace(
+                '/<link\s+rel=["\']stylesheet["\']\s+href=["\'][^"\']*task\.css[^"\']*["\'][^>]*>/i',
+                '<style>'.$cssContent.'</style>',
+                $html
+            );
+        }
+
+        $footerHtml = '<div style="width:100%; font-size:10px; text-align:center; color:#000;font-family: "Times New Roman", serif; padding-top:6px; border-top:1px solid #000;">
         © '.date('Y').' год. Вариант сгенерирован на сайте kim365.ru<br>
         Публикация в интернете или печатных изданиях без письменного согласия запрещена
     </div>';
 
-    $headerHtml = '<div style="height:0; overflow:hidden;"></div>';
+        $headerHtml = '<div style="height:0; overflow:hidden;"></div>';
 
-    $browser = Browsershot::html($html)
-        ->format('A4')
-        ->margins(15, 15, 35, 15)              // большее нижнее поле под футер
-        ->showBrowserHeaderAndFooter()         // включает header/footer
-        ->headerHtml($headerHtml)              // HTML заголовка
-        ->footerHtml($footerHtml)              // HTML футера
-        ->waitUntilNetworkIdle()
-        ->setDelay(2000)                       // Увеличиваем задержку для применения стилей
-        ->timeout(600)
-        ->noSandbox()
-        ->emulateMedia('print');               // Эмулируем print media для корректных page-break
+        $browser = Browsershot::html($html)
+            ->format('A4')
+            ->margins(15, 15, 35, 15)              // большее нижнее поле под футер
+            ->showBrowserHeaderAndFooter()         // включает header/footer
+            ->headerHtml($headerHtml)              // HTML заголовка
+            ->footerHtml($footerHtml)              // HTML футера
+            ->waitUntilNetworkIdle()
+            ->setDelay(2000)                       // Увеличиваем задержку для применения стилей
+            ->timeout(600)
+            ->noSandbox()
+            ->emulateMedia('print');               // Эмулируем print media для корректных page-break
 
-    $browser->setOption('args', [
-        '--allow-file-access-from-files',
-        '--disable-web-security',
-    ]);
+        $browser->setOption('args', [
+            '--allow-file-access-from-files',
+            '--disable-web-security',
+        ]);
 
-    $browser->savePdf($fullPath);
-}
+        $browser->savePdf($fullPath);
+    }
 
     /**
      * Попытка сгенерировать DOCX напрямую из HTML через LibreOffice (soffice)
@@ -222,11 +325,13 @@ private function savePdf(string $html, string $fullPath): void
             $produced = $outDir.DIRECTORY_SEPARATOR.'index.docx';
             if ($code === 0 && is_file($produced)) {
                 @rename($produced, $targetDocx);
+
                 return true;
             }
         } catch (\Throwable $e) {
 
         }
+
         return false;
     }
 
@@ -236,21 +341,27 @@ private function savePdf(string $html, string $fullPath): void
     private function saveDocxFromPdf(string $pdfPath, string $targetDocx): bool
     {
         try {
-            if (!is_file($pdfPath)) return false;
+            if (! is_file($pdfPath)) {
+                return false;
+            }
             $outDir = dirname($targetDocx);
             $bin = $this->detectSofficeBinary();
-            if ($bin === null) return false;
+            if ($bin === null) {
+                return false;
+            }
             $cmd = escapeshellcmd($bin).' --headless --convert-to '.escapeshellarg('docx:MS Word 2007 XML').' --outdir '.escapeshellarg($outDir).' '.escapeshellarg($pdfPath).' 2>&1';
             @exec($cmd, $output, $code);
             $base = pathinfo($pdfPath, PATHINFO_FILENAME);
             $produced = $outDir.DIRECTORY_SEPARATOR.$base.'.docx';
             if ($code === 0 && is_file($produced)) {
                 @rename($produced, $targetDocx);
+
                 return true;
             }
         } catch (\Throwable $e) {
 
         }
+
         return false;
     }
 
@@ -259,18 +370,26 @@ private function savePdf(string $html, string $fullPath): void
         $candidates = ['soffice', 'libreoffice'];
         foreach ($candidates as $bin) {
             $path = trim(@shell_exec('command -v '.escapeshellarg($bin)) ?: '');
-            if ($path !== '' && is_executable($path)) return $path;
+            if ($path !== '' && is_executable($path)) {
+                return $path;
+            }
         }
 
         $mac = '/Applications/LibreOffice.app/Contents/MacOS/soffice';
-        if (is_executable($mac)) return $mac;
+        if (is_executable($mac)) {
+            return $mac;
+        }
+
         return null;
     }
 
     private function detectNodeBinary(): ?string
     {
         $path = trim(@shell_exec('command -v node') ?: '');
-        if ($path !== '' && is_executable($path)) return $path;
+        if ($path !== '' && is_executable($path)) {
+            return $path;
+        }
+
         return null;
     }
 
@@ -278,7 +397,9 @@ private function savePdf(string $html, string $fullPath): void
     {
         try {
             $node = $this->detectNodeBinary();
-            if ($node === null) return false;
+            if ($node === null) {
+                return false;
+            }
             $tmpDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'docx_'.uniqid();
             @mkdir($tmpDir, 0775, true);
             $htmlFile = $tmpDir.DIRECTORY_SEPARATOR.'index.html';
@@ -289,6 +410,7 @@ private function savePdf(string $html, string $fullPath): void
             $script = base_path('scripts/html-to-docx.js');
             $cmd = escapeshellarg($node).' '.escapeshellarg($script).' '.escapeshellarg($htmlFile).' '.escapeshellarg($targetDocx).' 2>&1';
             @exec($cmd, $output, $code);
+
             return $code === 0 && is_file($targetDocx);
         } catch (\Throwable $e) {
             return false;
@@ -298,7 +420,10 @@ private function savePdf(string $html, string $fullPath): void
     private function detectPandocBinary(): ?string
     {
         $path = trim(@shell_exec('command -v pandoc') ?: '');
-        if ($path !== '' && is_executable($path)) return $path;
+        if ($path !== '' && is_executable($path)) {
+            return $path;
+        }
+
         return null;
     }
 
@@ -309,7 +434,9 @@ private function savePdf(string $html, string $fullPath): void
     {
         try {
             $pandoc = $this->detectPandocBinary();
-            if ($pandoc === null) return false;
+            if ($pandoc === null) {
+                return false;
+            }
             $tmpDir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'pandoc_'.uniqid();
             @mkdir($tmpDir, 0775, true);
             $htmlFile = $tmpDir.DIRECTORY_SEPARATOR.'index.html';
@@ -322,6 +449,7 @@ private function savePdf(string $html, string $fullPath): void
                 .'--resource-path='.escapeshellarg($resourcePath).' '
                 .escapeshellarg($htmlFile).' -o '.escapeshellarg($targetDocx).' 2>&1';
             @exec($cmd, $output, $code);
+
             return $code === 0 && is_file($targetDocx);
         } catch (\Throwable $e) {
             return false;
@@ -333,7 +461,7 @@ private function savePdf(string $html, string $fullPath): void
      */
     private function saveDocxFallback(Collection $tasks, array $questionHtmlMap, bool $withAnswers, string $fullPath): void
     {
-        $phpWord = new PhpWord();
+        $phpWord = new PhpWord;
         $section = $phpWord->addSection();
         foreach ($tasks as $t) {
 
@@ -349,9 +477,12 @@ private function savePdf(string $html, string $fullPath): void
             }
 
             foreach ($this->extractImages($html) as $imgPath) {
-                try { $section->addImage($imgPath, ['width' => 400]); } catch (\Throwable $e) {}
+                try {
+                    $section->addImage($imgPath, ['width' => 400]);
+                } catch (\Throwable $e) {
+                }
             }
-            $answerText = $withAnswers ? (string)($t->response ?? '') : '___________________________';
+            $answerText = $withAnswers ? (string) ($t->response ?? '') : '___________________________';
             $section->addText('Ответ: '.$answerText, ['size' => 11]);
             $section->addTextBreak(1);
         }
@@ -362,17 +493,19 @@ private function savePdf(string $html, string $fullPath): void
     {
         $normalized = preg_replace(['#<br\s*/?>#i', '#</p>#i', '#</div>#i'], ["\n", "\n", "\n"], $html);
         $text = strip_tags($normalized);
+
         return html_entity_decode($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**
      * Достаём изображения (data: и http) в temp-файлы
+     *
      * @return array<string> paths
      */
     private function extractImages(string $html): array
     {
         $paths = [];
-        if (!preg_match_all('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i', $html, $m)) {
+        if (! preg_match_all('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i', $html, $m)) {
             return $paths;
         }
         foreach ($m[1] as $src) {
@@ -384,7 +517,7 @@ private function savePdf(string $html, string $fullPath): void
                         $mime = $mm[1] ?: 'image/jpeg';
                         $data = base64_decode($mm[2]);
                     }
-                } else if (preg_match('#^https?://#i', $src)) {
+                } elseif (preg_match('#^https?://#i', $src)) {
                     $data = @file_get_contents($src);
                     $ext = strtolower(pathinfo(parse_url($src, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
                     $mime = $this->extToMime($ext);
@@ -403,8 +536,10 @@ private function savePdf(string $html, string $fullPath): void
                     @file_put_contents($new, $data);
                     $paths[] = $new;
                 }
-            } catch (\Throwable $e) {}
+            } catch (\Throwable $e) {
+            }
         }
+
         return $paths;
     }
 
@@ -413,6 +548,7 @@ private function savePdf(string $html, string $fullPath): void
         $map = [
             'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'webp' => 'image/webp', 'svg' => 'image/svg+xml',
         ];
+
         return $map[$ext] ?? 'image/jpeg';
     }
 
@@ -421,15 +557,20 @@ private function savePdf(string $html, string $fullPath): void
         $map = [
             'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp', 'image/svg+xml' => 'svg',
         ];
+
         return $map[$mime] ?? 'jpg';
     }
 
     private function inlineImages(?string $html): string
     {
-        if (!$html) return '';
+        if (! $html) {
+            return '';
+        }
+
         return preg_replace_callback('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i', function ($m) {
             $src = $m[1] ?? '';
             $resolved = $this->resolveImageSrc($src);
+
             return str_replace($src, $resolved, $m[0]);
         }, $html);
     }
@@ -447,7 +588,7 @@ private function savePdf(string $html, string $fullPath): void
             $path = substr($path, 7);
         }
         $full = public_path($path);
-        if (!is_file($full)) {
+        if (! is_file($full)) {
             $try = public_path('docs/'.ltrim($path, '/'));
             if (is_file($try)) {
                 $full = $try;
@@ -482,8 +623,10 @@ private function savePdf(string $html, string $fullPath): void
                 'svg' => 'image/svg+xml',
             ];
             $mime = $map[$ext] ?? 'image/jpeg';
+
             return 'data:'.$mime.';base64,'.base64_encode($httpData);
         }
+
         return $abs;
     }
 
@@ -492,18 +635,18 @@ private function savePdf(string $html, string $fullPath): void
      */
     private function addSubjectAdditionalFilesToZip(ZipArchive $zip, ?\App\Models\Subject $subject): void
     {
-        if (!$subject?->additional_files) {
+        if (! $subject?->additional_files) {
             return;
         }
 
         $files = $subject->additional_files;
-        if (!is_array($files)) {
+        if (! is_array($files)) {
             return;
         }
 
         foreach ($files as $filePath) {
             $path = ltrim((string) $filePath, '/');
-            if (!str_starts_with($path, 'files/')) {
+            if (! str_starts_with($path, 'files/')) {
                 continue;
             }
 
@@ -513,76 +656,6 @@ private function savePdf(string $html, string $fullPath): void
                 Log::info('Added subject additional file to ZIP', ['file' => $filePath]);
             } else {
                 Log::warning('Subject additional file not found', ['file' => $filePath]);
-            }
-        }
-    }
-
-    /**
-     * Добавляет файлы из additional_files задач в ZIP архив.
-     * MP3-файлы переименовываются в «Аудио изложения 1.mp3», «Аудио изложения 2.mp3» и т.д.
-     */
-    private function addAdditionalFilesToZip(ZipArchive $zip, Collection $tasks): void
-    {
-        $addedFiles = []; // Для предотвращения дубликатов
-        $audioIndex = 0;
-
-        foreach ($tasks as $task) {
-            if (!$task->additional_files) {
-                continue;
-            }
-
-            try {
-                $files = json_decode($task->additional_files, true);
-                if (!is_array($files)) {
-                    continue;
-                }
-
-                foreach ($files as $filePath) {
-
-                    if (in_array($filePath, $addedFiles)) {
-                        continue;
-                    }
-
-
-                    $path = ltrim($filePath, '/');
-
-
-                    if (!str_starts_with($path, 'files/')) {
-                        continue;
-                    }
-
-
-                    $fullPath = public_path($path);
-
-
-                    if (is_file($fullPath)) {
-                        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-                        if ($ext === 'mp3') {
-                            $audioIndex++;
-                            $zipFileName = 'Аудио изложения ' . $audioIndex . '.mp3';
-                        } else {
-                            $zipFileName = basename($path);
-                        }
-                        $zip->addFile($fullPath, 'Дополнительные файлы/' . $zipFileName);
-                        $addedFiles[] = $filePath;
-                        Log::info('Added additional file to ZIP', [
-                            'file' => $filePath,
-                            'zip_name' => $zipFileName,
-                            'task_id' => $task->id
-                        ]);
-                    } else {
-                        Log::warning('Additional file not found', [
-                            'file' => $filePath,
-                            'full_path' => $fullPath,
-                            'task_id' => $task->id
-                        ]);
-                    }
-                }
-            } catch (\Throwable $e) {
-                Log::error('Error processing additional_files', [
-                    'task_id' => $task->id,
-                    'error' => $e->getMessage()
-                ]);
             }
         }
     }
@@ -619,5 +692,3 @@ private function savePdf(string $html, string $fullPath): void
         return $messages[$code] ?? "Unknown error (code: {$code})";
     }
 }
-
-
