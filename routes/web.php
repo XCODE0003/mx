@@ -67,6 +67,10 @@ Route::post('/variants/{uuid}/regenerate', [TaskExportController::class, 'regene
     ->name('variants.regenerate')
     ->whereUuid('uuid');
 
+
+Route::get('/mailru-domainpyRkzdZCNB0Cq5fn.html', function () {
+    return view('mailru-domainpyRkzdZCNB0Cq5fn');
+})->name('mailru-domainpyRkzdZCNB0Cq5fn');
 require __DIR__.'/auth.php';
 require __DIR__.'/profile.php';
 require __DIR__.'/settings.php';
