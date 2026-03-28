@@ -36,6 +36,18 @@ Route::get('/banks', function () {
     return Inertia::render('Banks');
 })->name('banks');
 
+Route::get('/policy', function () {
+    return Inertia::render('Policy');
+})->name('policy');
+
+Route::get('/contacts', function () {
+    return Inertia::render('Contacts');
+})->name('contacts');
+
+Route::get('/about', function () {
+    return Inertia::render('About');
+})->name('about');
+
 Route::prefix('banks-api')->middleware('throttle:180,1')->group(function () {
     Route::get('/subjects/{grade}', [BanksApiController::class, 'subjects'])->name('banks.api.subjects');
     Route::get('/groups/{grade}/{subject}', [BanksApiController::class, 'groups'])->name('banks.api.groups');

@@ -46,29 +46,44 @@ class TaskExportController extends Controller
         });
 
         return $packsByRangeSignature->map(function ($sameRangePacks) {
-            $packsWithSize = $sameRangePacks->map(function ($pack) {
-                $size = $pack
+            $packsWithMetrics = $sameRangePacks->map(function ($pack) {
+                $uniqueTitlesCount = $pack
                     ->map(function ($group) {
                         return (string) $group->formatted_title;
                     })
                     ->filter()
                     ->unique()
                     ->count();
+                
+                // Считаем минимальное количество заданий среди всех групп в пакете
+                $minTasksInGroup = $pack->map(function ($group) {
+                    return $group->tasks()->count();
+                })->min() ?? 0;
 
                 return [
                     'pack' => $pack,
-                    'size' => $size,
+                    'size' => $uniqueTitlesCount,
+                    'min_tasks' => $minTasksInGroup,
                 ];
             });
 
-            $maxSize = $packsWithSize->max('size');
-            $candidates = $packsWithSize
-                ->filter(function ($item) use ($maxSize) {
-                    return $item['size'] === $maxSize;
-                })
-                ->pluck('pack');
+            // Приоритет: сначала по размеру пакета (больше заданий), затем по минимальному количеству заданий
+            $maxSize = $packsWithMetrics->max('size');
+            $candidatesWithMaxSize = $packsWithMetrics->filter(function ($item) use ($maxSize) {
+                return $item['size'] === $maxSize;
+            });
+            
+            // Среди пакетов с максимальным размером выбираем те, у которых больше заданий
+            $maxTasks = $candidatesWithMaxSize->max('min_tasks');
+            $bestCandidates = $candidatesWithMaxSize->filter(function ($item) use ($maxTasks) {
+                return $item['min_tasks'] >= max(3, $maxTasks * 0.7); // Берём пакеты с количеством заданий >= 70% от максимума, но не менее 3
+            })->pluck('pack');
 
-            return $candidates->random();
+            if ($bestCandidates->isEmpty()) {
+                $bestCandidates = $candidatesWithMaxSize->pluck('pack');
+            }
+
+            return $bestCandidates->random();
         })->flatten(1)->values();
     }
 
@@ -130,13 +145,40 @@ class TaskExportController extends Controller
         }
 
         $variants = [];
+        $usedTaskIds = [];
+        
         for ($v = 0; $v < $variantCount; $v++) {
-            $tasks = $groups->map(function ($group) use ($subjectKey, $pinned) {
+            $tasks = $groups->map(function ($group) use ($subjectKey, $pinned, &$usedTaskIds, $v) {
                 if (isset($pinned[$group->id])) {
                     return Task::with('group')->find($pinned[$group->id]);
                 }
 
-                return $group->tasks()->where('subject_id', $subjectKey)->with('group')->inRandomOrder()->first();
+                // Избегаем повторов: выбираем задания, которых ещё не было в предыдущих вариантах
+                $query = $group->tasks()
+                    ->where('subject_id', $subjectKey)
+                    ->with('group');
+                
+                if (!empty($usedTaskIds)) {
+                    $query->whereNotIn('id', $usedTaskIds);
+                }
+                
+                // Принудительно сбрасываем возможное кеширование
+                $task = $query->inRandomOrder()->first();
+                
+                // Если не нашли новое задание (все уже использованы), берём любое
+                if (!$task) {
+                    $task = $group->tasks()
+                        ->where('subject_id', $subjectKey)
+                        ->with('group')
+                        ->inRandomOrder()
+                        ->first();
+                }
+                
+                if ($task) {
+                    $usedTaskIds[] = $task->id;
+                }
+                
+                return $task;
             })->filter()->sortBy(function ($task) {
                 return (int) $task->group->formatted_title;
             })->unique(function ($task) {
@@ -172,17 +214,42 @@ class TaskExportController extends Controller
         $subjectKey = $subject->subject_id;
         $shared = $this->sharedMarkIdsForSubject($subject);
         $byMark = $firstVariantTasks->keyBy('mark');
+        
+        $usedTaskIds = $firstVariantTasks->pluck('id')->all();
 
         $out = [];
         for ($i = 0; $i < $extraCount; $i++) {
-            $tasks = $groups->map(function ($group) use ($subjectKey, $shared, $byMark) {
+            $tasks = $groups->map(function ($group) use ($subjectKey, $shared, $byMark, &$usedTaskIds) {
                 if (in_array((int) $group->id, $shared, true)) {
                     $t = $byMark->get($group->id);
-
                     return $t ? Task::with('group')->find($t->id) : null;
                 }
 
-                return $group->tasks()->where('subject_id', $subjectKey)->with('group')->inRandomOrder()->first();
+                // Избегаем повторов с предыдущими вариантами
+                $query = $group->tasks()
+                    ->where('subject_id', $subjectKey)
+                    ->with('group');
+                
+                if (!empty($usedTaskIds)) {
+                    $query->whereNotIn('id', $usedTaskIds);
+                }
+                
+                $task = $query->inRandomOrder()->first();
+                
+                // Если не нашли новое задание, берём любое
+                if (!$task) {
+                    $task = $group->tasks()
+                        ->where('subject_id', $subjectKey)
+                        ->with('group')
+                        ->inRandomOrder()
+                        ->first();
+                }
+                
+                if ($task) {
+                    $usedTaskIds[] = $task->id;
+                }
+                
+                return $task;
             })->filter()->sortBy(function ($task) {
                 return (int) $task->group->formatted_title;
             })->unique(function ($task) {
@@ -328,6 +395,13 @@ class TaskExportController extends Controller
 
         $extraVariants = $this->buildManualExtraVariants($subjectRow, $firstTasks, $variantCount - 1);
         $allVariants = array_merge([$firstIds], $extraVariants);
+        
+        Log::info('Manual export prepared', [
+            'variant_count_requested' => $variantCount,
+            'all_variants_count' => count($allVariants),
+            'first_ids_count' => count($firstIds),
+            'extra_variants_count' => count($extraVariants),
+        ]);
 
         $baseName = $baseTask->subject?->class_name ?? ('subject_'.$baseTask->subject_id);
         $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'bundle';
@@ -454,6 +528,14 @@ class TaskExportController extends Controller
         }
 
         $firstIds = $variants[0];
+        
+        Log::info('Auto export prepared', [
+            'variant_count_requested' => $variantCount,
+            'variants_generated' => count($variants),
+            'subject_id' => $subject->subject_id,
+            'class_name' => $subject->class_name,
+        ]);
+        
         $baseName = $baseTask->subject?->class_name ?? ('subject_'.$baseTask->subject_id);
         $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'bundle';
         $zipName = $baseName.'.zip';

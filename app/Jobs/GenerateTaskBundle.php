@@ -58,10 +58,17 @@ class GenerateTaskBundle implements ShouldQueue
         $baseTask = Task::with('group', 'subject')->findOrFail($this->baseTaskId);
 
         $variants = $this->variantsTaskIds;
-        if (! is_array($variants) || count($variants) < 2) {
+        if (! is_array($variants) || count($variants) === 0) {
             $variants = [$this->taskIds];
         }
         $multi = count($variants) > 1;
+        
+        Log::info('GenerateTaskBundle started', [
+            'base_task_id' => $this->baseTaskId,
+            'variant_count' => count($variants),
+            'multi' => $multi,
+            'uuid' => $this->variantUuid,
+        ]);
 
         $dir = $this->variantUuid
             ? public_path('exports/variants/'.$this->variantUuid)
@@ -77,6 +84,28 @@ class GenerateTaskBundle implements ShouldQueue
 
         /** @var list<array{full: string, zip: string}> $zipEntries */
         $zipEntries = [];
+        
+        // Собираем общие задания (для синхронизации аудио между вариантами)
+        $sharedTaskIds = [];
+        if ($multi && count($variants) > 0) {
+            $firstVariant = $variants[0];
+            foreach ($variants as $variantIds) {
+                foreach ($variantIds as $taskId) {
+                    if (in_array($taskId, $firstVariant, true)) {
+                        $allHave = true;
+                        foreach ($variants as $vIds) {
+                            if (!in_array($taskId, $vIds, true)) {
+                                $allHave = false;
+                                break;
+                            }
+                        }
+                        if ($allHave && !in_array($taskId, $sharedTaskIds, true)) {
+                            $sharedTaskIds[] = $taskId;
+                        }
+                    }
+                }
+            }
+        }
 
         foreach ($variants as $index => $idList) {
             $ids = collect($idList);
@@ -170,7 +199,22 @@ class GenerateTaskBundle implements ShouldQueue
                 $zipEntries[] = ['full' => $docAns, 'zip' => $zipInner($docAns)];
             }
 
-            $this->collectAdditionalTaskFilesForZip($zipEntries, $tasks, $multi ? $folderLabel.'/Дополнительные файлы/' : 'Дополнительные файлы/');
+            // Для первого варианта добавляем общие файлы (аудио изложения) в корень архива
+            if ($index === 0 && $multi && !empty($sharedTaskIds)) {
+                $sharedTasks = $tasks->filter(fn($t) => in_array($t->id, $sharedTaskIds, true));
+                if ($sharedTasks->isNotEmpty()) {
+                    $this->collectAdditionalTaskFilesForZip($zipEntries, $sharedTasks, 'Общие файлы/');
+                }
+            }
+            
+            // Добавляем индивидуальные файлы варианта (исключая общие)
+            $individualTasks = $multi && !empty($sharedTaskIds) 
+                ? $tasks->filter(fn($t) => !in_array($t->id, $sharedTaskIds, true))
+                : $tasks;
+            
+            if ($individualTasks->isNotEmpty()) {
+                $this->collectAdditionalTaskFilesForZip($zipEntries, $individualTasks, $multi ? $folderLabel.'/Дополнительные файлы/' : 'Дополнительные файлы/');
+            }
         }
 
         $zip = new ZipArchive;
@@ -635,27 +679,47 @@ class GenerateTaskBundle implements ShouldQueue
      */
     private function addSubjectAdditionalFilesToZip(ZipArchive $zip, ?\App\Models\Subject $subject): void
     {
-        if (! $subject?->additional_files) {
+        if (! $subject) {
+            Log::warning('addSubjectAdditionalFilesToZip: subject is null');
+            return;
+        }
+        
+        if (! $subject->additional_files) {
+            Log::info('addSubjectAdditionalFilesToZip: no additional_files', [
+                'subject_id' => $subject->subject_id,
+                'class_name' => $subject->class_name,
+            ]);
             return;
         }
 
         $files = $subject->additional_files;
         if (! is_array($files)) {
+            Log::warning('addSubjectAdditionalFilesToZip: additional_files is not an array', [
+                'subject_id' => $subject->subject_id,
+                'type' => gettype($files),
+            ]);
             return;
         }
+
+        Log::info('addSubjectAdditionalFilesToZip: processing files', [
+            'subject_id' => $subject->subject_id,
+            'files_count' => count($files),
+            'files' => $files,
+        ]);
 
         foreach ($files as $filePath) {
             $path = ltrim((string) $filePath, '/');
             if (! str_starts_with($path, 'files/')) {
+                Log::warning('Subject additional file: invalid path format', ['file' => $filePath]);
                 continue;
             }
 
             $fullPath = public_path($path);
             if (is_file($fullPath)) {
                 $zip->addFile($fullPath, 'Дополнительные файлы/'.basename($path));
-                Log::info('Added subject additional file to ZIP', ['file' => $filePath]);
+                Log::info('Added subject additional file to ZIP', ['file' => $filePath, 'fullPath' => $fullPath]);
             } else {
-                Log::warning('Subject additional file not found', ['file' => $filePath]);
+                Log::warning('Subject additional file not found', ['file' => $filePath, 'fullPath' => $fullPath]);
             }
         }
     }

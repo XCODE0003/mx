@@ -9,7 +9,7 @@ return [
 
     'sync_mark_ids' => [
         'oge' => [
-            'rus' => [4],
+            'RUSS_OGE' => [4],
         ],
     ],
 ];

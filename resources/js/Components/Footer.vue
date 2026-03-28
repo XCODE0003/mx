@@ -1,8 +1,9 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 
 const showScrollToTop = ref(true);
+const currentYear = computed(() => new Date().getFullYear());
 let mainContainer = null;
 const THRESHOLD = 300;
 
@@ -94,6 +95,14 @@ onUnmounted(() => {
           </ul>
         </div>
       </nav>
+    </div>
+
+    <div class="footer_disclaimer" style="text-align: center; margin: auto;">
+      <p style="text-align: center; margin: auto;">Сайт является информационным ресурсом и не относится к официальным источникам экзаменационных материалов. Задания формируются на основе данных из открытых источников, включая материалы Министерства образования Российской Федерации и ФИПИ. Официальные контрольные измерительные материалы, используемые при проведении государственной итоговой аттестации, на сайте не размещаются и не предоставляются.</p>
+    </div>
+
+    <div style="padding-bottom: 20px;" class="footer_copyright">
+      <p>© kim365.ru {{ currentYear }}</p>
     </div>
   </div>
 

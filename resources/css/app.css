@@ -4,6 +4,38 @@
     padding: 0;
 }
 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.scroll-animate {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-animate.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 h1,
 h2,
 h3 {
@@ -33,6 +65,7 @@ body, mainlayout {
     display: flex;
     flex-direction: column;
     color: #000;
+    scroll-behavior: smooth;
 }
 
 html,
@@ -45,6 +78,7 @@ body, mainlayout {
     flex-direction: column;
     min-height: 100vh;
     min-height: 100dvh;
+    scroll-behavior: smooth;
 }
 
 #app {
@@ -135,8 +169,8 @@ header {
 .header_items {
     display: flex;
     align-items: center;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding-top: 18px;
+    padding-bottom: 18px;
 }
 
 .autharization .header_item_user {
@@ -193,15 +227,14 @@ form[name="chkcodeform"] {
     margin: 0 auto;
 }
 
-.header_item:nth-child(2) {
-    margin-left: 60px;
+.header_item--center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin-left: 40px;
 }
 
 .header_item:nth-child(3) {
-    margin-left: auto;
-}
-
-.header_item:nth-child(4) {
     margin-left: auto;
 }
 
@@ -214,22 +247,40 @@ form[name="chkcodeform"] {
     display: flex;
     align-items: center;
     list-style: none;
-    gap: 40px;
+    gap: 32px;
 }
 
 .header_item_nav a {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 16px;
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
     font-style: normal;
     font-weight: 500;
     line-height: normal;
     cursor: pointer;
-    transition: all 0.5s;
+    transition: all 0.3s ease;
+    padding: 8px 4px;
+    position: relative;
 }
 
 .header_item_nav a:hover {
     color: #8f70ff;
+}
+
+.header_item_nav a.active {
+    color: #8f70ff;
+    font-weight: 600;
+}
+
+.header_item_nav a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 4px;
+    right: 4px;
+    height: 2px;
+    background: #8f70ff;
+    border-radius: 2px;
 }
 
 .header_item_buttons {
@@ -240,27 +291,33 @@ form[name="chkcodeform"] {
 
 .header_item_buttons a .header_button {
     cursor: pointer;
-    transition: all 0.5s;
+    transition: all 0.3s ease;
     color: #8f70ff;
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 16px;
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     line-height: normal;
-    padding: 10px 28px;
+    padding: 12px 32px;
     border-radius: 64px;
-    border: 1px solid #8f70ff;
+    border: 1.5px solid #8f70ff;
     background: transparent;
 }
 
 .header_button:hover {
-    transform: scale(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(143, 112, 255, 0.25);
 }
 
 .header_item_buttons a:last-child .header_button {
     background: #8f70ff;
-    border: 1px solid #8f70ff;
+    border: 1.5px solid #8f70ff;
     color: #fff;
+}
+
+.header_item_buttons a:last-child .header_button:hover {
+    background: #7a5ce8;
+    border-color: #7a5ce8;
 }
 
 .header_item_user {
@@ -270,14 +327,13 @@ form[name="chkcodeform"] {
 
 .header_item_user_email {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
-    padding: 9px 50px 9px 15px;
-    font-size: 16px;
+    font-family: "Poppins", sans-serif;
+    padding: 11px 50px 11px 18px;
+    font-size: 15px;
     font-style: normal;
     width: fit-content;
     font-weight: 500;
     line-height: 140%;
-    /* 22.4px */
     border-radius: 64px;
     background: #f6f7ff;
     margin-left: auto;
@@ -301,7 +357,8 @@ form[name="chkcodeform"] {
 .intro {
     width: 100%;
     height: auto;
-    margin-top: 110px;
+    margin-top: 160px;
+    animation: fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .intro_blocks {
@@ -317,52 +374,99 @@ form[name="chkcodeform"] {
 
 .intro_block_tittle {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 48px;
     font-style: normal;
     font-weight: 700;
     line-height: 120%;
-    /* 57.6px */
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;
+}
+
+.intro_accent {
+    color: #8f70ff;
+    font-weight: 700;
 }
 
 .intro_block_subtittle {
-    margin-top: 25px;
-    color: rgba(57, 60, 91, 0.6);
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 18px;
+    margin-top: 28px;
+    color: rgba(57, 60, 91, 0.65);
+    font-family: "Poppins", sans-serif;
+    font-size: 17px;
     font-style: normal;
-    font-weight: 500;
-    line-height: 140%;
-    /* 25.2px */
-    max-width: 511px;
+    font-weight: 400;
+    line-height: 150%;
+    max-width: 540px;
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s backwards;
 }
 
 .intro_block_button {
-    margin-top: 35px;
+    margin-top: 40px;
     outline: none;
     border: none;
     cursor: pointer;
-    transition: all 0.5s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: #fff;
     text-align: center;
-    font-family: "SF Pro Display", sans-serif;
-    padding: 14px 28px;
-    font-size: 18px;
+    font-family: "Poppins", sans-serif;
+    padding: 16px 32px;
+    font-size: 16px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     line-height: normal;
     border-radius: 64px;
-    background: #8f70ff;
+    background: linear-gradient(135deg, #8f70ff 0%, #7a5ce8 100%);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 20px rgba(143, 112, 255, 0.35);
+    animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s backwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.intro_block_button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #7a5ce8 0%, #6a4cd8 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.intro_block_button:hover::before {
+    opacity: 1;
+}
+
+.intro_block_button > * {
+    position: relative;
+    z-index: 1;
+}
+
+.intro_block_button svg {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .intro_block_button:hover {
-    transform: scale(1.05);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(143, 112, 255, 0.45);
+}
+
+.intro_block_button:hover svg {
+    transform: translateX(5px);
+}
+
+.intro_block_button:active {
+    transform: translateY(-1px);
 }
 
 .intro_block_image {
     vertical-align: middle;
     width: 100%;
     max-width: 803px;
+    animation: fadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) 0.4s backwards;
 }
 
 .home_create {
@@ -380,11 +484,17 @@ form[name="chkcodeform"] {
 .home_create_block {
     width: 100%;
     height: 100%;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .home_create_block:first-child {
     border-radius: 20px;
     background: #fff;
+}
+
+.home_create_block:first-child:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(143, 112, 255, 0.12);
 }
 
 .home_create_block:last-child {
@@ -400,12 +510,11 @@ form[name="chkcodeform"] {
 
 .home_create_tittle {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 26px;
     font-style: normal;
     font-weight: 700;
     line-height: 120%;
-    /* 31.2px */
 }
 
 .home_create_settings {
@@ -422,12 +531,11 @@ form[name="chkcodeform"] {
 
 .home_create_setting_tittle {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 14px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 140%;
-    /* 19.6px */
 }
 
 .home_create_setting_select {
@@ -438,6 +546,12 @@ form[name="chkcodeform"] {
     background: #f6f7ff;
     position: relative;
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home_create_setting_select:hover {
+    box-shadow: 0 4px 12px rgba(143, 112, 255, 0.15);
+    background: #fff;
 }
 
 .home_create_setting_select_content {
@@ -448,12 +562,11 @@ form[name="chkcodeform"] {
     display: flex;
     align-items: center;
     color: #393C5B;
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 16px;
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
     font-style: normal;
     font-weight: 500;
     line-height: 140%;
-    /* 22.4px */
 }
 
 .home_create_setting_selected svg {
@@ -482,22 +595,22 @@ form[name="chkcodeform"] {
 
 .home_create_setting_select_rect_text {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 14px;
     white-space: nowrap;
     font-style: normal;
     font-weight: 500;
     line-height: 140%;
-    /* 22.4px */
     cursor: pointer;
-    transition: all 0.5s;
-    padding: 5px 10px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px 12px;
     border-radius: 10px;
 }
 
 .home_create_setting_select_rect_text:hover {
-    background: rgba(143, 112, 255, 0.25);
-
+    background: linear-gradient(135deg, rgba(143, 112, 255, 0.15) 0%, rgba(122, 92, 232, 0.15) 100%);
+    transform: translateX(4px);
+    color: #7a5ce8;
 }
 
 .home_create_block_button {
@@ -620,6 +733,12 @@ form[name="chkcodeform"] {
     background: url(/assets/img/home_plans_bg.png) center no-repeat;
     background-size: 100% 100%;
     border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home_plans_rect:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(143, 112, 255, 0.25);
 }
 
 .home_plans_rect_content {
@@ -675,7 +794,7 @@ form[name="chkcodeform"] {
 
 .home_plans_block_up_tittle {
     color: #fff;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     display: flex;
     align-items: flex-end;
     gap: 8px;
@@ -683,17 +802,15 @@ form[name="chkcodeform"] {
     font-style: normal;
     font-weight: 700;
     line-height: 120%;
-    /* 33.6px */
 }
 
 .home_plans_block_up_tittle span {
     color: #fff;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 16px;
     font-style: normal;
     font-weight: 300;
     line-height: 120%;
-    /* 19.2px */
     margin-bottom: 3px;
 }
 
@@ -719,13 +836,18 @@ form[name="chkcodeform"] {
     border-bottom: 1px solid #dfe3ff;
     display: flex;
     align-items: center;
-    color: rgba(57, 60, 91, 0.6);
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 18px;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: "Poppins", sans-serif;
+    font-size: 17px;
     font-style: normal;
-    font-weight: 500;
-    line-height: 120%;
-    /* 21.6px */
+    font-weight: 400;
+    line-height: 140%;
+    transition: all 0.3s ease;
+}
+
+.home_plans_block_item:hover {
+    padding-left: 8px;
+    color: #fff;
 }
 
 .home_plans_block_item:last-child {
@@ -766,28 +888,39 @@ form[name="chkcodeform"] {
 .home_faq {
     width: 100%;
     height: auto;
-    margin-top: 50px;
+    margin-top: 60px;
+    margin-bottom: 60px;
 }
 
 .home_faq_tittle {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 40px;
     font-style: normal;
     font-weight: 700;
     line-height: 120%;
-    /* 48px */
 }
 
 .home_faq_subtittle {
-    margin-top: 10px;
-    color: rgba(57, 60, 91, 0.6);
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 18px;
+    margin-top: 12px;
+    display: ruby-text;
+    color: rgba(57, 60, 91, 0.65);
+    font-family: "Poppins", sans-serif;
+    font-size: 17px;
     font-style: normal;
-    font-weight: 500;
-    line-height: 140%;
-    /* 25.2px */
+    font-weight: 400;
+    line-height: 150%;
+    max-width: 700px;
+}
+
+.home_faq_subtittle a {
+    color: #7a5ce8;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.home_faq_subtittle a:hover {
+    color: #8f70ff;
 }
 
 .home_faq_items {
@@ -795,20 +928,54 @@ form[name="chkcodeform"] {
     height: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 12px;
+    margin-top: 32px;
 }
 
 .home_faq_item {
     width: 100%;
     height: auto;
-    border-radius: 25px;
+    border-radius: 20px;
     background: #fff;
-    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 12px rgba(143, 112, 255, 0.08);
+    border: 1px solid transparent;
 }
 
-.home_faq_item_active {
-    background: #a389ff;
+.home_faq_item:hover {
+    box-shadow: 0 8px 24px rgba(143, 112, 255, 0.15);
+    border-color: rgba(143, 112, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.home_faq_item_header {
+    cursor: pointer;
+    padding: 20px 28px;
+    background: #fff;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.home_faq_item_header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #8f70ff 0%, #7a5ce8 100%);
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 20px 20px 0 0;
+}
+
+.home_faq_item_active .home_faq_item_header {
+    background: transparent;
+}
+
+.home_faq_item_active .home_faq_item_header::before {
+    opacity: 1;
 }
 
 .home_faq_item_active .home_faq_item_tittle {
@@ -820,35 +987,48 @@ form[name="chkcodeform"] {
 }
 
 .home_faq_item_content {
-    padding: 12px 25px;
+    padding: 0 28px 24px 28px;
+    background: #fff;
 }
 
 .home_faq_item_tittle {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 22px;
+    font-family: "Poppins", sans-serif;
+    font-size: 18px;
     font-style: normal;
     font-weight: 600;
-    line-height: 120%;
-    /* 26.4px */
+    line-height: 140%;
     display: flex;
     align-items: center;
+    transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
 }
 
 .home_faq_item_arrow {
     vertical-align: middle;
     margin-left: auto;
+    flex-shrink: 0;
+}
+
+.home_faq_item_arrow {
+    position: relative;
+    z-index: 1;
+}
+
+.home_faq_item_arrow path {
+    transition: fill 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .home_faq_item_tittle_text {
+    color: #393c5b;
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
     margin-top: 10px;
-    color: rgba(255, 255, 255, 0.6);
-    font-family: "SF Pro Display", sans-serif;
-    font-size: 18px;
     font-style: normal;
-    font-weight: 500;
-    line-height: 140%;
-    /* 25.2px */
+    font-weight: 400;
+    line-height: 160%;
+    white-space: pre-line;
 }
 
 
@@ -938,6 +1118,118 @@ footer,
     color: #8f70ff;
 }
 
+.footer_disclaimer {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid rgba(57, 60, 91, 0.1);
+}
+
+.footer_disclaimer p {
+    color: rgba(57, 60, 91, 0.55);
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 160%;
+    max-width: 1000px;
+}
+
+.footer_copyright {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(57, 60, 91, 0.1);
+}
+
+.footer_copyright p {
+    color: rgba(57, 60, 91, 0.45);
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    text-align: center;
+}
+
+/* Страницы контента */
+.policy-page,
+.contacts-page,
+.about-page {
+    min-height: calc(100vh - 80px);
+    padding: 80px 0 120px;
+}
+
+.policy-content,
+.contacts-content,
+.about-content {
+    max-width: 900px;
+    margin: 60px auto;
+}
+.news{
+    padding-top: 60px;
+}
+.policy-title,
+.contacts-title,
+.about-title {
+    color: #393c5b;
+    font-family: "Poppins", sans-serif;
+    font-size: 42px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 120%;
+    margin-bottom: 48px;
+}
+
+.policy-text,
+.contacts-text,
+.about-text {
+    color: #393c5b;
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 170%;
+}
+
+.policy-text h2,
+.contacts-text h2,
+.about-text h2 {
+    color: #393c5b;
+    font-family: "Poppins", sans-serif;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 130%;
+    margin-top: 48px;
+    margin-bottom: 20px;
+}
+
+.policy-text p,
+.contacts-text p,
+.about-text p {
+    margin-bottom: 24px;
+}
+
+.policy-text strong,
+.contacts-text strong,
+.about-text strong {
+    font-weight: 600;
+    color: #393c5b;
+}
+
+.policy-text a,
+.contacts-text a,
+.about-text a {
+    color: #8f70ff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.policy-text a:hover,
+.contacts-text a:hover,
+.about-text a:hover {
+    color: #7a5ce8;
+    text-decoration: underline;
+}
+
 .header_mobile {
     width: 100%;
     height: auto;
@@ -1021,6 +1313,15 @@ footer,
     margin-left: 0px;
     width: 100%;
     padding-left: 39px;
+    font-family: "Poppins", sans-serif;
+}
+
+.header_mobile_menu .header_item_nav a {
+    font-family: "Poppins", sans-serif;
+}
+
+.header_mobile_menu .header_button {
+    font-family: "Poppins", sans-serif;
 }
 
 .no-scroll {
@@ -1731,7 +2032,7 @@ main.login {
     background: #fff;
     position: absolute;
     left: 217px;
-    top: calc(50% - 206px);
+    top: calc(50% - 260px);
     z-index: 1;
     box-shadow: 0px 5px 10px 5px rgba(0, 0, 0, 0.25);
 }
@@ -3197,8 +3498,18 @@ table.profile_history_tabble_main th {
         display: none;
     }
 
+    .intro {
+        margin-top: 100px;
+    }
+
     .intro_block_tittle {
         font-size: 37px;
+        font-family: "Poppins", sans-serif;
+        text-align: center;
+    }
+
+    .intro_block_subtittle {
+        font-family: "Poppins", sans-serif;
     }
 
     .home_create {
@@ -3267,18 +3578,34 @@ table.profile_history_tabble_main th {
 
     .home_faq_tittle {
         font-size: 32px;
+        font-family: "Poppins", sans-serif;
     }
 
     .home_faq {
-        margin-top: 37px;
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+
+    .home_faq_subtittle {
+        font-family: "Poppins", sans-serif;
+    }
+
+    .home_faq_item_header {
+        padding: 16px 20px;
     }
 
     .home_faq_item_content {
-        padding: 12px 20px;
+        padding: 0 20px 20px 20px;
+    }
+
+    .home_faq_item_tittle {
+        font-size: 16px;
+        font-family: "Poppins", sans-serif;
     }
 
     .home_faq_item_tittle_text {
-        margin-top: 12px;
+        font-size: 14px;
+        font-family: "Poppins", sans-serif;
     }
 
     .footer_items {
@@ -3292,6 +3619,58 @@ table.profile_history_tabble_main th {
         align-items: stretch;
         justify-content: flex-start;
         gap: 28px;
+    }
+
+    .footer_disclaimer {
+        margin-top: 32px;
+        padding-top: 24px;
+    }
+
+    .footer_disclaimer p {
+        font-size: 13px;
+        line-height: 155%;
+    }
+
+    .footer_copyright {
+        margin-top: 20px;
+        padding-top: 20px;
+    }
+
+    .footer_copyright p {
+        font-size: 13px;
+    }
+
+    .policy-page,
+    .contacts-page,
+    .about-page {
+        padding: 60px 0 80px;
+    }
+
+    .policy-title,
+    .contacts-title,
+    .about-title {
+        font-size: 32px;
+        margin-bottom: 32px;
+    }
+
+    .policy-text,
+    .contacts-text,
+    .about-text {
+        font-size: 16px;
+    }
+
+    .policy-text h2,
+    .contacts-text h2,
+    .about-text h2 {
+        font-size: 22px;
+        margin-top: 36px;
+        margin-bottom: 16px;
+    }
+
+    .policy-text p,
+    .contacts-text p,
+    .about-text p {
+        margin-bottom: 20px;
     }
 
     .home_plans_mobile {
@@ -3658,12 +4037,22 @@ table.profile_history_tabble_main th {
         grid-template-columns: 100%;
     }
 
+    .intro {
+        margin-top: 100px;
+    }
+
     .intro_block:last-child {
         display: none;
     }
 
     .intro_block_tittle {
         text-align: center;
+        font-family: "Poppins", sans-serif;
+        font-size: 38px;
+    }
+
+    .intro_block_subtittle {
+        font-family: "Poppins", sans-serif;
     }
 
     .intro_block_subtittle {
@@ -3732,10 +4121,19 @@ table.profile_history_tabble_main th {
 
     .home_faq_tittle {
         font-size: 32px;
+        font-family: "Poppins", sans-serif;
+    }
+
+    .home_faq_subtittle {
+        font-family: "Poppins", sans-serif;
+    }
+
+    .home_faq_item_tittle {
+        font-family: "Poppins", sans-serif;
     }
 
     .home_faq_item_tittle_text {
-        margin-top: 12px;
+        font-family: "Poppins", sans-serif;
     }
 
     .home_plans_block {
@@ -3753,6 +4151,58 @@ table.profile_history_tabble_main th {
         align-items: stretch;
         justify-content: flex-start;
         gap: 24px;
+    }
+
+    .footer_disclaimer {
+        margin-top: 28px;
+        padding-top: 20px;
+    }
+
+    .footer_disclaimer p {
+        font-size: 12px;
+        line-height: 150%;
+    }
+
+    .footer_copyright {
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+
+    .footer_copyright p {
+        font-size: 12px;
+    }
+
+    .policy-page,
+    .contacts-page,
+    .about-page {
+        padding: 40px 0 60px;
+    }
+
+    .policy-title,
+    .contacts-title,
+    .about-title {
+        font-size: 26px;
+        margin-bottom: 24px;
+    }
+
+    .policy-text,
+    .contacts-text,
+    .about-text {
+        font-size: 15px;
+    }
+
+    .policy-text h2,
+    .contacts-text h2,
+    .about-text h2 {
+        font-size: 20px;
+        margin-top: 32px;
+        margin-bottom: 14px;
+    }
+
+    .policy-text p,
+    .contacts-text p,
+    .about-text p {
+        margin-bottom: 18px;
     }
 
     .modal .home_plans {
@@ -4051,6 +4501,8 @@ table.profile_history_tabble_main th {
         text-align: center;
         display: block;
         margin: 0 auto;
+        font-family: "Poppins", sans-serif;
+        font-size: 32px;
     }
 
     .intro_block_subtittle {
@@ -4058,12 +4510,20 @@ table.profile_history_tabble_main th {
         margin: 0 auto;
         margin-top: 25px;
         text-align: center;
+        font-family: "Poppins", sans-serif;
+        max-width: 100%;
+    }
+
+    .intro {
+        margin-top: 120px;
     }
 
     .intro_block_button {
-        display: block;
-        margin: 0 auto;
+        display: flex;
+        margin-left: auto;
+        margin-right: auto;
         margin-top: 35px;
+        width: fit-content;
     }
 
     .home_create {
@@ -4111,7 +4571,7 @@ table.profile_history_tabble_main th {
     }
 
     .signin_main_rect {
-        top: calc(50% - 206px);
+        top: calc(50% - 260px);
     }
 
     .login main {
@@ -4194,7 +4654,7 @@ table.profile_history_tabble_main th {
     }
 
     .signin_main_rect {
-        top: calc(50% - 206px);
+        top: calc(50% - 260px);
     }
 
     .login main {
@@ -4211,14 +4671,18 @@ table.profile_history_tabble_main th {
     .intro_block_tittle {
         text-align: center;
         font-size: 30px;
+        font-family: "Poppins", sans-serif;
     }
 
     .intro_block_subtittle {
         text-align: center;
+        font-family: "Poppins", sans-serif;
     }
 
     .intro_block_button {
         width: 100%;
+        display: inline-flex;
+        justify-content: center;
     }
 
     .home_create_tittle {
@@ -4237,6 +4701,7 @@ table.profile_history_tabble_main th {
 
     .policy_main .home_faq_tittle {
         font-size: 25px;
+        font-family: "Poppins", sans-serif;
     }
 
     .modal_ready {
@@ -4247,7 +4712,7 @@ table.profile_history_tabble_main th {
 
 @media (min-width: 1441px) and (max-width: 1920px) {
     .signin_main_rect {
-        top: calc(50% - 206px);
+        top: calc(50% - 260px);
     }
 
     .login main {
