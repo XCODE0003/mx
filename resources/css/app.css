@@ -2055,23 +2055,22 @@ main.login {
     background: #fff;
     position: absolute;
     left: 217px;
-    top: calc(50% - 260px);
+    top: calc(50% - 300px);
     z-index: 1;
-    box-shadow: 0px 5px 10px 5px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .signin_main_rect_content {
-    padding: 25px 30px;
+    padding: 32px 36px;
 }
 
 .signin_main_rect_tittle {
     color: #393c5b;
     font-family: "SF Pro Display", sans-serif;
-    font-size: 24px;
+    font-size: 28px;
     font-style: normal;
     font-weight: 700;
     line-height: 120%;
-    /* 28.8px */
 }
 
 .signin_main_rect_inputs {
@@ -2085,17 +2084,23 @@ main.login {
     width: 100%;
     height: auto;
     outline: none;
-    border: 1px solid transparent;
+    border: 1.5px solid transparent;
     color: #393c5b;
     font-family: "SF Pro Display", sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 140%;
-    /* 22.4px */
-    padding: 9px 15px;
-    border-radius: 82px;
+    padding: 11px 15px;
+    border-radius: 10px;
     background: #f6f7ff;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.signin_main_rect_input:focus {
+    border-color: rgba(143, 112, 255, 0.4);
+    background: #fff;
 }
 
 .signin_main_rect_input::placeholder {
@@ -2122,35 +2127,37 @@ main.login {
 }
 
 .signin_main_rect_button {
-    margin-top: 25px;
+    margin-top: 22px;
     outline: none;
     border: none;
     cursor: pointer;
-    transition: all 0.5s;
+    transition: all 0.3s;
     color: #fff;
     text-align: center;
     font-family: "SF Pro Display", sans-serif;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding-top: 14px;
+    padding-bottom: 14px;
     width: 100%;
-    border-radius: 64px;
-    background: #8f70ff;
-    font-size: 18px;
+    border-radius: 10px;
+    background: #1d6ff3;
+    font-size: 16px;
     font-style: normal;
-    font-weight: 500;
+    font-weight: 600;
     line-height: normal;
 }
 
 .signin_main_rect_button:hover {
-    transform: scale(1.05);
+    background: #1558d6;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(29, 111, 243, 0.35);
 }
 
 .signin_main_rect_socials {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 19px;
-    gap: 5px;
+    margin-top: 16px;
+    gap: 12px;
 }
 
 .signin_main_rect_social {
