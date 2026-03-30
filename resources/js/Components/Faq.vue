@@ -19,6 +19,40 @@ onMounted(() => {
         isVisible.value = true;
     }, 100);
 });
+
+function enter(el) {
+    el.style.height = '0px';
+    el.style.opacity = '0';
+    el.style.overflow = 'hidden';
+
+    requestAnimationFrame(() => {
+        el.style.transition = 'height 0.35s ease, opacity 0.25s ease';
+        el.style.height = el.scrollHeight + 'px';
+        el.style.opacity = '1';
+    });
+}
+
+function afterEnter(el) {
+    el.style.height = 'auto';
+    el.style.transition = '';
+}
+
+function leave(el) {
+    el.style.height = el.scrollHeight + 'px';
+    el.style.opacity = '1';
+    el.style.overflow = 'hidden';
+
+    requestAnimationFrame(() => {
+        el.style.transition = 'height 0.3s ease, opacity 0.2s ease';
+        el.style.height = '0px';
+        el.style.opacity = '0';
+    });
+}
+
+function afterLeave(el) {
+    el.style.transition = '';
+}
+
 </script>
 
 <template>
@@ -48,41 +82,19 @@ onMounted(() => {
                     <transition 
                         name="slide-fade"
                         @enter="enter"
+                        @after-enter="afterEnter"
                         @leave="leave"
+                        @after-leave="afterLeave"
                     >
                         <div v-if="openIndex === index" class="home_faq_item_content">
                             <p class="home_faq_item_tittle_text">{{ item.text }}</p>
-                        </div>
+                       </div>
                     </transition>
                 </div>
             </div>
         </div>
     </section>
 </template>
-
-<script>
-export default {
-    methods: {
-        enter(el) {
-            el.style.height = '0';
-            el.style.opacity = '0';
-            requestAnimationFrame(() => {
-                el.style.transition = 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease';
-                el.style.height = el.scrollHeight + 'px';
-                el.style.opacity = '1';
-            });
-        },
-        leave(el) {
-            el.style.height = el.scrollHeight + 'px';
-            requestAnimationFrame(() => {
-                el.style.transition = 'height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease';
-                el.style.height = '0';
-                el.style.opacity = '0';
-            });
-        }
-    }
-}
-</script>
 
 <style scoped>
 @keyframes fadeInUp {
@@ -138,5 +150,3 @@ export default {
   overflow: hidden;
 }
 </style>
-
-

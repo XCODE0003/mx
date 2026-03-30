@@ -8,6 +8,10 @@ const props = defineProps({
     class: {
         type: String,
         default: ''
+    },
+    hideFooter: {
+        type: Boolean,
+        default: false
     }
 });
 </script>
@@ -18,7 +22,7 @@ const props = defineProps({
         <div class="layout-app__main">
             <slot />
         </div>
-        <Footer />
+        <Footer v-if="!props.hideFooter" />
         <ToastContainer />
     </div>
 </template>

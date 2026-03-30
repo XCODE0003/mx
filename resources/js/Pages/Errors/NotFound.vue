@@ -6,7 +6,7 @@ import { Head, Link } from '@inertiajs/vue3';
 <template>
     <Head title="Страница не найдена" />
 
-    <MainLayout>
+    <MainLayout class="layout-app--notfound">
         <main class="error404-main">
             <section class="page_error page_error--site">
                 <div class="container">
@@ -25,21 +25,17 @@ import { Head, Link } from '@inertiajs/vue3';
 </template>
 
 <style scoped>
+.layout-app__main {
+    flex: 0 0 auto;
+}
+
 .error404-main {
-    min-height: 0;
+    min-height: auto;
+    flex: none;
 }
 
 .page_error--site {
-    background-image: none;
-    background: linear-gradient(
-        165deg,
-        rgba(143, 112, 255, 0.12) 0%,
-        rgba(132, 140, 228, 0.08) 38%,
-        #f5f6fb 100%
-    );
-    background-size: cover;
-    padding: 32px 0 72px;
-    min-height: min(72vh, 720px);
+    padding: 80px 0 72px;
     box-sizing: border-box;
 }
 

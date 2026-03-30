@@ -3,7 +3,7 @@ import MainLayout from '../Layouts/MainLayout.vue';
 import { ref, onUnmounted } from 'vue';
 import AnimatedSelect from '../Components/UI/AnimatedSelect.vue';
 import Faq from '../Components/Faq.vue';
-import { router, usePage } from '@inertiajs/vue3';
+import { router, usePage, Link } from '@inertiajs/vue3';
 import axiosClient from '../api/axios';
 import { useScrollAnimation } from '../composables/useScrollAnimation';
 
@@ -138,7 +138,7 @@ init();
                                 вариантов <span class="intro_accent">ОГЭ</span> и <span class="intro_accent">ЕГЭ</span></h1>
                             <h2 class="intro_block_subtittle">Вы можете собрать уникальный вариант из нашего банка заданий за несколько секунд. Все материалы соответствуют актуальным демоверсиям ФИПИ текущего учебного года.</h2>
                             <Link href="/profile/constructor" class="intro_block_button">
-                                Сформировать вариант
+                                <span>Сформировать вариант</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path d="M4.16699 10H15.8337M15.8337 10L10.0003 4.16669M15.8337 10L10.0003 15.8334" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
@@ -243,7 +243,16 @@ init();
 
                             </div>
                         </div>
-                        <div class="home_create_block">
+                        <div class="home_create_block home_create_video_card">
+                        <div class="home_create_mobile_hint">
+                            <p class="home_create_mobile_hint_title">
+                                Не знаете, как пользоваться сайтом?
+                            </p>
+                            <p class="home_create_mobile_hint_text">
+                                Посмотрите короткую видеоинструкцию.
+                            </p>
+                        </div>
+
                             <div class="home_create_block_player">
                                 <svg class="home_create_block_player_icon" xmlns="http://www.w3.org/2000/svg" width="51" height="64" viewBox="0 0 51 64" fill="none">
                                     <path d="M48.149 26.9529C51.8229 29.3148 51.8229 34.6853 48.149 37.0471L9.24455 62.0571C5.25148 64.624 2.45083e-07 61.757 4.31437e-07 57.01L2.39508e-06 6.98999C2.58144e-06 2.243 5.25148 -0.624051 9.24455 1.94292L48.149 26.9529Z" fill="#D3D7FF" />
@@ -254,85 +263,11 @@ init();
                 </div>
             </section>
 
-            <section class="home_plans home_plans_mobile">
-                <div class="container">
-                    <div class="home_plans_rect">
-                        <div class="home_plans_rect_content">
-                            <h4 class="home_plans_rect_tittle">Выберите план подписки</h4>
-                            <div class="home_plans_blocks">
-                                <div class="home_plans_block">
-                                    <div class="home_plans_block_up">
-                                        <div class="home_plans_block_up_content">
-                                            <p class="home_plans_block_up_tittle">Basic <span>Бесплатно</span></p>
-                                        </div>
-                                    </div>
-                                    <div class="home_plans_block_content">
-                                        <ul class="home_plans_block_items">
-                                            <li class="home_plans_block_item">- Полный банк <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                                                    <circle cx="7.5" cy="7.5" r="7.5" fill="#FF4646" />
-                                                    <rect x="10.293" y="3.29297" width="2" height="9.89957" rx="0.5" transform="rotate(45 10.293 3.29297)" fill="white" />
-                                                    <rect x="3.29297" y="4.70703" width="2" height="9.89957" rx="0.5" transform="rotate(-45 3.29297 4.70703)" fill="white" />
-                                                </svg></li>
-                                            <li class="home_plans_block_item">- Автоматическое формирование <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
-                                                    <circle cx="7.5" cy="8" r="7.5" fill="#3BF763" />
-                                                    <rect x="11.5054" y="3.97803" width="2" height="9.37598" rx="0.5" transform="rotate(45 11.5054 3.97803)" fill="white" />
-                                                    <rect x="2.08057" y="7.81689" width="2" height="5.94688" rx="0.5" transform="rotate(-45 2.08057 7.81689)" fill="white" />
-                                                </svg></li>
-                                            <li class="home_plans_block_item">- Ручное формирование варианта <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                                                    <circle cx="7.5" cy="7.5" r="7.5" fill="#FF4646" />
-                                                    <rect x="10.293" y="3.29297" width="2" height="9.89957" rx="0.5" transform="rotate(45 10.293 3.29297)" fill="white" />
-                                                    <rect x="3.29297" y="4.70703" width="2" height="9.89957" rx="0.5" transform="rotate(-45 3.29297 4.70703)" fill="white" />
-                                                </svg></li>
-                                            <li class="home_plans_block_item">- Неограниченный функционал <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                                                    <circle cx="7.5" cy="7.5" r="7.5" fill="#FF4646" />
-                                                    <rect x="10.293" y="3.29297" width="2" height="9.89957" rx="0.5" transform="rotate(45 10.293 3.29297)" fill="white" />
-                                                    <rect x="3.29297" y="4.70703" width="2" height="9.89957" rx="0.5" transform="rotate(-45 3.29297 4.70703)" fill="white" />
-                                                </svg></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="home_plans_block">
-                                    <div class="home_plans_block_up">
-                                        <div class="home_plans_block_up_content">
-                                            <p class="home_plans_block_up_tittle">Pro <span>2000₽/мес.</span></p>
-                                            <button class="home_plans_block_up_button">Купить</button>
-                                        </div>
-                                    </div>
-                                    <div class="home_plans_block_content">
-                                        <ul class="home_plans_block_items">
-                                            <li class="home_plans_block_item">- Полный банк <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
-                                                    <circle cx="7.5" cy="8" r="7.5" fill="#3BF763" />
-                                                    <rect x="11.5054" y="3.97803" width="2" height="9.37598" rx="0.5" transform="rotate(45 11.5054 3.97803)" fill="white" />
-                                                    <rect x="2.08057" y="7.81689" width="2" height="5.94688" rx="0.5" transform="rotate(-45 2.08057 7.81689)" fill="white" />
-                                                </svg></li>
-                                            <li class="home_plans_block_item">- Автоматическое формирование <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
-                                                    <circle cx="7.5" cy="8" r="7.5" fill="#3BF763" />
-                                                    <rect x="11.5054" y="3.97803" width="2" height="9.37598" rx="0.5" transform="rotate(45 11.5054 3.97803)" fill="white" />
-                                                    <rect x="2.08057" y="7.81689" width="2" height="5.94688" rx="0.5" transform="rotate(-45 2.08057 7.81689)" fill="white" />
-                                                </svg></li>
-                                            <li class="home_plans_block_item">- Ручное формирование варианта <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
-                                                    <circle cx="7.5" cy="8" r="7.5" fill="#3BF763" />
-                                                    <rect x="11.5054" y="3.97803" width="2" height="9.37598" rx="0.5" transform="rotate(45 11.5054 3.97803)" fill="white" />
-                                                    <rect x="2.08057" y="7.81689" width="2" height="5.94688" rx="0.5" transform="rotate(-45 2.08057 7.81689)" fill="white" />
-                                                </svg></li>
-                                            <li class="home_plans_block_item">- Неограниченный функционал <svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
-                                                    <circle cx="7.5" cy="8" r="7.5" fill="#3BF763" />
-                                                    <rect x="11.5054" y="3.97803" width="2" height="9.37598" rx="0.5" transform="rotate(45 11.5054 3.97803)" fill="white" />
-                                                    <rect x="2.08057" y="7.81689" width="2" height="5.94688" rx="0.5" transform="rotate(-45 2.08057 7.81689)" fill="white" />
-                                                </svg></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-            </section>
 
             <Faq title="Остались вопросы?" :items="faqItems">
                 <template #subtitle>
-                    Если в списке часто задаваемых вопросов вы не нашли ответ на свой — напишите нам на <a href="mailto:test@mail.ru">почту</a> или в онлайн чат!
+                    Если среди часто задаваемых вопросов вы не нашли нужного ответа — напишите нам любым удобным способом через раздел <a href="/contacts">«Контакты».</a>
                 </template>
             </Faq>
         </main>

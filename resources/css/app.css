@@ -24,6 +24,10 @@
     }
 }
 
+    .home_create_mobile_hint {
+    display: none;
+}
+
 .scroll-animate {
     opacity: 0;
     transform: translateY(40px);
@@ -989,6 +993,7 @@ form[name="chkcodeform"] {
 .home_faq_item_content {
     padding: 0 28px 24px 28px;
     background: #fff;
+    allign-items: center;
 }
 
 .home_faq_item_tittle {
@@ -1023,7 +1028,7 @@ form[name="chkcodeform"] {
 .home_faq_item_tittle_text {
     color: #393c5b;
     font-family: "Poppins", sans-serif;
-    font-size: 15px;
+    font-size: 17px;
     margin-top: 10px;
     font-style: normal;
     font-weight: 400;
@@ -1044,11 +1049,10 @@ footer,
 }
 
 .footer_items {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 40px 56px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    align-items: start;
+    gap: 56px;
     padding-top: 30px;
     padding-bottom: 30px;
 }
@@ -1071,23 +1075,19 @@ footer,
 
 .footer_blocks {
     display: flex;
-    flex-wrap: wrap;
     align-items: flex-start;
-    gap: 48px 72px;
-    flex: 1 1 auto;
-    justify-content: flex-end;
+    justify-content: start;
+    gap: 100px;
 }
 
 .footer_block {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    min-width: 0;
+    align-items: flex-start;
 }
 
 .footer_block_title {
-    color: rgba(57, 60, 91, 0.45);
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -1102,11 +1102,13 @@ footer,
     gap: 10px;
     margin: 0;
     padding: 0;
+    opacity: 0.6;
+    margin-bottom: 10px;
 }
 
 .footer_block_link {
     color: #393c5b;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 16px;
     font-weight: 400;
     line-height: 140%;
@@ -1126,12 +1128,14 @@ footer,
 
 .footer_disclaimer p {
     color: rgba(57, 60, 91, 0.55);
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
     line-height: 160%;
     max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
 }
 
 .footer_copyright {
@@ -1142,7 +1146,7 @@ footer,
 
 .footer_copyright p {
     color: rgba(57, 60, 91, 0.45);
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 14px;
     font-style: normal;
     font-weight: 400;
@@ -1151,18 +1155,27 @@ footer,
 
 /* Страницы контента */
 .policy-page,
-.contacts-page,
 .about-page {
     min-height: calc(100vh - 80px);
     padding: 80px 0 120px;
 }
 
+.contacts-page {
+    min-height: auto;
+    padding: 40px 0 60px;
+}
+
 .policy-content,
-.contacts-content,
 .about-content {
     max-width: 900px;
     margin: 60px auto;
 }
+
+.contacts-content {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
 .news{
     padding-top: 60px;
 }
@@ -1921,11 +1934,21 @@ footer,
 }
 
 .reviews_main_block_review_avatar {
-    vertical-align: middle;
-    object-fit: cover;
-    width: 75px;
-    height: 75px;
-    border-radius: 100px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #fff;
+    font-weight: 700; 
+    font-size: 16px;
+    text-transform: uppercase;
+
+    line-height: 1; 
 }
 
 .reviews_main_block_review_info {
@@ -3599,12 +3622,12 @@ table.profile_history_tabble_main th {
     }
 
     .home_faq_item_tittle {
-        font-size: 16px;
+        font-size: 18px;
         font-family: "Poppins", sans-serif;
     }
 
     .home_faq_item_tittle_text {
-        font-size: 14px;
+        font-size: 17px;
         font-family: "Poppins", sans-serif;
     }
 
@@ -4721,6 +4744,142 @@ table.profile_history_tabble_main th {
     }
 }
 
+@media (max-width: 768px) {
+    .reviews_main_block_review {
+        width: 100%;
+    }
+
+    .reviews_main_block_review_content {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 20px 18px;
+    }
+
+    .reviews_main_block_review_avatar {
+        width: 56px;
+        height: 56px;
+        min-width: 56px;
+        min-height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+    .reviews_main_block_review_info {
+        flex: 1;
+        min-width: 0;
+        text-align: left !important;
+    }
+
+    .reviews_main_block_review_info_up {
+        display: block;
+    }
+
+    .reviews_main_block_review_info_up_name {
+        margin: 0 0 6px;
+        font-size: 18px;
+        line-height: 1.25;
+        word-break: break-word;
+        text-align: left !important;
+    }
+
+    .reviews_main_block_review_info_up_date {
+        margin: 0 0 10px;
+        font-size: 14px;
+        line-height: 1.4;
+        text-align: left !important;
+    }
+
+    .reviews_main_block_review_info_text {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.5;
+        word-break: break-word;
+        margin-top: 15px;
+        text-align: left !important;
+    }
+
+    .reviews_main_block_reviews {
+        padding-bottom: 90px;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer_items {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+
+    .footer_item_logo {
+        display: none;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .footer_item_logo img {
+        margin: 0 auto;
+    }
+    .footer_col--brand {
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer_brand_subtitle {
+        display: none;
+        text-align: center;
+        max-width: 220px;
+    }
+
+    .footer_blocks {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        margin: 0;
+        width: 100%;
+    }
+
+    .footer_block {
+        align-items: center;
+        text-align: center;
+        width: 100%;
+    }
+
+    .footer_block_list {
+        align-items: center;
+    }
+
+    .footer_disclaimer {
+        margin-top: 32px;
+        padding-top: 24px;
+    }
+
+    .footer_disclaimer p {
+        font-size: 13px;
+        line-height: 150%;
+        padding: 0 8px;
+    }
+
+    .footer_copyright {
+        margin-top: 20px;
+        padding-top: 20px;
+        padding-bottom: 90px;
+    }
+}
+
 @media (min-width: 1921px) {
     .signin_main_rect {
         top: calc(50% - 206px);
@@ -4730,6 +4889,63 @@ table.profile_history_tabble_main th {
         width: 100%;
         height: 100%;
     }
+}
+
+@media (max-width: 768px) {
+    .home_create_block:first-child {
+        display: none !important;
+    }
+
+    .home_create_block:last-child {
+        background: transparent;
+        height: auto;
+        margin-bottom: 40px;
+    }
+
+    .home_create_mobile_hint {
+        display: block;
+        text-align: center;
+        margin-bottom: 16px;
+        padding: 0 16px;
+    }
+
+    .home_create_block_player {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        background: #a389ff;
+        border-radius: 20px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+        margin-top: 12px;
+    }
+    .home_create_mobile_hint_title {
+    color: #393c5b;
+    font-family: "Poppins", sans-serif;
+    font-size: 40px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 120%;
+    margin: 0 0 6px;
+}
+
+.home_create_mobile_hint_text {
+    color: rgba(57, 60, 91, 0.65);
+    font-family: "Poppins", sans-serif;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    margin: 0;
+}
+
+.home_create_video_card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 20px 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}    
 }
 
 .overlay_no_subscribe {
@@ -4755,4 +4971,7 @@ table.profile_history_tabble_main th {
     justify-content: start;
     gap: 20px;
     padding: 40px 20px;
+}
+.layout-app--notfound main {
+    margin-bottom: 0 !important;
 }

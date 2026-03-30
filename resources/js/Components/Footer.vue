@@ -77,20 +77,23 @@ onUnmounted(() => {
         <Link href="/" class="footer_item_logo" aria-label="На главную">
           <img src="/assets/img/logo.svg" alt="" width="100">
         </Link>
-      </div>
+        <p class="footer_brand_subtitle">
+        Конструктор тренировочных вариантов
+    </p>
+</div>
       <nav class="footer_blocks" aria-label="Нижнее меню">
         <div class="footer_block">
           <p class="footer_block_title">О проекте</p>
           <ul class="footer_block_list">
             <li><Link href="/about" class="footer_block_link">О сайте</Link></li>
-            <li><Link href="/instructions" class="footer_block_link">Инструкция по работе с сайтом</Link></li>
-            <li><Link href="/contacts" class="footer_block_link">Контакты</Link></li>
+            <li><Link href="/profile/constructor" class="footer_block_link">Конструктор вариантов</Link></li>
+            <li><Link href="/reviews" class="footer_block_link">Отзывы</Link></li>
           </ul>
         </div>
         <div class="footer_block">
-          <p class="footer_block_title">Сервис</p>
+          <p class="footer_block_title">Документы</p>
           <ul class="footer_block_list">
-            <li><Link href="/banks" class="footer_block_link">Банк заданий</Link></li>
+            <li><Link href="/contacts" class="footer_block_link">Контакты</Link></li>
             <li><Link href="/policy" class="footer_block_link">Политика конфиденциальности</Link></li>
           </ul>
         </div>
@@ -98,13 +101,12 @@ onUnmounted(() => {
     </div>
 
     <div class="footer_disclaimer" style="text-align: center; margin: auto;">
-      <p style="text-align: center; margin: auto;">Сайт является информационным ресурсом и не относится к официальным источникам экзаменационных материалов. Задания формируются на основе данных из открытых источников, включая материалы Министерства образования Российской Федерации и ФИПИ. Официальные контрольные измерительные материалы, используемые при проведении государственной итоговой аттестации, на сайте не размещаются и не предоставляются.</p>
+      <p style="text-align: center; margin: auto;">Сайт является информационным ресурсом и не относится к официальным источникам экзаменационных материалов. Задания формируются на основе данных из открытых источников, включая материалы Министерства образования Российской Федерации и ФИПИ. Официальные контрольные измерительные материалы, используемые при проведении государственной итоговой аттестации, на сайте <b>не размещаются и не предоставляются</b>.</p>
     </div>
 
     <div style="padding-bottom: 20px;" class="footer_copyright">
-      <p>© kim365.ru {{ currentYear }}</p>
+      <p>© KIM365 {{ currentYear }}</p>
     </div>
-  </div>
 
   <transition name="scroll-to-top">
     <button
@@ -119,10 +121,25 @@ onUnmounted(() => {
       </svg>
     </button>
   </transition>
+ </div>
 </footer>
 </template>
 
 <style scoped>
+.footer_col--brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footer_brand_subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  color: rgba(57, 60, 91, 0.6);
+  line-height: 1.4;
+  max-width: 200px;
+}
+
 .scroll-to-top-btn {
   position: fixed;
   bottom: 30px;

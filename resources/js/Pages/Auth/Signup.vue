@@ -49,7 +49,7 @@ const errorMessages = computed(() => {
 });
 </script>
 <template>
-    <MainLayout class="login">
+    <MainLayout class="login" :hideFooter="true">
         <main>
 
             <section class="signin_main">

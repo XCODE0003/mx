@@ -16,7 +16,7 @@ const submit = () => {
 </script>
 
 <template>
-    <MainLayout class="login">
+    <MainLayout class="login" :hideFooter="true">
         <main>
             <section class="signin_main">
                 <div class="signin_main_rect">
