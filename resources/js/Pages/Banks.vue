@@ -6,6 +6,10 @@ import { onBeforeUnmount, onMounted, ref, watch, computed } from 'vue';
 import { extractNumbersAndSymbols } from '../utils/text';
 import { subtaskNumberFromGroupTitle, taskAudioUrls } from '../utils/banksTask';
 
+// Модальное окно с предупреждением
+const showModal = ref(true);
+let autoCloseTimer = null;
+
 const grades = [
     { key: 'oge', value: 'ОГЭ' },
     { key: 'ege', value: 'ЕГЭ' },
@@ -160,8 +164,22 @@ async function loadGroupTasks() {
     }
 }
 
+function closeModal() {
+    showModal.value = false;
+    if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = null;
+    }
+}
+
 onMounted(async () => {
     window.addEventListener('message', handleIframeResizeMessage);
+    
+    // Автозакрытие модального окна через 10 секунд
+    autoCloseTimer = setTimeout(() => {
+        showModal.value = false;
+    }, 10000);
+    
     try {
         await fetchSubjects();
         await fetchGroups();
@@ -223,11 +241,40 @@ watch(
 
 onBeforeUnmount(() => {
     window.removeEventListener('message', handleIframeResizeMessage);
+    if (autoCloseTimer) {
+        clearTimeout(autoCloseTimer);
+    }
 });
 </script>
 
 <template>
     <MainLayout>
+        <!-- Модальное окно с предупреждением -->
+        <Transition name="modal-fade">
+            <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+                <div class="modal-content">
+                    <button class="modal-close" @click="closeModal" aria-label="Закрыть">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    <div class="modal-body">
+                        <div class="modal-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#8F70FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <h3 class="modal-title">Раздел в разработке</h3>
+                        <p class="modal-text">
+                            Этот раздел находится в стадии разработки.<br>
+                            Некоторые функции могут работать нестабильно.<br>
+                            Мы активно работаем над улучшениями и скоро он будет доступен в полном объёме.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+
         <main class="banks">
             <section class="navigations_main">
                 <div class="container">
@@ -577,5 +624,98 @@ onBeforeUnmount(() => {
         justify-content: flex-end;
         max-width: min(100%, 520px);
     }
+}
+
+/* Модальное окно */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modal-content {
+    position: relative;
+    background: #fff;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    padding: 40px 32px 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: rgba(57, 60, 91, 0.5);
+    transition: color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: #393c5b;
+    transform: scale(1.1);
+}
+
+.modal-body {
+    text-align: center;
+}
+
+.modal-icon {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.modal-title {
+    margin: 0 0 16px;
+    font-family: 'Poppins', 'SF Pro Display', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #393c5b;
+    line-height: 1.3;
+}
+
+.modal-text {
+    margin: 0;
+    font-family: 'SF Pro Display', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(57, 60, 91, 0.75);
+}
+
+/* Анимация модального окна */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.modal-fade-enter-active .modal-content,
+.modal-fade-leave-active .modal-content {
+    transition: transform 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+
+.modal-fade-enter-from .modal-content {
+    transform: scale(0.9) translateY(20px);
+}
+
+.modal-fade-leave-to .modal-content {
+    transform: scale(0.95);
 }
 </style>

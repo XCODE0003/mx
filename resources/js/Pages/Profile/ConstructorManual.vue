@@ -40,7 +40,18 @@ const totalPages = computed(() => {
 });
 const creating = ref(false);
 const isTaskSelected = (task) => taskStore.isTaskSelected(task);
-const toggleTaskSelection = (task) => taskStore.toggleTaskSelection(task);
+
+// Блокировка ручного формирования
+const showBlockedNotification = ref(true);
+const toggleTaskSelection = (task) => {
+    // Показываем уведомление вместо выбора задания
+    if (!showBlockedNotification.value) {
+        showBlockedNotification.value = true;
+        setTimeout(() => {
+            showBlockedNotification.value = false;
+        }, 5000);
+    }
+};
 const paginatedTasks = computed(() => {
     const start = (currentPage.value - 1) * perPage.value;
     const end = start + perPage.value;
@@ -57,6 +68,16 @@ function handleIframeLoad(taskId) {
 }
 const downloadMeta = ref({ variantUuid: null, url: null });
 function handleExportPdfManual() {
+    // Блокируем формирование и показываем уведомление
+    if (!showBlockedNotification.value) {
+        showBlockedNotification.value = true;
+        setTimeout(() => {
+            showBlockedNotification.value = false;
+        }, 5000);
+    }
+    return;
+    
+    /* ЗАБЛОКИРОВАНО
     creating.value = true;
     const selectedCount = Object.keys(taskStore.selectedTaskByGroup || {}).length;
     const groupsCount = groups.value?.length || 0;
@@ -101,7 +122,7 @@ function handleExportPdfManual() {
             toast.error('Не удалось запустить формирование. Попробуйте позже.');
             creating.value = false;
         });
-
+    КОНЕЦ ЗАБЛОКИРОВАННОГО КОДА */
 }
 function prevPage() { goToPage(currentPage.value - 1); }
 function nextPage() { goToPage(currentPage.value + 1); }
@@ -182,8 +203,27 @@ onBeforeUnmount(() => {
                                 <div class="profile_block_rect_content ">
                                     <h3 class="profile_block_rect_tittle">Создание варианта</h3>
 
-
-
+                                    <!-- Плашка блокировки ручного формирования -->
+                                    <Transition name="notification-slide">
+                                        <div v-if="showBlockedNotification" class="blocked-notification">
+                                            <div class="blocked-notification__icon">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                    <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                            </div>
+                                            <div class="blocked-notification__content">
+                                                <p class="blocked-notification__title">Функционал находится в разработке</p>
+                                                <p class="blocked-notification__text">
+                                                    Данный функционал находится в разработке и временно недоступен. В ближайшее время он будет добавлен и станет доступен в полном объёме.
+                                                </p>
+                                            </div>
+                                            <button class="blocked-notification__close" @click="showBlockedNotification = false" aria-label="Закрыть">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                                    <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </Transition>
 
                                     <div class="profile_constructor_manual_up">
                                         <div class="profile_constructor_manual_up_item">
@@ -338,7 +378,7 @@ onBeforeUnmount(() => {
                                                             </div>
                                                         </div> -->
 
-                                                        <button @click="toggleTaskSelection(task)" class="home_create_block_button">{{ isTaskSelected(task) ? 'Убрать' : 'Добавить' }}</button>
+                                                        <button @click="toggleTaskSelection(task)" class="home_create_block_button" disabled style="opacity: 0.6; cursor: not-allowed;">{{ isTaskSelected(task) ? 'Убрать' : 'Добавить' }}</button>
                                                     </div>
 
                                                 </div>
@@ -402,7 +442,7 @@ onBeforeUnmount(() => {
 
                                                     <div class="profile_manual_bottom_rect_item">
                                                         <p class="profile_manual_bottom_rect_item_text">Дождитесь окончания формирования вашего варианта. Каждый вариант уникален и формируется из множества заданий</p>
-                                                        <button @click="handleExportPdfManual" :class="{ 'home_create_forming': creating }" class="home_create_block_button">{{ creating ? "Идет формирование" : 'Начать формирование' }}</button>
+                                                        <button @click="handleExportPdfManual" :class="{ 'home_create_forming': creating }" class="home_create_block_button" disabled style="opacity: 0.6; cursor: not-allowed;">{{ creating ? "Идет формирование" : 'Начать формирование' }}</button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -462,5 +502,83 @@ iframe {
 }
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Плашка блокировки ручного формирования */
+.blocked-notification {
+    position: relative;
+    margin: 24px 0;
+    padding: 20px 60px 20px 24px;
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid rgba(255, 193, 7, 0.4);
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.blocked-notification__icon {
+    flex-shrink: 0;
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blocked-notification__content {
+    flex: 1;
+}
+
+.blocked-notification__title {
+    margin: 0 0 8px;
+    font-family: 'Poppins', 'SF Pro Display', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #393c5b;
+    line-height: 1.3;
+}
+
+.blocked-notification__text {
+    margin: 0;
+    font-family: 'SF Pro Display', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(57, 60, 91, 0.75);
+}
+
+.blocked-notification__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    color: rgba(57, 60, 91, 0.4);
+    transition: color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blocked-notification__close:hover {
+    color: #393c5b;
+    transform: scale(1.1);
+}
+
+/* Анимация плашки */
+.notification-slide-enter-active,
+.notification-slide-leave-active {
+    transition: all 0.3s ease;
+}
+
+.notification-slide-enter-from {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.notification-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
 }
 </style>
