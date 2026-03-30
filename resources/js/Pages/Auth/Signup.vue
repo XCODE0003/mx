@@ -9,7 +9,6 @@ const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const passwordConfirm = ref('');
-const successMessage = ref('');
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -24,21 +23,10 @@ const onRegister = async () => {
         return;
     }
 
-    authStore.errors = null;
-    successMessage.value = '';
-
-    const response = await authStore.register({
+    await authStore.register({
         email: email.value,
         password: password.value
     });
-
-    if (response && response.status === 201) {
-        successMessage.value = 'Вы успешно зарегистрированы! Проверьте вашу почту и подтвердите email по ссылке из письма.';
-
-        setTimeout(() => {
-            window.location.href = '/login';
-        }, 5000);
-    }
 };
 
 const errorMessages = computed(() => {
@@ -84,30 +72,33 @@ const errorMessages = computed(() => {
                             />
                         </div>
                         <button class="signin_main_rect_button" id="registerBtn" @click="onRegister">Зарегистрироваться</button>
-
-                        <div v-if="successMessage" class="signin_success_message" style="margin-top: 12px;">
-                            {{ successMessage }}
-                        </div>
-
                         <div v-if="errorMessages.length" class="signin_main_rect_errors" style="margin-top: 12px; color: #ff4d4f;">
                             <ul>
                                 <li v-for="(msg, idx) in errorMessages" :key="idx">{{ msg }}</li>
                             </ul>
                         </div>
-                        <div class="signin_main_rect_socials">
-                            <a href="/auth/yandex" class="signin_main_rect_social">
-                                <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.04 12c0-5.523 4.476-10 10-10 5.522 0 10 4.477 10 10s-4.478 10-10 10c-5.524 0-10-4.477-10-10z" fill="#FC3F1D"/><path d="M13.32 7.666h-.924c-1.694 0-2.585.858-2.585 2.123 0 1.43.616 2.1 1.881 2.959l1.045.704-3.003 4.487H7.49l2.695-4.014c-1.55-1.111-2.42-2.19-2.42-4.015 0-2.288 1.595-3.85 4.62-3.85h3.003v11.868H13.32V7.666z" fill="#fff"/></svg>
-                            </a>
-                            <!-- <a href="#!" class="signin_main_rect_social"><svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
-                                    <rect width="50" height="50" rx="25" fill="#EE8208" />
-                                    <path d="M25.4858 12.0659C21.8959 12.0659 18.9858 14.9761 18.9858 18.5658C18.9858 22.1556 21.8959 25.0659 25.4858 25.0659C29.0757 25.0659 31.9858 22.1556 31.9858 18.5658C31.9858 14.9761 29.0757 12.0659 25.4858 12.0659ZM25.4858 21.2529C24.0019 21.2529 22.7989 20.0498 22.7989 18.5659C22.7989 17.082 24.0019 15.879 25.4858 15.879C26.9698 15.879 28.1728 17.082 28.1728 18.5659C28.1728 20.0498 26.9698 21.2529 25.4858 21.2529Z" fill="white" />
-                                    <path d="M27.95 30.0885C30.6212 29.5533 32.2219 28.3092 32.3066 28.2424C33.0882 27.6259 33.2137 26.5029 32.5869 25.734C31.9601 24.9653 30.8184 24.8418 30.0366 25.4582C30.0201 25.4714 28.3129 26.7595 25.5038 26.7613C22.6949 26.7595 20.9516 25.4714 20.935 25.4582C20.1532 24.8418 19.0115 24.9653 18.3848 25.734C17.7579 26.5029 17.8835 27.6259 18.6651 28.2424C18.751 28.3101 20.4177 29.5867 23.1637 30.1093L19.3367 34.0431C18.6412 34.7525 18.6621 35.8821 19.3833 36.5661C19.7354 36.9 20.1891 37.0659 20.6425 37.0659C21.1178 37.0659 21.5926 36.8833 21.9486 36.5201L25.5039 32.7951L29.4184 36.5442C30.1276 37.2407 31.2761 37.2396 31.984 36.5423C32.6919 35.8449 32.6911 34.7151 31.982 34.0189L27.95 30.0885Z" fill="white" />
-                                </svg></a>
-                            <a href="#!" class="signin_main_rect_social"><svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
-                                    <rect width="50" height="50" rx="25" fill="#4D77A2" />
-                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M24.6567 33.9245H26.5694C26.5694 33.9245 27.147 33.8617 27.4423 33.5484C27.7138 33.2605 27.7051 32.72 27.7051 32.72C27.7051 32.72 27.6677 30.1896 28.8586 29.8169C30.0331 29.4496 31.5409 32.2625 33.139 33.3442C34.3475 34.1625 35.2659 33.9834 35.2659 33.9834L39.5393 33.9245C39.5393 33.9245 41.7747 33.7885 40.7147 32.0555C40.628 31.914 40.0972 30.7736 37.5372 28.4307C34.8574 25.9784 35.2166 26.3752 38.4444 22.1333C40.4102 19.5501 41.1959 17.9731 40.9504 17.2977C40.7164 16.6542 39.2705 16.8241 39.2705 16.8241L34.4589 16.8535C34.4589 16.8535 34.102 16.8056 33.8376 16.9616C33.579 17.1141 33.413 17.4705 33.413 17.4705C33.413 17.4705 32.6512 19.4694 31.6359 21.1696C29.4934 24.7567 28.6365 24.9466 28.2863 24.7235C27.4715 24.2043 27.6751 22.6382 27.6751 21.5253C27.6751 18.0488 28.2099 16.5994 26.6337 16.2242C26.1107 16.0998 25.7255 16.0174 24.3878 16.004C22.6709 15.9868 21.2181 16.0092 20.3953 16.4066C19.8478 16.6709 19.4255 17.2598 19.6829 17.2937C20.001 17.3354 20.721 17.4853 21.1028 17.9975C21.596 18.6591 21.5788 20.1444 21.5788 20.1444C21.5788 20.1444 21.8622 24.2366 20.9171 24.7448C20.2686 25.0935 19.3789 24.3817 17.4687 21.1273C16.4901 19.4603 15.751 17.6174 15.751 17.6174C15.751 17.6174 15.6087 17.2731 15.3545 17.0888C15.0462 16.8655 14.6154 16.7947 14.6154 16.7947L10.043 16.8241C10.043 16.8241 9.35676 16.843 9.10458 17.1373C8.88023 17.3993 9.08666 17.9405 9.08666 17.9405C9.08666 17.9405 12.6661 26.1979 16.7196 30.3592C20.4366 34.1749 24.6567 33.9245 24.6567 33.9245Z" fill="white" />
-                                </svg></a> -->
-                        </div>
+                        <div class="signin_divider">
+                                    <span>Или продолжите с помощью</span>
+                                </div>
+
+                                <div class="signin_main_rect_socials">
+                                    <a href="/auth/yandex" class="signin_social_btn">
+                                        <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.04 12c0-5.523 4.476-10 10-10 5.522 0 10 4.477 10 10s-4.478 10-10 10c-5.524 0-10-4.477-10-10z" fill="#FC3F1D"/><path d="M13.32 7.666h-.924c-1.694 0-2.585.858-2.585 2.123 0 1.43.616 2.1 1.881 2.959l1.045.704-3.003 4.487H7.49l2.695-4.014c-1.55-1.111-2.42-2.19-2.42-4.015 0-2.288 1.595-3.85 4.62-3.85h3.003v11.868H13.32V7.666z" fill="#fff"/></svg>
+                                    </a>
+                                    <!-- <a href="#!" class="signin_social_btn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 50 50" fill="none">
+                                            <rect width="50" height="50" rx="25" fill="#EE8208" />
+                                            <path d="M25.4858 12.0659C21.8959 12.0659 18.9858 14.9761 18.9858 18.5658C18.9858 22.1556 21.8959 25.0659 25.4858 25.0659C29.0757 25.0659 31.9858 22.1556 31.9858 18.5658C31.9858 14.9761 29.0757 12.0659 25.4858 12.0659ZM25.4858 21.2529C24.0019 21.2529 22.7989 20.0498 22.7989 18.5659C22.7989 17.082 24.0019 15.879 25.4858 15.879C26.9698 15.879 28.1728 17.082 28.1728 18.5659C28.1728 20.0498 26.9698 21.2529 25.4858 21.2529Z" fill="white" />
+                                            <path d="M27.95 30.0885C30.6212 29.5533 32.2219 28.3092 32.3066 28.2424C33.0882 27.6259 33.2137 26.5029 32.5869 25.734C31.9601 24.9653 30.8184 24.8418 30.0366 25.4582C30.0201 25.4714 28.3129 26.7595 25.5038 26.7613C22.6949 26.7595 20.9516 25.4714 20.935 25.4582C20.1532 24.8418 19.0115 24.9653 18.3848 25.734C17.7579 26.5029 17.8835 27.6259 18.6651 28.2424C18.751 28.3101 20.4177 29.5867 23.1637 30.1093L19.3367 34.0431C18.6412 34.7525 18.6621 35.8821 19.3833 36.5661C19.7354 36.9 20.1891 37.0659 20.6425 37.0659C21.1178 37.0659 21.5926 36.8833 21.9486 36.5201L25.5039 32.7951L29.4184 36.5442C30.1276 37.2407 31.2761 37.2396 31.984 36.5423C32.6919 35.8449 32.6911 34.7151 31.982 34.0189L27.95 30.0885Z" fill="white" />
+                                        </svg>
+                                    </a>
+                                    <a href="#!" class="signin_social_btn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 50 50" fill="none">
+                                            <rect width="50" height="50" rx="12" fill="#FC3F1D" />
+                                            <path d="M27.4 25.5L33 16H29.2L25 22.9L20.8 16H17L22.6 25.5L16.5 36H20.3L25 28.4L29.7 36H33.5L27.4 25.5Z" fill="white" />
+                                        </svg>
+                                    </a> -->
+                                </div>
                         <a href="/login" class="signin_main_rect_signin">Уже есть аккаунт?</a>
                     </div>
                 </div>
@@ -118,4 +109,126 @@ const errorMessages = computed(() => {
 </template>
 
 
-<style scoped></style>
+<style scoped>
+.signin_subtitle {
+    margin-top: 6px;
+    color: rgba(57, 60, 91, 0.55);
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.signin_field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.signin_field_label {
+    color: #393c5b;
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.signin_input_wrap {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.signin_input_icon {
+    position: absolute;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    color: rgba(57, 60, 91, 0.45);
+    pointer-events: none;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.signin_input_with_icon {
+    padding-left: 42px !important;
+}
+
+.signin_input_wrap :deep(.password-input-wrap) {
+    width: 100%;
+}
+
+.signin_input_wrap :deep(.password-input-wrap input) {
+    padding-left: 42px;
+}
+
+.signin_main_rect_errors {
+    margin-top: 12px;
+    color: #ff4d4f;
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 13px;
+}
+
+.signin_main_rect_errors ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.signin_divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 22px;
+    color: rgba(57, 60, 91, 0.4);
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.signin_divider::before,
+.signin_divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(57, 60, 91, 0.15);
+}
+
+.signin_social_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 46px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(57, 60, 91, 0.12);
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+}
+
+.signin_social_btn:hover {
+    border-color: rgba(57, 60, 91, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: none;
+}
+
+.signin_register_wrap {
+    margin-top: 20px;
+    text-align: center;
+    color: rgba(57, 60, 91, 0.6);
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.signin_register_wrap .signin_main_rect_signin {
+    margin-top: 0;
+    display: inline;
+}
+</style>
