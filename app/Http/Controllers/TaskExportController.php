@@ -11,6 +11,7 @@ use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -71,9 +72,9 @@ class TaskExportController extends Controller
                     ->unique()
                     ->count();
                 
-                // Считаем минимальное количество заданий среди всех групп в пакете
+                // Используем предзагруженные счетчики заданий
                 $minTasksInGroup = $pack->map(function ($group) {
-                    return $group->tasks()->count();
+                    return $group->_tasks_count_cache ?? $group->tasks()->count();
                 })->min() ?? 0;
 
                 return [
@@ -110,9 +111,25 @@ class TaskExportController extends Controller
         }
 
         $baseGroups = $subject->groups->where('is_forming', true)->where('question', '=', null);
-        $groupedPacks = $this->pickGroupedPacks(
-            $subject->groups->where('is_forming', true)->where('question', '!=', null)
-        );
+        $groupsWithQuestion = $subject->groups->where('is_forming', true)->where('question', '!=', null);
+        
+        // Оптимизация: предзагружаем счетчики заданий для всех групп ОДНИМ запросом
+        if ($groupsWithQuestion->isNotEmpty()) {
+            $groupIds = $groupsWithQuestion->pluck('id')->all();
+            $taskCounts = \DB::table('tasks')
+                ->selectRaw('mark, COUNT(*) as count')
+                ->whereIn('mark', $groupIds)
+                ->where('subject_id', $subject->subject_id)
+                ->groupBy('mark')
+                ->pluck('count', 'mark');
+            
+            // Добавляем счетчики к группам как атрибут
+            $groupsWithQuestion->each(function ($group) use ($taskCounts) {
+                $group->_tasks_count_cache = $taskCounts[$group->id] ?? 0;
+            });
+        }
+        
+        $groupedPacks = $this->pickGroupedPacks($groupsWithQuestion);
         $packTitles = $groupedPacks->map(function ($group) {
             return (string) $group->formatted_title;
         })->filter()->unique();
@@ -149,14 +166,20 @@ class TaskExportController extends Controller
 
         $subjectKey = $subject->subject_id;
         $shared = $this->sharedMarkIdsForSubject($subject);
+        
+        // Оптимизация: загружаем все задания для всех групп ОДНИМ запросом
+        $groupIds = $groups->pluck('id')->all();
+        $allTasksByGroup = Task::whereIn('mark', $groupIds)
+            ->where('subject_id', $subjectKey)
+            ->with('group')
+            ->get()
+            ->groupBy('mark');
+        
+        // Выбираем закрепленные задания для синхронизированных групп
         $pinned = [];
         foreach ($shared as $markId) {
-            $g = $groups->firstWhere('id', $markId);
-            if ($g) {
-                $t = $g->tasks()->where('subject_id', $subjectKey)->with('group')->inRandomOrder()->first();
-                if ($t) {
-                    $pinned[$markId] = $t->id;
-                }
+            if (isset($allTasksByGroup[$markId]) && $allTasksByGroup[$markId]->isNotEmpty()) {
+                $pinned[$markId] = $allTasksByGroup[$markId]->random()->id;
             }
         }
 
@@ -164,31 +187,28 @@ class TaskExportController extends Controller
         $usedTaskIds = [];
         
         for ($v = 0; $v < $variantCount; $v++) {
-            $tasks = $groups->map(function ($group) use ($subjectKey, $pinned, &$usedTaskIds, $v) {
+            $tasks = $groups->map(function ($group) use ($subjectKey, $pinned, &$usedTaskIds, $allTasksByGroup) {
+                // Используем закрепленное задание для синхронизированных групп
                 if (isset($pinned[$group->id])) {
                     return Task::with('group')->find($pinned[$group->id]);
                 }
 
-                // Избегаем повторов: выбираем задания, которых ещё не было в предыдущих вариантах
-                $query = $group->tasks()
-                    ->where('subject_id', $subjectKey)
-                    ->with('group');
-                
-                if (!empty($usedTaskIds)) {
-                    $query->whereNotIn('id', $usedTaskIds);
+                // Получаем задания для текущей группы из предзагруженных
+                $groupTasks = $allTasksByGroup[$group->id] ?? collect();
+                if ($groupTasks->isEmpty()) {
+                    return null;
                 }
                 
-                // Принудительно сбрасываем возможное кеширование
-                $task = $query->inRandomOrder()->first();
+                // Фильтруем неиспользованные задания
+                $availableTasks = $groupTasks->whereNotIn('id', $usedTaskIds);
                 
-                // Если не нашли новое задание (все уже использованы), берём любое
-                if (!$task) {
-                    $task = $group->tasks()
-                        ->where('subject_id', $subjectKey)
-                        ->with('group')
-                        ->inRandomOrder()
-                        ->first();
+                // Если все задания использованы, берём из всех
+                if ($availableTasks->isEmpty()) {
+                    $availableTasks = $groupTasks;
                 }
+                
+                // Выбираем случайное задание
+                $task = $availableTasks->random();
                 
                 if ($task) {
                     $usedTaskIds[] = $task->id;
@@ -231,35 +251,41 @@ class TaskExportController extends Controller
         $shared = $this->sharedMarkIdsForSubject($subject);
         $byMark = $firstVariantTasks->keyBy('mark');
         
+        // Оптимизация: загружаем все задания для всех групп ОДНИМ запросом
+        $groupIds = $groups->pluck('id')->all();
+        $allTasksByGroup = Task::whereIn('mark', $groupIds)
+            ->where('subject_id', $subjectKey)
+            ->with('group')
+            ->get()
+            ->groupBy('mark');
+        
         $usedTaskIds = $firstVariantTasks->pluck('id')->all();
 
         $out = [];
         for ($i = 0; $i < $extraCount; $i++) {
-            $tasks = $groups->map(function ($group) use ($subjectKey, $shared, $byMark, &$usedTaskIds) {
+            $tasks = $groups->map(function ($group) use ($subjectKey, $shared, $byMark, &$usedTaskIds, $allTasksByGroup) {
+                // Используем закрепленное задание для синхронизированных групп
                 if (in_array((int) $group->id, $shared, true)) {
                     $t = $byMark->get($group->id);
                     return $t ? Task::with('group')->find($t->id) : null;
                 }
 
-                // Избегаем повторов с предыдущими вариантами
-                $query = $group->tasks()
-                    ->where('subject_id', $subjectKey)
-                    ->with('group');
-                
-                if (!empty($usedTaskIds)) {
-                    $query->whereNotIn('id', $usedTaskIds);
+                // Получаем задания для текущей группы из предзагруженных
+                $groupTasks = $allTasksByGroup[$group->id] ?? collect();
+                if ($groupTasks->isEmpty()) {
+                    return null;
                 }
                 
-                $task = $query->inRandomOrder()->first();
+                // Фильтруем неиспользованные задания
+                $availableTasks = $groupTasks->whereNotIn('id', $usedTaskIds);
                 
-                // Если не нашли новое задание, берём любое
-                if (!$task) {
-                    $task = $group->tasks()
-                        ->where('subject_id', $subjectKey)
-                        ->with('group')
-                        ->inRandomOrder()
-                        ->first();
+                // Если все задания использованы, берём из всех
+                if ($availableTasks->isEmpty()) {
+                    $availableTasks = $groupTasks;
                 }
+                
+                // Выбираем случайное задание
+                $task = $availableTasks->random();
                 
                 if ($task) {
                     $usedTaskIds[] = $task->id;
