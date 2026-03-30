@@ -9,6 +9,7 @@ const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
 const passwordConfirm = ref('');
+const successMessage = ref('');
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,10 +24,17 @@ const onRegister = async () => {
         return;
     }
 
-    await authStore.register({
+    authStore.errors = null;
+    successMessage.value = '';
+
+    const response = await authStore.register({
         email: email.value,
         password: password.value
     });
+
+    if (response && response.status === 201) {
+        successMessage.value = 'Вы успешно зарегистрированы! Проверьте вашу почту и подтвердите email по ссылке из письма.';
+    }
 };
 
 const errorMessages = computed(() => {
@@ -72,6 +80,11 @@ const errorMessages = computed(() => {
                             />
                         </div>
                         <button class="signin_main_rect_button" id="registerBtn" @click="onRegister">Зарегистрироваться</button>
+                        
+                        <div v-if="successMessage" class="signin_success_message">
+                            {{ successMessage }}
+                        </div>
+                        
                         <div v-if="errorMessages.length" class="signin_main_rect_errors" style="margin-top: 12px; color: #ff4d4f;">
                             <ul>
                                 <li v-for="(msg, idx) in errorMessages" :key="idx">{{ msg }}</li>
