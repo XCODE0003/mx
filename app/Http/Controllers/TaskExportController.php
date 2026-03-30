@@ -18,8 +18,8 @@ class TaskExportController extends Controller
 {
     /**
      * Берем по одной случайной "пачке" для каждого набора номеров заданий.
-     * Если для одного стартового номера есть несколько вариантов пачек,
-     * выбираем самую длинную (например, 23-27 вместо одиночной 23).
+     * Для тематических наборов (задания 1-5 с общим question) выбирается один полный набор.
+     * Для остальных: выбираем самую длинную пачку (например, 23-27 вместо одиночной 23).
      * При равной длине берется случайная.
      */
     private function pickGroupedPacks($groupsWithQuestion)
@@ -29,7 +29,22 @@ class TaskExportController extends Controller
         }
 
         $packsByQuestion = $groupsWithQuestion->groupBy('question');
+        
+        // Проверяем, является ли это тематическим набором (задания 1-5 с одинаковым question)
+        $isThematicSet = $packsByQuestion->first()->filter(function ($group) {
+            $title = (string) $group->formatted_title;
+            return in_array($title, ['1', '2', '3', '4', '5']);
+        })->count() >= 5;
+        
+        // Если это тематический набор (например, ОГЭ Математика задания 1-5),
+        // выбираем случайно один полный набор
+        if ($isThematicSet) {
+            // Выбираем случайный набор (один question с заданиями 1-5)
+            $randomSet = $packsByQuestion->random();
+            return $randomSet;
+        }
 
+        // Для обычных пачек (не тематические наборы) - старая логика
         $packsByRangeSignature = $packsByQuestion->groupBy(function ($pack) {
             $titles = $pack
                 ->map(function ($group) {
