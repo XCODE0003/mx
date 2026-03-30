@@ -202,6 +202,10 @@ class GenerateTaskBundle implements ShouldQueue
             // Для первого варианта добавляем общие файлы (аудио изложения) в корень архива
             if ($index === 0 && $multi && !empty($sharedTaskIds)) {
                 $sharedTasks = $tasks->filter(fn($t) => in_array($t->id, $sharedTaskIds, true));
+                Log::info('Adding shared files', [
+                    'shared_task_ids' => $sharedTaskIds,
+                    'shared_tasks_count' => $sharedTasks->count(),
+                ]);
                 if ($sharedTasks->isNotEmpty()) {
                     $this->collectAdditionalTaskFilesForZip($zipEntries, $sharedTasks, 'Общие файлы/');
                 }
@@ -211,6 +215,15 @@ class GenerateTaskBundle implements ShouldQueue
             $individualTasks = $multi && !empty($sharedTaskIds) 
                 ? $tasks->filter(fn($t) => !in_array($t->id, $sharedTaskIds, true))
                 : $tasks;
+            
+            Log::info('Adding individual files for variant', [
+                'variant_index' => $index,
+                'multi' => $multi,
+                'total_tasks' => $tasks->count(),
+                'individual_tasks' => $individualTasks->count(),
+                'shared_task_ids' => $sharedTaskIds,
+                'prefix' => $multi ? $folderLabel.'/Дополнительные файлы/' : 'Дополнительные файлы/',
+            ]);
             
             if ($individualTasks->isNotEmpty()) {
                 $this->collectAdditionalTaskFilesForZip($zipEntries, $individualTasks, $multi ? $folderLabel.'/Дополнительные файлы/' : 'Дополнительные файлы/');
@@ -255,30 +268,53 @@ class GenerateTaskBundle implements ShouldQueue
     {
         $addedPaths = [];
         $audioIndex = 0;
+        
+        Log::info('collectAdditionalTaskFilesForZip called', [
+            'tasks_count' => $tasks->count(),
+            'zip_folder_prefix' => $zipFolderPrefix,
+        ]);
 
         foreach ($tasks as $task) {
+            Log::info('Processing task', [
+                'task_id' => $task->id,
+                'mark' => $task->mark,
+                'has_additional_files' => (bool) $task->additional_files,
+                'additional_files' => $task->additional_files,
+            ]);
+            
             if (! $task->additional_files) {
                 continue;
             }
 
             try {
-                $decoded = json_decode($task->additional_files, true);
-                if (! is_array($decoded)) {
+                // Если уже массив (благодаря cast в модели), используем напрямую
+                $files = is_array($task->additional_files) 
+                    ? $task->additional_files 
+                    : json_decode($task->additional_files, true);
+                    
+                if (! is_array($files)) {
+                    Log::warning('additional_files is not array', [
+                        'task_id' => $task->id,
+                        'type' => gettype($task->additional_files),
+                    ]);
                     continue;
                 }
 
-                foreach ($decoded as $filePath) {
+                foreach ($files as $filePath) {
                     if (in_array($filePath, $addedPaths, true)) {
+                        Log::info('Skipping already added file', ['path' => $filePath]);
                         continue;
                     }
 
                     $path = ltrim((string) $filePath, '/');
                     if (! str_starts_with($path, 'files/')) {
+                        Log::warning('File path does not start with files/', ['path' => $path]);
                         continue;
                     }
 
                     $fullPath = public_path($path);
                     if (! is_file($fullPath)) {
+                        Log::warning('File does not exist', ['full_path' => $fullPath]);
                         continue;
                     }
 
@@ -290,6 +326,12 @@ class GenerateTaskBundle implements ShouldQueue
                         $zipName = $zipFolderPrefix.basename($path);
                     }
 
+                    Log::info('Adding file to ZIP', [
+                        'task_id' => $task->id,
+                        'full_path' => $fullPath,
+                        'zip_name' => $zipName,
+                    ]);
+                    
                     $zipEntries[] = ['full' => $fullPath, 'zip' => str_replace('\\', '/', $zipName)];
                     $addedPaths[] = $filePath;
                 }
