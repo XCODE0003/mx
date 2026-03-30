@@ -3,10 +3,14 @@ import MainLayout from '../../Layouts/MainLayout.vue';
 import PasswordInput from '../../Components/PasswordInput.vue';
 import { ref, computed } from 'vue';
 import { useAuthStore } from '../../stores/authStore';
+import { usePage } from '@inertiajs/vue3';
 
+const page = usePage();
 const authStore = useAuthStore();
 const email = ref('');
 const password = ref('');
+
+const statusMessage = computed(() => page.props.flash?.status || null);
 
 const onLogin = async () => {
     await authStore.login({
@@ -77,6 +81,11 @@ const errorMessages = computed(() => {
                                 </div>
 
                                 <a href="/forgot-password" class="signin_main_rect_help">Забыли пароль?</a>
+
+                                <div v-if="statusMessage" class="signin_success_message">
+                                    {{ statusMessage }}
+                                </div>
+
                                 <button class="signin_main_rect_button" @click="onLogin">Войти</button>
 
                                 <div v-if="errorMessages.length" class="signin_main_rect_errors">
@@ -90,13 +99,10 @@ const errorMessages = computed(() => {
                                 </div>
 
                                 <div class="signin_main_rect_socials">
-                                    <a href="#!" class="signin_social_btn">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 50 50" fill="none">
-                                            <rect width="50" height="50" rx="25" fill="#005FF9" />
-                                            <path d="M29.5118 25C29.5118 27.4879 27.4879 29.5118 25 29.5118C22.5121 29.5118 20.4882 27.4879 20.4882 25C20.4882 22.5121 22.5121 20.4882 25 20.4882C27.4879 20.4882 29.5118 22.5121 29.5118 25ZM25 10C16.7286 10 10 16.7286 10 25C10 33.2714 16.7286 40 25 40C28.03 40 30.9518 39.0979 33.4493 37.3911L33.4921 37.3611L31.4714 35.0125L31.4371 35.0339C29.515 36.2714 27.2886 36.925 25 36.925C18.4246 36.925 13.075 31.5754 13.075 25C13.075 18.4246 18.4246 13.075 25 13.075C31.5754 13.075 36.925 18.4246 36.925 25C36.925 25.8518 36.8296 26.7143 36.6443 27.5629C36.2671 29.1111 35.1829 29.5846 34.3696 29.5225C33.5511 29.4561 32.5932 28.8732 32.5868 27.4461V26.3586V25C32.5868 20.8161 29.1839 17.4132 25 17.4132C20.8161 17.4132 17.4132 20.8161 17.4132 25C17.4132 29.1839 20.8161 32.5868 25 32.5868C27.0325 32.5868 28.9386 31.7929 30.3754 30.3475C31.2111 31.6482 32.5729 32.4636 34.1232 32.5879C34.2561 32.5986 34.3921 32.6039 34.5261 32.6039C35.6179 32.6039 36.6989 32.2386 37.5711 31.5775C38.47 30.8939 39.1418 29.9071 39.5125 28.7211C39.5714 28.5293 39.6807 28.0911 39.6807 28.0879L39.6839 28.0718C39.9025 27.1204 40 26.1721 40 25C40 16.7286 33.2714 10 25 10Z" fill="#FF9620" />
-                                        </svg>
+                                    <a href="/auth/yandex" class="signin_social_btn">
+                                        <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.04 12c0-5.523 4.476-10 10-10 5.522 0 10 4.477 10 10s-4.478 10-10 10c-5.524 0-10-4.477-10-10z" fill="#FC3F1D"/><path d="M13.32 7.666h-.924c-1.694 0-2.585.858-2.585 2.123 0 1.43.616 2.1 1.881 2.959l1.045.704-3.003 4.487H7.49l2.695-4.014c-1.55-1.111-2.42-2.19-2.42-4.015 0-2.288 1.595-3.85 4.62-3.85h3.003v11.868H13.32V7.666z" fill="#fff"/></svg>
                                     </a>
-                                    <a href="#!" class="signin_social_btn">
+                                    <!-- <a href="#!" class="signin_social_btn">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 50 50" fill="none">
                                             <rect width="50" height="50" rx="25" fill="#EE8208" />
                                             <path d="M25.4858 12.0659C21.8959 12.0659 18.9858 14.9761 18.9858 18.5658C18.9858 22.1556 21.8959 25.0659 25.4858 25.0659C29.0757 25.0659 31.9858 22.1556 31.9858 18.5658C31.9858 14.9761 29.0757 12.0659 25.4858 12.0659ZM25.4858 21.2529C24.0019 21.2529 22.7989 20.0498 22.7989 18.5659C22.7989 17.082 24.0019 15.879 25.4858 15.879C26.9698 15.879 28.1728 17.082 28.1728 18.5659C28.1728 20.0498 26.9698 21.2529 25.4858 21.2529Z" fill="white" />
@@ -108,7 +114,7 @@ const errorMessages = computed(() => {
                                             <rect width="50" height="50" rx="12" fill="#FC3F1D" />
                                             <path d="M27.4 25.5L33 16H29.2L25 22.9L20.8 16H17L22.6 25.5L16.5 36H20.3L25 28.4L29.7 36H33.5L27.4 25.5Z" fill="white" />
                                         </svg>
-                                    </a>
+                                    </a> -->
                                 </div>
 
                                 <p class="signin_register_wrap">

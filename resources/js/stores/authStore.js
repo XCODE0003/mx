@@ -44,15 +44,12 @@ export const useAuthStore = defineStore('auth', {
 
                 const response = await axiosClient.post('/register', credentials);
 
-                if (response.status === 201) {
-                    router.visit('/login');
-                }
-
                 return response;
             } catch (error) {
                 this.errors = error.response?.data?.errors || error.response?.data || {
                     message: 'Registration failed'
                 };
+                return null;
             } finally {
                 this.loading = false;
             }

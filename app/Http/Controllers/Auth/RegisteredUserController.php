@@ -41,8 +41,10 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
+        event(new Registered($user));
+
         return response()->json([
-            'message' => 'Registered successfully',
+            'message' => 'Registered successfully. Please check your email to verify your account.',
         ], 201);
     }
 }

@@ -16,7 +16,7 @@ class PasswordResetLinkController extends Controller
      */
     public function create(Request $request): Response
     {
-        return Inertia::render('auth/ForgotPassword', [
+        return Inertia::render('Auth/ForgotPassword', [
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -32,10 +32,15 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
 
-        Password::sendResetLink(
+        $status = Password::sendResetLink(
             $request->only('email')
         );
 
-        return back()->with('status', __('A reset link will be sent if the account exists.'));
+        if ($status == Password::RESET_LINK_SENT) {
+            return back()->with('status', 'Ссылка для восстановления пароля отправлена на вашу почту!');
+        }
+
+        return back()->withInput($request->only('email'))
+            ->withErrors(['email' => 'Не удалось отправить ссылку. Проверьте правильность email.']);
     }
 }

@@ -16,7 +16,12 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.post(route('password.store'));
+    form.post(route('password.store'), {
+        onSuccess: () => {
+            // Редирект на login с сообщением об успехе происходит на backend
+        },
+        preserveScroll: true,
+    });
 };
 </script>
 

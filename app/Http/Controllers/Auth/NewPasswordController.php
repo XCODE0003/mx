@@ -19,7 +19,7 @@ class NewPasswordController extends Controller
 
     public function create(Request $request): Response
     {
-        return Inertia::render('auth/ResetPassword', [
+        return Inertia::render('Auth/ResetPassword', [
             'email' => $request->email,
             'token' => $request->route('token'),
         ]);
@@ -31,11 +31,14 @@ class NewPasswordController extends Controller
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ], [
+            'password.required' => 'Укажите новый пароль',
+            'password.confirmed' => 'Пароли не совпадают',
+            'password.min' => 'Пароль должен содержать минимум 8 символов',
+            'email.required' => 'Укажите email',
+            'email.email' => 'Некорректный email',
         ]);
-
-
-
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
@@ -49,15 +52,23 @@ class NewPasswordController extends Controller
             }
         );
 
-
-
-
-        if ($status == Password::PasswordReset) {
-            return to_route('login')->with('status', __($status));
+        if ($status == Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', 'Пароль успешно изменён! Войдите с новым паролем.');
         }
 
-        throw ValidationException::withMessages([
-            'email' => [__($status)],
-        ]);
+        return back()->withInput($request->only('email'))
+            ->withErrors(['email' => $this->getResetErrorMessage($status)]);
+    }
+
+    /**
+     * Получить понятное сообщение об ошибке
+     */
+    private function getResetErrorMessage(string $status): string
+    {
+        return match($status) {
+            Password::INVALID_TOKEN => 'Ссылка недействительна или устарела. Запросите новую ссылку для сброса пароля.',
+            Password::INVALID_USER => 'Пользователь с таким email не найден.',
+            default => 'Не удалось сбросить пароль. Попробуйте ещё раз.',
+        };
     }
 }
