@@ -177,9 +177,29 @@ class TaskExportController extends Controller
         
         // Выбираем закрепленные задания для синхронизированных групп
         $pinned = [];
+        
+        // 1. Явно указанные в конфиге
         foreach ($shared as $markId) {
             if (isset($allTasksByGroup[$markId]) && $allTasksByGroup[$markId]->isNotEmpty()) {
                 $pinned[$markId] = $allTasksByGroup[$markId]->random()->id;
+            }
+        }
+        
+        // 2. Динамическая синхронизация: группы с question (тематические наборы) 
+        //    или группы с малым количеством заданий (<=3)
+        foreach ($groups as $group) {
+            if (!isset($pinned[$group->id])) {
+                $groupTasks = $allTasksByGroup[$group->id] ?? collect();
+                $taskCount = $groupTasks->count();
+                
+                // Синхронизируем если:
+                // - есть question (тематический набор, например ОГЭ Математика 1-5)
+                // - или мало заданий (<=3, например ЕГЭ Русский 23-27)
+                if ($group->question !== null || $taskCount <= 3) {
+                    if ($groupTasks->isNotEmpty()) {
+                        $pinned[$group->id] = $groupTasks->random()->id;
+                    }
+                }
             }
         }
 
@@ -259,13 +279,28 @@ class TaskExportController extends Controller
             ->get()
             ->groupBy('mark');
         
+        // Динамическая синхронизация: группы с question или малым количеством заданий
+        $shouldBeSynced = function($groupId) use ($groups, $shared, $allTasksByGroup) {
+            if (in_array((int) $groupId, $shared, true)) {
+                return true;
+            }
+            
+            $group = $groups->firstWhere('id', $groupId);
+            if (!$group) {
+                return false;
+            }
+            
+            $taskCount = ($allTasksByGroup[$groupId] ?? collect())->count();
+            return $group->question !== null || $taskCount <= 3;
+        };
+        
         $usedTaskIds = $firstVariantTasks->pluck('id')->all();
 
         $out = [];
         for ($i = 0; $i < $extraCount; $i++) {
-            $tasks = $groups->map(function ($group) use ($subjectKey, $shared, $byMark, &$usedTaskIds, $allTasksByGroup) {
-                // Используем закрепленное задание для синхронизированных групп
-                if (in_array((int) $group->id, $shared, true)) {
+            $tasks = $groups->map(function ($group) use ($byMark, &$usedTaskIds, $allTasksByGroup, $shouldBeSynced) {
+                // Используем задание из первого варианта для синхронизированных групп
+                if ($shouldBeSynced($group->id)) {
                     $t = $byMark->get($group->id);
                     return $t ? Task::with('group')->find($t->id) : null;
                 }
