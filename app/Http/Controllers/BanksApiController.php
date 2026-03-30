@@ -37,9 +37,16 @@ class BanksApiController extends Controller
             return response()->json(['groups' => [], 'total' => 0]);
         }
 
+        // Оптимизированный запрос: используем один JOIN вместо N+1 запросов withCount
         $groups = Group::query()
-            ->where('subject_id', $subjectModel->subject_id)
-            ->withCount('tasks')
+            ->select('groups.*')
+            ->selectRaw('COUNT(tasks.id) as tasks_count')
+            ->where('groups.subject_id', $subjectModel->subject_id)
+            ->leftJoin('tasks', function ($join) use ($subjectModel) {
+                $join->on('tasks.mark', '=', 'groups.id')
+                     ->where('tasks.subject_id', '=', $subjectModel->subject_id);
+            })
+            ->groupBy('groups.id', 'groups.title', 'groups.subject_id', 'groups.question', 'groups.image', 'groups.created_at', 'groups.updated_at', 'groups.is_forming', 'groups.text_title')
             ->get()
             ->sort(function ($a, $b) {
                 $normalize = function ($s) {
