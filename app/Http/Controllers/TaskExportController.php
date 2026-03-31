@@ -604,6 +604,16 @@ class TaskExportController extends Controller
         $order->refresh();
         $order->forceFill(['file_url' => $order->download_url])->saveQuietly();
 
+        Log::info('Order created', [
+            'order_id' => $order->id,
+            'uuid' => $order->uuid,
+            'created_at' => $order->created_at,
+            'user_id' => $user?->id,
+            'subject_id' => $subject->id,
+            'class_name' => $subject->class_name,
+            'variant_count' => count($variants),
+        ]);
+
         GenerateTaskBundle::dispatch(
             $baseTask->id,
             $firstIds,
@@ -618,8 +628,11 @@ class TaskExportController extends Controller
             'data' => [
                 'variant_uuid' => $order->uuid,
                 'download_url' => $order->download_url,
+                'created_at' => $order->created_at->toIso8601String(),
             ],
-        ]);
+        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+          ->header('Pragma', 'no-cache')
+          ->header('Expires', '0');
     }
 
     public function checkReadyAuto($taskId, $file)
