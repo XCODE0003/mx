@@ -80,27 +80,38 @@ onUnmounted(() => {
         <p class="footer_brand_subtitle">
         Конструктор тренировочных вариантов
     </p>
+        <p class="footer_brand_mobile">
+    <span class="brand-highlight">KИМ 365</span> — конструктор тренировочных вариантов
+  </p>
 </div>
       <nav class="footer_blocks" aria-label="Нижнее меню">
         <div class="footer_block">
-          <p class="footer_block_title">О проекте</p>
+          <p class="footer_block_title">О проекте:</p>
           <ul class="footer_block_list">
             <li><Link href="/about" class="footer_block_link">О сайте</Link></li>
-            <li><Link href="/profile/constructor" class="footer_block_link">Конструктор вариантов</Link></li>
             <li><Link href="/reviews" class="footer_block_link">Отзывы</Link></li>
+            <li><Link href="/news" class="footer_block_link">Новости</Link></li>
+            <li><Link href="/faq" class="footer_block_link">FAQ</Link></li>
           </ul>
         </div>
         <div class="footer_block">
-          <p class="footer_block_title">Документы</p>
+          <p class="footer_block_title">Документы:</p>
           <ul class="footer_block_list">
             <li><Link href="/contacts" class="footer_block_link">Контакты</Link></li>
             <li><Link href="/policy" class="footer_block_link">Политика конфиденциальности</Link></li>
           </ul>
         </div>
+        <div class="footer_block">
+          <p class="footer_block_title">Сервис:</p>
+          <ul class="footer_block_list">
+            <li><Link href="/profile/constructor" class="footer_block_link">Конструктор вариантов</Link></li>
+            <li><Link href="/banks" class="footer_block_link">Банк заданий</Link></li>
+          </ul>
+        </div>
       </nav>
     </div>
 
-    <div class="footer_disclaimer" style="text-align: center; margin: auto;">
+    <div class="footer_disclaimer">
       <p style="text-align: center; margin: auto;">Сайт является информационным ресурсом и не относится к официальным источникам экзаменационных материалов. Задания формируются на основе данных из открытых источников, включая материалы Министерства образования Российской Федерации и ФИПИ. Официальные контрольные измерительные материалы, используемые при проведении государственной итоговой аттестации, на сайте <b>не размещаются и не предоставляются</b>.</p>
     </div>
 
@@ -126,6 +137,16 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.brand-highlight {
+  color: #8F70FF;
+  font-weight: 700;
+  display: inline;
+}
+
+.footer_brand_mobile {
+  display: none;
+}
+
 .footer_col--brand {
   display: flex;
   flex-direction: column;
@@ -180,6 +201,63 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .footer_items {
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 0 20px;
+  }
+
+  .footer_logo_desktop,
+  .footer_brand_subtitle_desktop {
+    display: none;
+  }
+
+  .footer_brand_mobile {
+    display: block;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: #393c5b;
+    max-width: 260px;
+  }
+
+  .footer_blocks {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .footer_block_title {
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .footer_block_list li + li {
+    margin-top: 8px;
+  }
+
+  .footer_block_link {
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .footer_disclaimer {
+    padding: 20px 0;
+    margin-top: 4px;
+  }
+
+  .footer_disclaimer p {
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 100%;
+  }
+
+  .footer_copyright {
+    padding: 16px 0 80px;
+  }
+
   .scroll-to-top-btn {
     bottom: 20px;
     right: 20px;

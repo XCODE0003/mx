@@ -512,13 +512,56 @@ form[name="chkcodeform"] {
     padding: 25px;
 }
 
+.home_create_subtitle {
+    margin-top: 12px;
+    margin-bottom: 20px;
+    color: #6f7285;
+    line-height: 1.5;
+    max-width: 420px;
+}
+
+.home_create_arrow {
+    margin: 16px 0;
+    font-size: 24px;
+    opacity: 0.6;
+}
+
+.home_create_features {
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.home_create_features p {
+    margin: 0;
+    padding-left: 18px;
+    position: relative;
+}
+
+.home_create_features p::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #8f70ff;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    top: 8px;
+}
+
 .home_create_tittle {
-    color: #393c5b;
+    color: #6f7285;
     font-family: "Poppins", sans-serif;
     font-size: 26px;
     font-style: normal;
     font-weight: 700;
-    line-height: 120%;
+    line-height: 1.5;
+    max-width: 420px;
+}
+
+.home_create_mobile_button {
+    display: none;
 }
 
 .home_create_settings {
@@ -618,27 +661,30 @@ form[name="chkcodeform"] {
 }
 
 .home_create_block_button {
-    width: 100%;
+    width: fit-content;
+    min-width: 260px;
     height: auto;
     outline: none;
     border: none;
     cursor: pointer;
-    transition: all 0.5s;
+    transition: all 0.3s;
     color: #fff;
     text-align: center;
-    font-family: "SF Pro Display", sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 18px;
-    padding: 15px;
+    padding: 15px 28px;
     font-style: normal;
     font-weight: 500;
     line-height: normal;
     border-radius: 64px;
     background: #8f70ff;
-    margin-top: 30px;
+    margin-top: 24px;
+    box-shadow: 0 8px 20px rgba(143, 112, 255, 0.25);
 }
 
 .home_create_block_button:hover {
-    transform: scale(1.05);
+    background: #7c5cff;
+    transform: translateY(-1px);
 }
 
 .home_create_block_bottom {
@@ -1045,6 +1091,7 @@ footer,
     width: 100%;
     flex-shrink: 0;
     margin-top: auto;
+    border-top: 1px solid rgba(57, 60, 91, 0.08);
     background: #fff;
 }
 
@@ -1091,15 +1138,16 @@ footer,
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;
-    text-transform: uppercase;
+    text-transform: None;
     line-height: 1.2;
+    margin-bottom: 10px;
 }
 
 .footer_block_list {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
     margin: 0;
     padding: 0;
     opacity: 0.6;
@@ -1121,7 +1169,7 @@ footer,
 }
 
 .footer_disclaimer {
-    margin-top: 48px;
+    margin-top: 0;
     padding-top: 32px;
     border-top: 1px solid rgba(57, 60, 91, 0.1);
 }
@@ -3567,7 +3615,7 @@ table.profile_history_tabble_main th {
     }
 
     .intro {
-        margin-top: 100px;
+        margin-top: 160px;
     }
 
     .intro_block_tittle {
@@ -4106,7 +4154,7 @@ table.profile_history_tabble_main th {
     }
 
     .intro {
-        margin-top: 100px;
+        margin-top: 160px;
     }
 
     .intro_block:last-child {
@@ -4583,7 +4631,7 @@ table.profile_history_tabble_main th {
     }
 
     .intro {
-        margin-top: 120px;
+        margin-top: 160px;
     }
 
     .intro_block_button {
@@ -4965,6 +5013,7 @@ table.profile_history_tabble_main th {
         margin-bottom: 40px;
         margin-top: 12px;
     }
+
     .home_create_mobile_hint_title {
     color: #393c5b;
     font-family: "Poppins", sans-serif;
@@ -4985,13 +5034,34 @@ table.profile_history_tabble_main th {
     margin: 0;
 }
 
+.home_create_mobile_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 64px;
+    background: #8f70ff;
+    color: #fff;
+    text-align: center;
+    font-family: "SF Pro Display", sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1;
+    text-decoration: none;
+    border: none;
+}
+
+
+}
+
 .home_create_video_card {
     background: #ffffff;
     border-radius: 24px;
     padding: 20px 16px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }    
-}
 
 .overlay_no_subscribe {
     width: 100%;
