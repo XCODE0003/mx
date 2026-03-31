@@ -65,19 +65,48 @@ const errorMessages = computed(() => {
                     <div class="signin_main_rect_content">
                         <h1 class="signin_main_rect_tittle">Регистация</h1>
                         <div class="signin_main_rect_inputs">
-                            <input v-model="email" type="email" placeholder="Введите почту" class="signin_main_rect_input" autocomplete="username">
-                            <PasswordInput
-                                v-model="password"
-                                placeholder="Введите пароль"
-                                input-class="signin_main_rect_input"
-                                autocomplete="new-password"
-                            />
-                            <PasswordInput
-                                v-model="passwordConfirm"
-                                placeholder="Повторите пароль"
-                                input-class="signin_main_rect_input"
-                                autocomplete="new-password"
-                            />
+                            <!-- Email -->
+                            <div class="signin_field">
+                                <label class="signin_field_label">Email</label>
+                                <div class="signin_input_wrap">
+                                    <svg class="signin_input_icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                    </svg>
+                                    <input v-model="email" type="email" placeholder="Введите ваш email" class="signin_main_rect_input signin_input_with_icon" autocomplete="username">
+                                </div>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="signin_field">
+                                <label class="signin_field_label">Пароль</label>
+                                <div class="signin_input_wrap">
+                                    <svg class="signin_input_icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                    </svg>
+                                    <PasswordInput
+                                        v-model="password"
+                                        placeholder="Введите пароль"
+                                        input-class="signin_main_rect_input signin_input_with_icon"
+                                        autocomplete="new-password"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Password Confirmation -->
+                            <div class="signin_field">
+                                <label class="signin_field_label">Повторите пароль</label>
+                                <div class="signin_input_wrap">
+                                    <svg class="signin_input_icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                                    </svg>
+                                    <PasswordInput
+                                        v-model="passwordConfirm"
+                                        placeholder="Повторите пароль"
+                                        input-class="signin_main_rect_input signin_input_with_icon"
+                                        autocomplete="new-password"
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <button class="signin_main_rect_button" id="registerBtn" @click="onRegister">Зарегистрироваться</button>
                         
