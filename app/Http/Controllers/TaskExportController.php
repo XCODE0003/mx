@@ -30,13 +30,13 @@ class TaskExportController extends Controller
         }
 
         $packsByQuestion = $groupsWithQuestion->groupBy('question');
-        
+
         // Проверяем, является ли это тематическим набором (задания 1-5 с одинаковым question)
         $isThematicSet = $packsByQuestion->first()->filter(function ($group) {
             $title = (string) $group->formatted_title;
             return in_array($title, ['1', '2', '3', '4', '5']);
         })->count() >= 5;
-        
+
         // Если это тематический набор (например, ОГЭ Математика задания 1-5),
         // выбираем случайно один полный набор
         if ($isThematicSet) {
@@ -71,7 +71,7 @@ class TaskExportController extends Controller
                     ->filter()
                     ->unique()
                     ->count();
-                
+
                 // Используем предзагруженные счетчики заданий
                 $minTasksInGroup = $pack->map(function ($group) {
                     return $group->_tasks_count_cache ?? $group->tasks()->count();
@@ -89,7 +89,7 @@ class TaskExportController extends Controller
             $candidatesWithMaxSize = $packsWithMetrics->filter(function ($item) use ($maxSize) {
                 return $item['size'] === $maxSize;
             });
-            
+
             // Среди пакетов с максимальным размером выбираем те, у которых больше заданий
             $maxTasks = $candidatesWithMaxSize->max('min_tasks');
             $bestCandidates = $candidatesWithMaxSize->filter(function ($item) use ($maxTasks) {
@@ -112,7 +112,7 @@ class TaskExportController extends Controller
 
         $baseGroups = $subject->groups->where('is_forming', true)->where('question', '=', null);
         $groupsWithQuestion = $subject->groups->where('is_forming', true)->where('question', '!=', null);
-        
+
         // Оптимизация: предзагружаем счетчики заданий для всех групп ОДНИМ запросом
         if ($groupsWithQuestion->isNotEmpty()) {
             $groupIds = $groupsWithQuestion->pluck('id')->all();
@@ -122,13 +122,13 @@ class TaskExportController extends Controller
                 ->where('subject_id', $subject->subject_id)
                 ->groupBy('mark')
                 ->pluck('count', 'mark');
-            
+
             // Добавляем счетчики к группам как атрибут
             $groupsWithQuestion->each(function ($group) use ($taskCounts) {
                 $group->_tasks_count_cache = $taskCounts[$group->id] ?? 0;
             });
         }
-        
+
         $groupedPacks = $this->pickGroupedPacks($groupsWithQuestion);
         $packTitles = $groupedPacks->map(function ($group) {
             return (string) $group->formatted_title;
@@ -162,17 +162,17 @@ class TaskExportController extends Controller
         // Для каждого варианта нужно выбрать СВОЙ набор групп
         $variants = [];
         $firstBase = null;
-        
+
         $subjectKey = $subject->subject_id;
         $shared = $this->sharedMarkIdsForSubject($subject);
-        
+
         for ($v = 0; $v < $variantCount; $v++) {
             // Для каждого варианта формируем СВОЙ набор групп
             $groups = $this->formingGroupsCollection($subject);
             if ($groups->isEmpty()) {
                 continue;
             }
-            
+
             // Загружаем задания для этого набора групп
             $groupIds = $groups->pluck('id')->all();
             $allTasksByGroup = Task::whereIn('mark', $groupIds)
@@ -180,7 +180,7 @@ class TaskExportController extends Controller
                 ->with('group')
                 ->get()
                 ->groupBy('mark');
-            
+
             // Для первого варианта: выбираем закрепленные задания
             $pinned = [];
             if ($v === 0) {
@@ -199,7 +199,7 @@ class TaskExportController extends Controller
                     }
                 }
             }
-            
+
             $tasks = $groups->map(function ($group) use ($pinned, $allTasksByGroup) {
                 // Используем закрепленное задание для синхронизированных групп
                 if (isset($pinned[$group->id])) {
@@ -211,7 +211,7 @@ class TaskExportController extends Controller
                 if ($groupTasks->isEmpty()) {
                     return null;
                 }
-                
+
                 // Выбираем случайное задание
                 return $groupTasks->random();
             })->filter()->sortBy(function ($task) {
@@ -223,10 +223,10 @@ class TaskExportController extends Controller
             if ($tasks->isEmpty()) {
                 continue;
             }
-            
+
             $taskIds = $tasks->pluck('id')->all();
             $variants[] = $taskIds;
-            
+
             if ($v === 0) {
                 $firstBase = Task::with('group', 'subject')->find($taskIds[0] ?? null);
             }
@@ -257,7 +257,7 @@ class TaskExportController extends Controller
         $subjectKey = $subject->subject_id;
         $shared = $this->sharedMarkIdsForSubject($subject);
         $byMark = $firstVariantTasks->keyBy('mark');
-        
+
         // Оптимизация: загружаем все задания для всех групп ОДНИМ запросом
         $groupIds = $groups->pluck('id')->all();
         $allTasksByGroup = Task::whereIn('mark', $groupIds)
@@ -265,7 +265,7 @@ class TaskExportController extends Controller
             ->with('group')
             ->get()
             ->groupBy('mark');
-        
+
         $usedTaskIds = $firstVariantTasks->pluck('id')->all();
 
         $out = [];
@@ -282,22 +282,22 @@ class TaskExportController extends Controller
                 if ($groupTasks->isEmpty()) {
                     return null;
                 }
-                
+
                 // Фильтруем неиспользованные задания
                 $availableTasks = $groupTasks->whereNotIn('id', $usedTaskIds);
-                
+
                 // Если все задания использованы, берём из всех
                 if ($availableTasks->isEmpty()) {
                     $availableTasks = $groupTasks;
                 }
-                
+
                 // Выбираем случайное задание
                 $task = $availableTasks->random();
-                
+
                 if ($task) {
                     $usedTaskIds[] = $task->id;
                 }
-                
+
                 return $task;
             })->filter()->sortBy(function ($task) {
                 return (int) $task->group->formatted_title;
@@ -444,7 +444,7 @@ class TaskExportController extends Controller
 
         $extraVariants = $this->buildManualExtraVariants($subjectRow, $firstTasks, $variantCount - 1);
         $allVariants = array_merge([$firstIds], $extraVariants);
-        
+
         Log::info('Manual export prepared', [
             'variant_count_requested' => $variantCount,
             'all_variants_count' => count($allVariants),
@@ -577,14 +577,14 @@ class TaskExportController extends Controller
         }
 
         $firstIds = $variants[0];
-        
+
         Log::info('Auto export prepared', [
             'variant_count_requested' => $variantCount,
             'variants_generated' => count($variants),
             'subject_id' => $subject->subject_id,
             'class_name' => $subject->class_name,
         ]);
-        
+
         $baseName = $baseTask->subject?->class_name ?? ('subject_'.$baseTask->subject_id);
         $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'bundle';
         $zipName = $baseName.'.zip';
@@ -607,11 +607,11 @@ class TaskExportController extends Controller
         Log::info('Order created', [
             'order_id' => $order->id,
             'uuid' => $order->uuid,
-            'created_at' => $order->created_at,
-            'user_id' => $user?->id,
-            'subject_id' => $subject->id,
-            'class_name' => $subject->class_name,
+            'base_task_id' => $baseTask->id,
+            'subject_class' => $subject->class_name,
             'variant_count' => count($variants),
+            'user_id' => $user?->id,
+            'created_at' => $order->created_at,
         ]);
 
         GenerateTaskBundle::dispatch(
@@ -622,17 +622,19 @@ class TaskExportController extends Controller
             count($variants) > 1 ? $variants : null
         );
 
+        Log::info('Job dispatched', [
+            'order_uuid' => $order->uuid,
+            'job' => 'GenerateTaskBundle',
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Генерация запущена. Скачайте архив, когда он будет готов.',
             'data' => [
                 'variant_uuid' => $order->uuid,
                 'download_url' => $order->download_url,
-                'created_at' => $order->created_at->toIso8601String(),
             ],
-        ])->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-          ->header('Pragma', 'no-cache')
-          ->header('Expires', '0');
+        ]);
     }
 
     public function checkReadyAuto($taskId, $file)

@@ -55,6 +55,14 @@ class GenerateTaskBundle implements ShouldQueue
         @ini_set('max_execution_time', '600');
         @set_time_limit(600);
 
+        Log::info('=== GenerateTaskBundle JOB STARTED ===', [
+            'base_task_id' => $this->baseTaskId,
+            'variant_uuid' => $this->variantUuid,
+            'zip_file_name' => $this->zipFileName,
+            'task_ids_count' => count($this->taskIds),
+            'variants_count' => $this->variantsTaskIds ? count($this->variantsTaskIds) : null,
+        ]);
+
         $baseTask = Task::with('group', 'subject')->findOrFail($this->baseTaskId);
 
         $variants = $this->variantsTaskIds;
@@ -68,6 +76,7 @@ class GenerateTaskBundle implements ShouldQueue
             'variant_count' => count($variants),
             'multi' => $multi,
             'uuid' => $this->variantUuid,
+            'subject_class' => $baseTask->subject?->class_name,
         ]);
 
         $dir = $this->variantUuid
@@ -243,9 +252,18 @@ class GenerateTaskBundle implements ShouldQueue
                 $this->addSubjectAdditionalFilesToZip($zip, $baseTask->subject);
 
                 $zip->close();
+                
+                Log::info('=== GenerateTaskBundle JOB COMPLETED ===', [
+                    'variant_uuid' => $this->variantUuid,
+                    'zip_path' => $zipPath,
+                    'zip_exists' => is_file($zipPath),
+                    'zip_size' => is_file($zipPath) ? filesize($zipPath) : 0,
+                    'subject_class' => $baseTask->subject?->class_name,
+                ]);
             } catch (\Throwable $e) {
                 Log::error('Error while creating ZIP archive', [
                     'path' => $zipPath,
+                    'uuid' => $this->variantUuid,
                     'error' => $e->getMessage(),
                 ]);
 
@@ -256,7 +274,9 @@ class GenerateTaskBundle implements ShouldQueue
         } else {
             Log::error('Failed to open ZIP archive', [
                 'path' => $zipPath,
+                'uuid' => $this->variantUuid,
                 'error_code' => $result,
+                'error_message' => $this->getZipErrorMessage($result),
             ]);
         }
     }
