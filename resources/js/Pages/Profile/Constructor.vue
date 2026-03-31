@@ -31,11 +31,6 @@ function handleExportPdfAuto() {
     step.value = 'forming';
     taskStore.exportPdfAuto(selectedSubject.value, variantCount.value)
         .then(async (data) => {
-            console.log('📦 Order created:', {
-                uuid: data.data.variant_uuid,
-                created_at: data.data.created_at,
-                url: data.data.download_url,
-            });
             toast.success('Формирование началось. Ожидайте готовности.');
             downloadMeta.value = {
                 variantUuid: data.data.variant_uuid,
