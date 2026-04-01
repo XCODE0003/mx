@@ -374,7 +374,7 @@ class TaskExportController extends Controller
             'tasks' => $randomTasks,
             'group' => $task->group,
             'subject' => $task->subject,
-            'withAnswers' => ! $forBank,
+            'withAnswers' => false,
             'embedConstructorPreview' => true,
             'embedBankPreview' => $forBank,
             'embedTaskId' => $task->id,
