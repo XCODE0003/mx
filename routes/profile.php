@@ -99,6 +99,7 @@ Route::group(['prefix' => 'profile', 'middleware' => 'auth'], function () {
     })->name('profile.constructor.manual.tasks');
     Route::get('/subjects/{grade}', function ($grade) {
         $subjects = Subject::where('exam_type', $grade)
+            ->where('is_forming', true)
             ->whereHas('groups')
             ->orderBy('name', 'desc')
             ->get();

@@ -19,40 +19,6 @@ onMounted(() => {
         isVisible.value = true;
     }, 100);
 });
-
-function enter(el) {
-    el.style.height = '0px';
-    el.style.opacity = '0';
-    el.style.overflow = 'hidden';
-
-    requestAnimationFrame(() => {
-        el.style.transition = 'height 0.35s ease, opacity 0.25s ease';
-        el.style.height = el.scrollHeight + 'px';
-        el.style.opacity = '1';
-    });
-}
-
-function afterEnter(el) {
-    el.style.height = 'auto';
-    el.style.transition = '';
-}
-
-function leave(el) {
-    el.style.height = el.scrollHeight + 'px';
-    el.style.opacity = '1';
-    el.style.overflow = 'hidden';
-
-    requestAnimationFrame(() => {
-        el.style.transition = 'height 0.3s ease, opacity 0.2s ease';
-        el.style.height = '0px';
-        el.style.opacity = '0';
-    });
-}
-
-function afterLeave(el) {
-    el.style.transition = '';
-}
-
 </script>
 
 <template>
@@ -79,17 +45,12 @@ function afterLeave(el) {
                             </svg>
                         </p>
                     </div>
-                    <transition 
-                        name="slide-fade"
-                        @enter="enter"
-                        @after-enter="afterEnter"
-                        @leave="leave"
-                        @after-leave="afterLeave"
-                    >
-                        <div v-if="openIndex === index" class="home_faq_item_content">
+
+                    <div class="home_faq_item_body">
+                        <div class="home_faq_item_content">
                             <p class="home_faq_item_tittle_text">{{ item.text }}</p>
-                       </div>
-                    </transition>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -100,7 +61,7 @@ function afterLeave(el) {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -110,43 +71,37 @@ function afterLeave(el) {
 
 .fade-in-up {
   opacity: 0;
-  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInUp 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .delay-1 {
   animation-delay: 0.1s;
 }
 
-.slide-fade-enter-active,
-.slide-fade-leave-active {
-  overflow: hidden;
+/* Grid trick: анимирует высоту без JS и без layout-скачков */
+.home_faq_item_body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+  opacity: 0;
 }
 
-.home_faq_item_arrow {
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.home_faq_item_active .home_faq_item_arrow {
-  transform: rotate(180deg);
-}
-
-.home_faq_item {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.home_faq_item:hover {
-  transform: translateY(-2px);
-}
-
-.home_faq_item_active {
-  transform: translateY(0) !important;
-}
-
-.home_faq_item_header {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.home_faq_item_active .home_faq_item_body {
+  grid-template-rows: 1fr;
+  opacity: 1;
 }
 
 .home_faq_item_content {
   overflow: hidden;
+}
+
+/* Стрелка */
+.home_faq_item_arrow {
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home_faq_item_active .home_faq_item_arrow {
+  transform: rotate(180deg);
 }
 </style>
