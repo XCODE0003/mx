@@ -14,6 +14,7 @@ class BanksApiController extends Controller
     {
         $subjects = Subject::query()
             ->where('exam_type', $grade)
+            ->where('is_forming', true)
             ->whereHas('groups')
             ->orderByDesc('name')
             ->get();
