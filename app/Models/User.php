@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
@@ -71,6 +72,16 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function isSubscribe(): bool
     {
         return $this->subscribe()->where('subscribe_end_at', '>', now())->exists();
+    }
+
+    public function getRegistrationDiscount(): ?RegistrationDiscount
+    {
+        $registeredAt = Carbon::parse($this->created_at)->startOfDay();
+
+        return RegistrationDiscount::where('is_active', true)
+            ->whereDate('registration_from', '<=', $registeredAt)
+            ->whereDate('registration_to', '>=', $registeredAt)
+            ->first();
     }
 
     /**

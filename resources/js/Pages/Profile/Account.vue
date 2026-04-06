@@ -5,9 +5,12 @@ import { ref, computed } from 'vue';
 import axiosClient from '../../api/axios';
 import { useUserStore } from '../../stores/userStore';
 import Aside from '../../Components/Profile/Aside.vue';
+import { usePage } from '@inertiajs/vue3';
 
 const userStore = useUserStore();
 const currentUser = computed(() => userStore.currentUser);
+const page = usePage();
+const registrationDiscount = computed(() => page.props.auth?.registration_discount ?? null);
 
 const email = ref(currentUser.value?.email || '');
 
@@ -93,6 +96,18 @@ const onChangePassword = async () => {
                         </div>
 
                         <div class="profile_block">
+                            <div v-if="registrationDiscount" class="profile_block_rect profile_discount_block">
+                                <div class="profile_block_rect_content">
+                                    <div class="profile_discount">
+                                        <span class="profile_discount_badge">-{{ registrationDiscount.discount_percent }}%</span>
+                                        <div class="profile_discount_info">
+                                            <p class="profile_discount_title">Ваша скидка на подписку</p>
+                                            <p class="profile_discount_desc">Вы зарегистрировались в период акции и получаете скидку {{ registrationDiscount.discount_percent }}% при первой покупке подписки.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="profile_block_rect">
                                 <div class="profile_block_rect_content">
                                     <h3 class="profile_block_rect_tittle">Настройки аккаунта</h3>
@@ -169,3 +184,42 @@ const onChangePassword = async () => {
         </main>
     </MainLayout>
 </template>
+
+<style scoped>
+.profile_discount_block {
+    margin-bottom: 16px;
+}
+
+.profile_discount {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.profile_discount_badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #8f70ff;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.profile_discount_title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #393c5b;
+    margin-bottom: 4px;
+}
+
+.profile_discount_desc {
+    font-size: 14px;
+    color: #6b6e8e;
+    margin: 0;
+}
+</style>
