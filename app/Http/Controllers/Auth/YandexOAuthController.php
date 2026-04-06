@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ReferralLink;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,16 @@ class YandexOAuthController extends Controller
             $user = User::where('email', $yandexUser->getEmail())->first();
 
             if (!$user) {
+                $referralLinkId = null;
+                if (session()->has('referral_code')) {
+                    $referralLink = ReferralLink::where('code', session()->get('referral_code'))
+                        ->where('is_active', true)
+                        ->first();
+                    if ($referralLink) {
+                        $referralLinkId = $referralLink->id;
+                    }
+                }
+
                 // Создаём нового пользователя
                 $user = User::create([
                     'email' => $yandexUser->getEmail(),
@@ -38,6 +49,7 @@ class YandexOAuthController extends Controller
                     'password' => Hash::make(Str::random(24)),
                     'email_verified_at' => now(),
                     'yandex_id' => $yandexUser->getId(),
+                    'referral_link_id' => $referralLinkId,
                 ]);
             } else {
                 // Обновляем Yandex ID, если его нет

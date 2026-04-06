@@ -27,6 +27,7 @@ class Order extends Model
         'variants_task_ids',
         'zip_file_name',
         'user_id',
+        'referral_link_id',
         'file_url',
         'files_expire_at',
         'files_purged_at',
@@ -49,6 +50,11 @@ class Order extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class, 'subject_id', 'id');
+    }
+
+    public function referralLink(): BelongsTo
+    {
+        return $this->belongsTo(ReferralLink::class);
     }
 
     protected function casts(): array

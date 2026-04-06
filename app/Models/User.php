@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
@@ -28,6 +29,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'email',
         'password',
         'is_admin',
+        'referral_link_id',
     ];
 
     /**
@@ -67,6 +69,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function subscribe(): HasOne
     {
         return $this->hasOne(Subscribe::class);
+    }
+
+    public function referralLink(): BelongsTo
+    {
+        return $this->belongsTo(ReferralLink::class);
     }
 
     public function isSubscribe(): bool

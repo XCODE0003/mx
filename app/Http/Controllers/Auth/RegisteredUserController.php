@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\ReferralLink;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -36,9 +37,20 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'string', 'min:8'],
         ]);
 
+        $referralLinkId = null;
+        if ($request->session()->has('referral_code')) {
+            $referralLink = ReferralLink::where('code', $request->session()->get('referral_code'))
+                ->where('is_active', true)
+                ->first();
+            if ($referralLink) {
+                $referralLinkId = $referralLink->id;
+            }
+        }
+
         $user = User::create([
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'referral_link_id' => $referralLinkId,
         ]);
 
         event(new Registered($user));

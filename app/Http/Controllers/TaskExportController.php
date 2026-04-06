@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\GenerateTaskBundle;
 use App\Jobs\GenerateTaskPdf;
 use App\Models\Order;
+use App\Models\ReferralLink;
 use App\Models\Subject;
 use App\Models\Task;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -456,6 +457,16 @@ class TaskExportController extends Controller
         $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'bundle';
         $zipName = $baseName.'.zip';
 
+        $referralLinkId = null;
+        if ($request->session()->has('referral_code')) {
+            $referralLink = ReferralLink::where('code', $request->session()->get('referral_code'))
+                ->where('is_active', true)
+                ->first();
+            if ($referralLink) {
+                $referralLinkId = $referralLink->id;
+            }
+        }
+
         $order = Order::create([
             'subject_id' => $subjectRow->id,
             'base_task_id' => $baseTask->id,
@@ -464,6 +475,7 @@ class TaskExportController extends Controller
             'variants_task_ids' => count($allVariants) > 1 ? $allVariants : null,
             'zip_file_name' => $zipName,
             'user_id' => $user->id,
+            'referral_link_id' => $referralLinkId,
             'files_expire_at' => now()->addMinutes(Order::FILES_TTL_MINUTES),
             'files_purged_at' => null,
             'file_url' => '',
@@ -589,6 +601,16 @@ class TaskExportController extends Controller
         $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $baseName) ?: 'bundle';
         $zipName = $baseName.'.zip';
 
+        $referralLinkId = null;
+        if ($request->session()->has('referral_code')) {
+            $referralLink = ReferralLink::where('code', $request->session()->get('referral_code'))
+                ->where('is_active', true)
+                ->first();
+            if ($referralLink) {
+                $referralLinkId = $referralLink->id;
+            }
+        }
+
         $order = Order::create([
             'subject_id' => $subject->id,
             'base_task_id' => $baseTask->id,
@@ -597,6 +619,7 @@ class TaskExportController extends Controller
             'variants_task_ids' => count($variants) > 1 ? $variants : null,
             'zip_file_name' => $zipName,
             'user_id' => $user?->id,
+            'referral_link_id' => $referralLinkId,
             'files_expire_at' => now()->addMinutes(Order::FILES_TTL_MINUTES),
             'files_purged_at' => null,
             'file_url' => '',
