@@ -71,12 +71,19 @@ class ReferralLinkResource extends Resource
                     ->searchable()
                     ->copyable()
                     ->copyMessage('Код скопирован!')
-                    ->badge(),
+                    ->badge()
+                    ->color('primary'),
                 Tables\Columns\TextColumn::make('url')
-                    ->label('Ссылка')
+                    ->label('Реферальная ссылка')
                     ->copyable()
                     ->copyMessage('Ссылка скопирована!')
-                    ->limit(50),
+                    ->formatStateUsing(fn ($state) => $state)
+                    ->url(fn ($record) => $record->url)
+                    ->openUrlInNewTab()
+                    ->icon('heroicon-o-link')
+                    ->iconPosition('after')
+                    ->weight('medium')
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('clicks')
                     ->label('Клики')
                     ->numeric()
@@ -95,10 +102,6 @@ class ReferralLinkResource extends Resource
                     ->sortable()
                     ->badge()
                     ->color('warning'),
-                Tables\Columns\TextColumn::make('total_revenue')
-                    ->label('Выручка')
-                    ->money('RUB')
-                    ->sortable(),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Активна')
                     ->boolean(),

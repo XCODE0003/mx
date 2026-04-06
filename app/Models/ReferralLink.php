@@ -57,9 +57,4 @@ class ReferralLink extends Model
     {
         return $this->orders()->count();
     }
-
-    public function getTotalRevenueAttribute(): float
-    {
-        return $this->orders()->sum('price') ?? 0;
-    }
 }
