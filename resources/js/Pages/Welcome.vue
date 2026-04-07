@@ -15,6 +15,10 @@ const step = ref('start');
 const downloadMeta = ref({ variantUuid: null, url: null });
 let uiExpiryTimer = null;
 
+// Видео плеер
+const videoPlayer = ref(null);
+const isPlaying = ref(false);
+
 // Инициализируем анимации при скролле
 useScrollAnimation();
 
@@ -116,6 +120,18 @@ function fetchSubjects() {
         });
 }
 
+function toggleVideo() {
+    if (!videoPlayer.value) return;
+    
+    if (isPlaying.value) {
+        videoPlayer.value.pause();
+        isPlaying.value = false;
+    } else {
+        videoPlayer.value.play();
+        isPlaying.value = true;
+    }
+}
+
 function init() {
     grade.value = 'oge';
     fetchSubjects();
@@ -186,15 +202,24 @@ init();
                             </p>
                         </div>
 
-                            <div class="home_create_block_player">
+                            <div class="home_create_block_player" @click="toggleVideo">
                                 <video
-                                    controls
+                                    ref="videoPlayer"
                                     class="home_create_video"
                                     poster="/assets/img/intro_image.png"
+                                    @click.stop="toggleVideo"
+                                    @ended="isPlaying = false"
+                                    controlsList="nodownload nofullscreen noremoteplayback"
+                                    disablePictureInPicture
                                 >
                                     <source src="/assets/media.mp4" type="video/mp4">
                                     Ваш браузер не поддерживает воспроизведение видео.
                                 </video>
+                                <div v-if="!isPlaying" class="video_play_overlay" @click="toggleVideo">
+                                    <svg class="video_play_icon" xmlns="http://www.w3.org/2000/svg" width="51" height="64" viewBox="0 0 51 64" fill="none">
+                                        <path d="M48.149 26.9529C51.8229 29.3148 51.8229 34.6853 48.149 37.0471L9.24455 62.0571C5.25148 64.624 2.45083e-07 61.757 4.31437e-07 57.01L2.39508e-06 6.98999C2.58144e-06 2.243 5.25148 -0.624051 9.24455 1.94292L48.149 26.9529Z" fill="#D3D7FF" />
+                                    </svg>
+                                </div>
                             </div>
  <Link href="/profile/constructor" class="home_create_mobile_button">
         Сформировать вариант
@@ -217,24 +242,68 @@ init();
 
 
 <style scoped>
+.home_create_video_card {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
 .home_create_block_player {
-    min-height: 290px;
+    min-height: 450px;
+    position: relative;
+    cursor: pointer;
 }
 
 .home_create_video {
     width: 100%;
-    max-height: 290px;
     height: 100%;
+    min-height: 450px;
     object-fit: cover;
-    border-radius: 16px;
+    border-radius: 24px;
+    display: block;
+}
+
+.home_create_video::-webkit-media-controls {
+    display: none !important;
+}
+
+.home_create_video::-webkit-media-controls-enclosure {
+    display: none !important;
+}
+
+.video_play_overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
     cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 24px;
+    pointer-events: auto;
+}
+
+.video_play_overlay:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.video_play_icon {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s;
+}
+
+.video_play_overlay:hover .video_play_icon {
+    transform: scale(1.1);
 }
 
 @media (max-width: 768px) {
     .home_create_block_player {
         min-height: 300px;
     }
-
+    
     .home_create_video {
         min-height: 300px;
     }
