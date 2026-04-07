@@ -2,7 +2,7 @@
 import MainLayout from '../../Layouts/MainLayout.vue';
 import Aside from '../../Components/Profile/Aside.vue';
 import AnimatedSelect from '../../Components/UI/AnimatedSelect.vue';
-import { onMounted, watch, ref } from 'vue';
+import { watch, ref } from 'vue';
 import { useTaskStore } from '../../stores/taskStore';
 import { storeToRefs } from 'pinia';
 import { useToastStore } from '../../stores/toastStore';
@@ -13,7 +13,6 @@ const toast = useToastStore();
 const { grades, subjects, selectedGrade, selectedSubject } = storeToRefs(taskStore);
 const creating = ref(false);
 const step = ref('start');
-const ready = ref(false);
 const downloadMeta = ref({ variantUuid: null, url: null });
 
 const variantCount = ref(1);
@@ -22,14 +21,12 @@ const variantCountOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => ({
     value: String(n),
 }));
 
-onMounted(() => {
-    taskStore.getSubjects();
-});
-
 function handleExportPdfAuto() {
+    const count = parseInt(variantCount.value) || 1;
     creating.value = true;
     step.value = 'forming';
-    taskStore.exportPdfAuto(selectedSubject.value, variantCount.value)
+    downloadMeta.value = { variantUuid: null, url: null };
+    taskStore.exportPdfAuto(selectedSubject.value, count)
         .then(async (data) => {
             toast.success('Формирование началось. Ожидайте готовности.');
             downloadMeta.value = {
