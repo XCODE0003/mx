@@ -5064,6 +5064,7 @@ table.profile_history_tabble_main th {
     background: #ffffff;
     border-radius: 24px;
     padding: 20px 16px;
+    padding-bottom: 4px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
 

@@ -187,8 +187,8 @@ init();
                         </div>
 
                             <div class="home_create_block_player">
-                                <video 
-                                    controls 
+                                <video
+                                    controls
                                     class="home_create_video"
                                     poster="/assets/img/intro_image.png"
                                 >
@@ -218,13 +218,13 @@ init();
 
 <style scoped>
 .home_create_block_player {
-    min-height: 450px;
+    min-height: 290px;
 }
 
 .home_create_video {
     width: 100%;
+    max-height: 290px;
     height: 100%;
-    min-height: 450px;
     object-fit: cover;
     border-radius: 16px;
     cursor: pointer;
@@ -234,7 +234,7 @@ init();
     .home_create_block_player {
         min-height: 300px;
     }
-    
+
     .home_create_video {
         min-height: 300px;
     }
