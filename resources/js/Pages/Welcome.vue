@@ -126,7 +126,7 @@ function toggleVideo() {
     if (isMobile.value) {
         // На мобильных просто играем видео
         if (!videoPlayer.value) return;
-        
+
         if (isPlaying.value) {
             videoPlayer.value.pause();
         } else {
@@ -218,12 +218,12 @@ init();
                             </div>
 
                             <div class="home_create_block_player" @click="toggleVideo">
-                                <video 
+                                <video
                                     v-if="isMobile"
-                                    ref="videoPlayer" 
-                                    class="home_create_video" 
-                                    @play="isPlaying = true" 
-                                    @pause="isPlaying = false" 
+                                    ref="videoPlayer"
+                                    class="home_create_video"
+                                    @play="isPlaying = true"
+                                    @pause="isPlaying = false"
                                     @ended="isPlaying = false"
                                     controls
                                 >
@@ -262,9 +262,9 @@ init();
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
-                <video 
+                <video
                     id="modalVideo"
-                    class="video_modal_player" 
+                    class="video_modal_player"
                     controls
                     autoplay
                 >
@@ -284,7 +284,6 @@ init();
 }
 
 .home_create_block_player {
-    min-height: 450px;
     position: relative;
     cursor: pointer;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -384,7 +383,7 @@ init();
     .home_create_block_player {
         min-height: 300px;
     }
-    
+
     .home_create_video {
         min-height: 300px;
     }
