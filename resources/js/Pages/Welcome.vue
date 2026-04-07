@@ -18,6 +18,8 @@ let uiExpiryTimer = null;
 // Видео плеер
 const videoPlayer = ref(null);
 const isPlaying = ref(false);
+const modalVideoOpen = ref(false);
+const isMobile = ref(window.innerWidth <= 768);
 
 // Инициализируем анимации при скролле
 useScrollAnimation();
@@ -121,14 +123,27 @@ function fetchSubjects() {
 }
 
 function toggleVideo() {
-    if (!videoPlayer.value) return;
-
-    if (isPlaying.value) {
-        videoPlayer.value.pause();
-        isPlaying.value = false;
+    if (isMobile.value) {
+        // На мобильных просто играем видео
+        if (!videoPlayer.value) return;
+        
+        if (isPlaying.value) {
+            videoPlayer.value.pause();
+        } else {
+            videoPlayer.value.play();
+        }
     } else {
-        videoPlayer.value.play();
-        isPlaying.value = true;
+        // На десктопе открываем модалку
+        modalVideoOpen.value = true;
+    }
+}
+
+function closeVideoModal() {
+    modalVideoOpen.value = false;
+    const modalVideo = document.getElementById('modalVideo');
+    if (modalVideo) {
+        modalVideo.pause();
+        modalVideo.currentTime = 0;
     }
 }
 
@@ -203,11 +218,19 @@ init();
                             </div>
 
                             <div class="home_create_block_player" @click="toggleVideo">
-                                <video ref="videoPlayer" class="home_create_video" poster="/assets/img/intro_image.png" @play="isPlaying = true" @pause="isPlaying = false" @ended="isPlaying = false" controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture>
+                                <video 
+                                    v-if="isMobile"
+                                    ref="videoPlayer" 
+                                    class="home_create_video" 
+                                    @play="isPlaying = true" 
+                                    @pause="isPlaying = false" 
+                                    @ended="isPlaying = false"
+                                    controls
+                                >
                                     <source src="/assets/media.mp4" type="video/mp4">
                                     Ваш браузер не поддерживает воспроизведение видео.
                                 </video>
-                                <div v-if="!isPlaying" class="video_play_overlay">
+                                <div class="video_play_overlay">
                                     <svg class="video_play_icon" xmlns="http://www.w3.org/2000/svg" width="51" height="64" viewBox="0 0 51 64" fill="none">
                                         <path d="M48.149 26.9529C51.8229 29.3148 51.8229 34.6853 48.149 37.0471L9.24455 62.0571C5.25148 64.624 2.45083e-07 61.757 4.31437e-07 57.01L2.39508e-06 6.98999C2.58144e-06 2.243 5.25148 -0.624051 9.24455 1.94292L48.149 26.9529Z" fill="#D3D7FF" />
                                     </svg>
@@ -229,6 +252,27 @@ init();
                 </template>
             </Faq>
         </main>
+
+        <!-- Модалка с видео -->
+        <div v-if="modalVideoOpen" class="video_modal" @click="closeVideoModal">
+            <div class="video_modal_content" @click.stop>
+                <button @click="closeVideoModal" class="video_modal_close">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <video 
+                    id="modalVideo"
+                    class="video_modal_player" 
+                    controls
+                    autoplay
+                >
+                    <source src="/assets/media.mp4" type="video/mp4">
+                    Ваш браузер не поддерживает воспроизведение видео.
+                </video>
+            </div>
+        </div>
     </MainLayout>
 </template>
 
@@ -240,25 +284,21 @@ init();
 }
 
 .home_create_block_player {
-    max-height: 330px;
+    min-height: 450px;
     position: relative;
     cursor: pointer;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px;
+    overflow: hidden;
 }
 
 .home_create_video {
     width: 100%;
     height: 100%;
+    min-height: 450px;
     object-fit: cover;
     border-radius: 24px;
     display: block;
-}
-
-.home_create_video::-webkit-media-controls {
-    display: none !important;
-}
-
-.home_create_video::-webkit-media-controls-enclosure {
-    display: none !important;
 }
 
 .video_play_overlay {
@@ -270,7 +310,6 @@ init();
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.2);
     cursor: pointer;
     transition: all 0.3s;
     border-radius: 24px;
@@ -278,11 +317,11 @@ init();
 }
 
 .video_play_overlay:hover {
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .video_play_icon {
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
     transition: transform 0.3s;
 }
 
@@ -290,13 +329,68 @@ init();
     transform: scale(1.1);
 }
 
+.video_modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.video_modal_content {
+    position: relative;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+}
+
+.video_modal_close {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+}
+
+.video_modal_close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.video_modal_player {
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
 @media (max-width: 768px) {
     .home_create_block_player {
         min-height: 300px;
     }
-
+    
     .home_create_video {
         min-height: 300px;
+    }
+
+    .video_play_overlay {
+        display: none;
     }
 }
 </style>
