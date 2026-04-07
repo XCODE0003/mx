@@ -48,6 +48,14 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        if (! Auth::user()->hasVerifiedEmail()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Пожалуйста, подтвердите адрес электронной почты перед входом. Проверьте ваш почтовый ящик.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
