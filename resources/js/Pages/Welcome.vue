@@ -207,7 +207,8 @@ init();
                                     ref="videoPlayer"
                                     class="home_create_video"
                                     poster="/assets/img/intro_image.png"
-                                    @click.stop="toggleVideo"
+                                    @play="isPlaying = true"
+                                    @pause="isPlaying = false"
                                     @ended="isPlaying = false"
                                     controlsList="nodownload nofullscreen noremoteplayback"
                                     disablePictureInPicture
@@ -215,7 +216,7 @@ init();
                                     <source src="/assets/media.mp4" type="video/mp4">
                                     Ваш браузер не поддерживает воспроизведение видео.
                                 </video>
-                                <div v-if="!isPlaying" class="video_play_overlay" @click="toggleVideo">
+                                <div v-if="!isPlaying" class="video_play_overlay">
                                     <svg class="video_play_icon" xmlns="http://www.w3.org/2000/svg" width="51" height="64" viewBox="0 0 51 64" fill="none">
                                         <path d="M48.149 26.9529C51.8229 29.3148 51.8229 34.6853 48.149 37.0471L9.24455 62.0571C5.25148 64.624 2.45083e-07 61.757 4.31437e-07 57.01L2.39508e-06 6.98999C2.58144e-06 2.243 5.25148 -0.624051 9.24455 1.94292L48.149 26.9529Z" fill="#D3D7FF" />
                                     </svg>
