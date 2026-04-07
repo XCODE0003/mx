@@ -122,7 +122,7 @@ function fetchSubjects() {
 
 function toggleVideo() {
     if (!videoPlayer.value) return;
-    
+
     if (isPlaying.value) {
         videoPlayer.value.pause();
         isPlaying.value = false;
@@ -156,7 +156,7 @@ init();
                             <Link href="/profile/constructor" class="intro_block_button">
                                 <span>Сформировать вариант</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <path d="M4.16699 10H15.8337M15.8337 10L10.0003 4.16669M15.8337 10L10.0003 15.8334" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M4.16699 10H15.8337M15.8337 10L10.0003 4.16669M15.8337 10L10.0003 15.8334" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </Link>
                         </div>
@@ -170,49 +170,40 @@ init();
             <section class="home_create scroll-animate">
                 <div class="container">
                     <div class="home_create_blocks">
-                        <div class="home_create_block">
-                                  <div class="home_create_block_content">
+                        <div class="home_create_block h-fit">
+                            <div class="home_create_block_content">
 
-    <h4 class="home_create_tittle">
-        Начните работу с КИМ 365
-    </h4>
+                                <h4 class="home_create_tittle">
+                                    Начните работу с КИМ 365
+                                </h4>
 
-    <p class="home_create_subtitle">
-        Посмотрите короткую видеоинструкцию и быстро соберите свой первый вариант
-    </p>
+                                <p class="home_create_subtitle">
+                                    Посмотрите короткую видеоинструкцию и быстро соберите свой первый вариант
+                                </p>
 
-    <div class="home_create_features">
-        <p>Неограниченное количество вариантов</p>
-        <p>Актуальные задания ОГЭ и ЕГЭ</p>
-        <p>Всё доступно бесплатно</p>
-    </div>
+                                <div class="home_create_features">
+                                    <p>Неограниченное количество вариантов</p>
+                                    <p>Актуальные задания ОГЭ и ЕГЭ</p>
+                                    <p>Всё доступно бесплатно</p>
+                                </div>
 
-    <Link href="/profile/constructor" class="home_create_block_button">
-        Сформировать вариант
-    </Link>
-</div>
-</div>
-                        <div class="home_create_block home_create_video_card">
-                        <div class="home_create_mobile_hint">
-                            <p class="home_create_mobile_hint_title">
-                                Начните работу с КИМ 365
-                            </p>
-                            <p class="home_create_mobile_hint_text">
-                                Посмотрите короткую видеоинструкцию и быстро соберите свой первый вариант
-                            </p>
+                                <Link href="/profile/constructor" class="home_create_block_button">
+                                    Сформировать вариант
+                                </Link>
+                            </div>
                         </div>
+                        <div class="home_create_block home_create_video_card">
+                            <div class="home_create_mobile_hint">
+                                <p class="home_create_mobile_hint_title">
+                                    Начните работу с КИМ 365
+                                </p>
+                                <p class="home_create_mobile_hint_text">
+                                    Посмотрите короткую видеоинструкцию и быстро соберите свой первый вариант
+                                </p>
+                            </div>
 
                             <div class="home_create_block_player" @click="toggleVideo">
-                                <video
-                                    ref="videoPlayer"
-                                    class="home_create_video"
-                                    poster="/assets/img/intro_image.png"
-                                    @play="isPlaying = true"
-                                    @pause="isPlaying = false"
-                                    @ended="isPlaying = false"
-                                    controlsList="nodownload nofullscreen noremoteplayback"
-                                    disablePictureInPicture
-                                >
+                                <video ref="videoPlayer" class="home_create_video" poster="/assets/img/intro_image.png" @play="isPlaying = true" @pause="isPlaying = false" @ended="isPlaying = false" controlsList="nodownload nofullscreen noremoteplayback" disablePictureInPicture>
                                     <source src="/assets/media.mp4" type="video/mp4">
                                     Ваш браузер не поддерживает воспроизведение видео.
                                 </video>
@@ -222,9 +213,9 @@ init();
                                     </svg>
                                 </div>
                             </div>
- <Link href="/profile/constructor" class="home_create_mobile_button">
-        Сформировать вариант
-    </Link>
+                            <Link href="/profile/constructor" class="home_create_mobile_button">
+                                Сформировать вариант
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -249,7 +240,7 @@ init();
 }
 
 .home_create_block_player {
-    min-height: 450px;
+    max-height: 330px;
     position: relative;
     cursor: pointer;
 }
@@ -257,7 +248,6 @@ init();
 .home_create_video {
     width: 100%;
     height: 100%;
-    min-height: 450px;
     object-fit: cover;
     border-radius: 24px;
     display: block;
@@ -304,7 +294,7 @@ init();
     .home_create_block_player {
         min-height: 300px;
     }
-    
+
     .home_create_video {
         min-height: 300px;
     }

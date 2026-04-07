@@ -4591,6 +4591,7 @@ table.profile_history_tabble_main th {
         margin-top: 30px;
     }
 
+
     .header_mobile_menu .header_item {
         margin-top: 20px;
     }
@@ -5094,4 +5095,8 @@ table.profile_history_tabble_main th {
 }
 .layout-app--notfound main {
     margin-bottom: 0 !important;
+}
+
+.h-fit {
+    height: fit-content !important;
 }
