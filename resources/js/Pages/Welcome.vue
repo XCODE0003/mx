@@ -217,11 +217,26 @@ init();
 
 
 <style scoped>
+.home_create_block_player {
+    min-height: 450px;
+}
+
 .home_create_video {
     width: 100%;
     height: 100%;
+    min-height: 450px;
     object-fit: cover;
     border-radius: 16px;
     cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .home_create_block_player {
+        min-height: 300px;
+    }
+    
+    .home_create_video {
+        min-height: 300px;
+    }
 }
 </style>
