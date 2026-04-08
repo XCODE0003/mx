@@ -116,8 +116,7 @@ class TaskResource extends Resource
                 Tables\Columns\TextColumn::make('article_id')
                     ->label('Номер')
                     ->sortable()
-                    ->searchable()
-                    ->searchDebounce('500ms'),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('subject.name')
                     ->label('Предмет')
                     ->sortable(),
@@ -184,7 +183,7 @@ class TaskResource extends Resource
                 Tables\Actions\Action::make('preview')
                     ->label('Предпросмотр')
                     ->icon('heroicon-o-eye')
-                    ->url(fn (Task $record): string => route('task.preview', $record->id))
+                    ->url(fn (Task $record): string => route('tasks.view', $record->id))
                     ->openUrlInNewTab(),
                 Tables\Actions\Action::make('downloadPdf')
                     ->label('PDF')
