@@ -12,8 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
+use Spatie\Browsershot\Browsershot;
+use ZipArchive;
 
 class TaskResource extends Resource
 {
@@ -186,8 +186,8 @@ class TaskResource extends Resource
                     ->url(fn (Task $record): string => route('tasks.view', $record->id))
                     ->openUrlInNewTab(),
                 Tables\Actions\Action::make('downloadPdf')
-                    ->label('PDF')
-                    ->icon('heroicon-o-document-arrow-down')
+                    ->label('ZIP')
+                    ->icon('heroicon-o-arrow-down-tray')
                     ->action(function (Task $record) {
                         return static::generateTaskPdf($record);
                     }),
@@ -221,26 +221,147 @@ class TaskResource extends Resource
 
     protected static function generateTaskPdf(Task $task)
     {
-        $task->load(['subject', 'blankText']);
+        $task->load(['subject', 'blankText', 'group']);
         
-        $html = view('pdf.task', [
-            'tasks' => collect([$task]),
+        $tasks = collect([$task]);
+        
+        // Создаем временную директорию
+        $tempDir = sys_get_temp_dir() . '/task_' . $task->id . '_' . time();
+        if (!is_dir($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+        
+        $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $task->subject?->class_name ?? 'task');
+        
+        // Подготовка HTML с инлайн изображениями
+        $questionHtmlMap = [$task->id => static::inlineImages($task->question)];
+        
+        // Генерируем PDF с заданием (без ответов)
+        $htmlNoAnswers = view('pdf.task', [
+            'task' => $task,
+            'tasks' => $tasks,
             'subject' => $task->subject,
+            'questionHtmlMap' => $questionHtmlMap,
+            'withAnswers' => false,
+        ])->render();
+        
+        $pdfNoAnswers = $tempDir . '/VARIANT_' . $baseName . '.pdf';
+        static::savePdf($htmlNoAnswers, $pdfNoAnswers);
+        
+        // Генерируем PDF с ответами
+        $htmlAnswers = view('pdf.task', [
+            'task' => $task,
+            'tasks' => $tasks,
+            'subject' => $task->subject,
+            'questionHtmlMap' => $questionHtmlMap,
             'withAnswers' => true,
         ])->render();
-
-        $pdf = Pdf::loadHTML($html)
-            ->setPaper('a4')
-            ->setOptions([
-                'isHtml5ParserEnabled' => true,
-                'isRemoteEnabled' => true,
-                'defaultFont' => 'DejaVu Sans',
-            ]);
-
-        $filename = 'task_' . $task->article_id . '_' . time() . '.pdf';
-
-        return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->output();
-        }, $filename);
+        
+        $pdfAnswers = $tempDir . '/ANSWER_' . $baseName . '.pdf';
+        static::savePdf($htmlAnswers, $pdfAnswers);
+        
+        // Создаем ZIP архив
+        $zipPath = $tempDir . '/task_' . $task->article_id . '_' . time() . '.zip';
+        $zip = new ZipArchive();
+        
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            if (is_file($pdfNoAnswers)) {
+                $zip->addFile($pdfNoAnswers, basename($pdfNoAnswers));
+            }
+            if (is_file($pdfAnswers)) {
+                $zip->addFile($pdfAnswers, basename($pdfAnswers));
+            }
+            $zip->close();
+        }
+        
+        // Возвращаем ZIP для скачивания и удаляем временные файлы
+        return response()->download($zipPath, basename($zipPath))->deleteFileAfterSend(true);
+    }
+    
+    protected static function savePdf(string $html, string $path): void
+    {
+        Browsershot::html($html)
+            ->format('A4')
+            ->margins(15, 15, 20, 15)
+            ->setDelay(1000)
+            ->waitUntilNetworkIdle()
+            ->setDelay(5000)
+            ->timeout(300)
+            ->noSandbox()
+            ->setOption('args', [
+                '--allow-file-access-from-files',
+                '--disable-web-security',
+            ])
+            ->savePdf($path);
+    }
+    
+    protected static function inlineImages(?string $html): string
+    {
+        if (!$html) return '';
+        
+        return preg_replace_callback('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i', function ($m) {
+            $src = $m[1] ?? '';
+            $resolved = static::resolveImageSrc($src);
+            return str_replace($src, $resolved, $m[0]);
+        }, $html);
+    }
+    
+    protected static function resolveImageSrc(string $src): string
+    {
+        if ($src === '' || str_starts_with($src, 'data:')) {
+            return $src;
+        }
+        if (preg_match('#^https?://#i', $src)) {
+            return $src;
+        }
+        
+        $path = ltrim($src, '/');
+        
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, 7);
+        }
+        
+        $full = public_path($path);
+        if (!is_file($full)) {
+            $try = public_path('docs/' . ltrim($path, '/'));
+            if (is_file($try)) {
+                $full = $try;
+            }
+        }
+        
+        if (is_file($full)) {
+            $ext = strtolower(pathinfo($full, PATHINFO_EXTENSION));
+            $map = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+            ];
+            $mime = $map[$ext] ?? (@mime_content_type($full) ?: 'image/jpeg');
+            $data = @file_get_contents($full);
+            if ($data !== false) {
+                return 'data:' . $mime . ';base64,' . base64_encode($data);
+            }
+        }
+        
+        $abs = url('/' . ltrim($path, '/'));
+        $httpData = @file_get_contents($abs);
+        if ($httpData !== false) {
+            $ext = strtolower(pathinfo(parse_url($abs, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+            $map = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml',
+            ];
+            $mime = $map[$ext] ?? 'image/jpeg';
+            return 'data:' . $mime . ';base64,' . base64_encode($httpData);
+        }
+        
+        return $abs;
     }
 }
