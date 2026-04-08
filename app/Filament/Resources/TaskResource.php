@@ -5,13 +5,11 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TaskResource\Pages;
 use App\Filament\Resources\TaskResource\RelationManagers;
 use App\Models\Task;
-use App\Jobs\GenerateTaskBundle;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -185,57 +183,11 @@ class TaskResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->url(fn (Task $record): string => route('tasks.view', $record->id))
                     ->openUrlInNewTab(),
-                Tables\Actions\ActionGroup::make([
-                    Tables\Actions\Action::make('generateZip')
-                        ->label('Генерировать ZIP')
-                        ->icon('heroicon-o-cog')
-                        ->action(function (Task $record) {
-                            static::generateTaskPdf($record);
-                            
-                            Notification::make()
-                                ->title('Генерация началась')
-                                ->body('ZIP файл генерируется. Обновите страницу через 10-20 секунд и используйте кнопку "Скачать ZIP".')
-                                ->success()
-                                ->send();
-                        })
-                        ->requiresConfirmation()
-                        ->modalHeading('Сгенерировать ZIP?')
-                        ->modalDescription('Будет создан ZIP с двумя PDF: задание и ответы')
-                        ->modalSubmitActionLabel('Генерировать'),
-                    Tables\Actions\Action::make('downloadZip')
-                        ->label('Скачать ZIP')
-                        ->icon('heroicon-o-arrow-down-tray')
-                        ->url(function (Task $record): ?string {
-                            $dir = public_path('exports/tasks/' . $record->id);
-                            if (!is_dir($dir)) {
-                                return null;
-                            }
-                            
-                            // Ищем последний ZIP файл
-                            $files = glob($dir . '/task_*.zip');
-                            if (empty($files)) {
-                                return null;
-                            }
-                            
-                            usort($files, fn($a, $b) => filemtime($b) <=> filemtime($a));
-                            $latestFile = basename($files[0]);
-                            
-                            return url('exports/tasks/' . $record->id . '/' . $latestFile);
-                        })
-                        ->openUrlInNewTab()
-                        ->visible(function (Task $record): bool {
-                            $dir = public_path('exports/tasks/' . $record->id);
-                            if (!is_dir($dir)) {
-                                return false;
-                            }
-                            
-                            $files = glob($dir . '/task_*.zip');
-                            return !empty($files);
-                        }),
-                ])
-                    ->label('ZIP')
+                Tables\Actions\Action::make('downloadZip')
+                    ->label('Скачать ZIP')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->button(),
+                    ->url(fn (Task $record): string => route('admin.tasks.prepare-download', $record->id))
+                    ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -262,21 +214,5 @@ class TaskResource extends Resource
             'view' => Pages\ViewTask::route('/{record}'),
             'edit' => Pages\EditTask::route('/{record}/edit'),
         ];
-    }
-
-    protected static function generateTaskPdf(Task $task): void
-    {
-        $task->load(['subject', 'group']);
-        
-        $zipFileName = 'task_' . $task->id . '_' . time() . '.zip';
-        
-        // Запускаем джобу для генерации ZIP с заданием
-        GenerateTaskBundle::dispatch(
-            $task->id,
-            [$task->id],
-            $zipFileName,
-            null, // variantUuid - null для старого пути exports/tasks/{id}
-            null  // variantsTaskIds - null для одного варианта
-        );
     }
 }

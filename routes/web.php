@@ -4,6 +4,7 @@ use App\Http\Controllers\BanksApiController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TaskExportController;
+use App\Http\Controllers\TaskDownloadController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -53,6 +54,9 @@ Route::prefix('banks-api')->middleware('throttle:180,1')->group(function () {
     Route::get('/groups/{grade}/{subject}', [BanksApiController::class, 'groups'])->name('banks.api.groups');
     Route::get('/tasks/{group_id}', [BanksApiController::class, 'tasks'])->name('banks.api.tasks');
 });
+
+Route::get('/admin/tasks/{task}/prepare-download', [TaskDownloadController::class, 'prepare'])->name('admin.tasks.prepare-download');
+Route::get('/admin/tasks/{task}/download-status', [TaskDownloadController::class, 'checkStatus'])->name('admin.tasks.download-status');
 
 Route::get('/tasks/{task}/view', [TaskExportController::class, 'view'])->name('tasks.view');
 Route::get('/tasks/{task}/view_tasks', [TaskExportController::class, 'viewTasks'])->name('tasks.view_tasks');
