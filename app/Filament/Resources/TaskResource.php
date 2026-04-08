@@ -5,15 +5,15 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\TaskResource\Pages;
 use App\Filament\Resources\TaskResource\RelationManagers;
 use App\Models\Task;
+use App\Jobs\GenerateTaskBundle;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Spatie\Browsershot\Browsershot;
-use ZipArchive;
 
 class TaskResource extends Resource
 {
@@ -185,12 +185,57 @@ class TaskResource extends Resource
                     ->icon('heroicon-o-eye')
                     ->url(fn (Task $record): string => route('tasks.view', $record->id))
                     ->openUrlInNewTab(),
-                Tables\Actions\Action::make('downloadPdf')
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('generateZip')
+                        ->label('Генерировать ZIP')
+                        ->icon('heroicon-o-cog')
+                        ->action(function (Task $record) {
+                            static::generateTaskPdf($record);
+                            
+                            Notification::make()
+                                ->title('Генерация началась')
+                                ->body('ZIP файл генерируется. Обновите страницу через 10-20 секунд и используйте кнопку "Скачать ZIP".')
+                                ->success()
+                                ->send();
+                        })
+                        ->requiresConfirmation()
+                        ->modalHeading('Сгенерировать ZIP?')
+                        ->modalDescription('Будет создан ZIP с двумя PDF: задание и ответы')
+                        ->modalSubmitActionLabel('Генерировать'),
+                    Tables\Actions\Action::make('downloadZip')
+                        ->label('Скачать ZIP')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->url(function (Task $record): ?string {
+                            $dir = public_path('exports/tasks/' . $record->id);
+                            if (!is_dir($dir)) {
+                                return null;
+                            }
+                            
+                            // Ищем последний ZIP файл
+                            $files = glob($dir . '/task_*.zip');
+                            if (empty($files)) {
+                                return null;
+                            }
+                            
+                            usort($files, fn($a, $b) => filemtime($b) <=> filemtime($a));
+                            $latestFile = basename($files[0]);
+                            
+                            return url('exports/tasks/' . $record->id . '/' . $latestFile);
+                        })
+                        ->openUrlInNewTab()
+                        ->visible(function (Task $record): bool {
+                            $dir = public_path('exports/tasks/' . $record->id);
+                            if (!is_dir($dir)) {
+                                return false;
+                            }
+                            
+                            $files = glob($dir . '/task_*.zip');
+                            return !empty($files);
+                        }),
+                ])
                     ->label('ZIP')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function (Task $record) {
-                        return static::generateTaskPdf($record);
-                    }),
+                    ->button(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -219,149 +264,19 @@ class TaskResource extends Resource
         ];
     }
 
-    protected static function generateTaskPdf(Task $task)
+    protected static function generateTaskPdf(Task $task): void
     {
-        $task->load(['subject', 'blankText', 'group']);
+        $task->load(['subject', 'group']);
         
-        $tasks = collect([$task]);
+        $zipFileName = 'task_' . $task->id . '_' . time() . '.zip';
         
-        // Создаем временную директорию
-        $tempDir = sys_get_temp_dir() . '/task_' . $task->id . '_' . time();
-        if (!is_dir($tempDir)) {
-            mkdir($tempDir, 0755, true);
-        }
-        
-        $baseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $task->subject?->class_name ?? 'task');
-        
-        // Подготовка HTML с инлайн изображениями
-        $questionHtmlMap = [$task->id => static::inlineImages($task->question)];
-        
-        // Генерируем PDF с заданием (без ответов)
-        $htmlNoAnswers = view('pdf.task', [
-            'task' => $task,
-            'tasks' => $tasks,
-            'subject' => $task->subject,
-            'questionHtmlMap' => $questionHtmlMap,
-            'withAnswers' => false,
-        ])->render();
-        
-        $pdfNoAnswers = $tempDir . '/VARIANT_' . $baseName . '.pdf';
-        static::savePdf($htmlNoAnswers, $pdfNoAnswers);
-        
-        // Генерируем PDF с ответами
-        $htmlAnswers = view('pdf.task', [
-            'task' => $task,
-            'tasks' => $tasks,
-            'subject' => $task->subject,
-            'questionHtmlMap' => $questionHtmlMap,
-            'withAnswers' => true,
-        ])->render();
-        
-        $pdfAnswers = $tempDir . '/ANSWER_' . $baseName . '.pdf';
-        static::savePdf($htmlAnswers, $pdfAnswers);
-        
-        // Создаем ZIP архив
-        $zipPath = $tempDir . '/task_' . $task->article_id . '_' . time() . '.zip';
-        $zip = new ZipArchive();
-        
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-            if (is_file($pdfNoAnswers)) {
-                $zip->addFile($pdfNoAnswers, basename($pdfNoAnswers));
-            }
-            if (is_file($pdfAnswers)) {
-                $zip->addFile($pdfAnswers, basename($pdfAnswers));
-            }
-            $zip->close();
-        }
-        
-        // Возвращаем ZIP для скачивания и удаляем временные файлы
-        return response()->download($zipPath, basename($zipPath))->deleteFileAfterSend(true);
-    }
-    
-    protected static function savePdf(string $html, string $path): void
-    {
-        Browsershot::html($html)
-            ->format('A4')
-            ->margins(15, 15, 20, 15)
-            ->setDelay(1000)
-            ->waitUntilNetworkIdle()
-            ->setDelay(5000)
-            ->timeout(300)
-            ->noSandbox()
-            ->setOption('args', [
-                '--allow-file-access-from-files',
-                '--disable-web-security',
-            ])
-            ->savePdf($path);
-    }
-    
-    protected static function inlineImages(?string $html): string
-    {
-        if (!$html) return '';
-        
-        return preg_replace_callback('/<img[^>]*src=["\']([^"\']+)["\'][^>]*>/i', function ($m) {
-            $src = $m[1] ?? '';
-            $resolved = static::resolveImageSrc($src);
-            return str_replace($src, $resolved, $m[0]);
-        }, $html);
-    }
-    
-    protected static function resolveImageSrc(string $src): string
-    {
-        if ($src === '' || str_starts_with($src, 'data:')) {
-            return $src;
-        }
-        if (preg_match('#^https?://#i', $src)) {
-            return $src;
-        }
-        
-        $path = ltrim($src, '/');
-        
-        if (str_starts_with($path, 'public/')) {
-            $path = substr($path, 7);
-        }
-        
-        $full = public_path($path);
-        if (!is_file($full)) {
-            $try = public_path('docs/' . ltrim($path, '/'));
-            if (is_file($try)) {
-                $full = $try;
-            }
-        }
-        
-        if (is_file($full)) {
-            $ext = strtolower(pathinfo($full, PATHINFO_EXTENSION));
-            $map = [
-                'jpg' => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'png' => 'image/png',
-                'gif' => 'image/gif',
-                'webp' => 'image/webp',
-                'svg' => 'image/svg+xml',
-            ];
-            $mime = $map[$ext] ?? (@mime_content_type($full) ?: 'image/jpeg');
-            $data = @file_get_contents($full);
-            if ($data !== false) {
-                return 'data:' . $mime . ';base64,' . base64_encode($data);
-            }
-        }
-        
-        $abs = url('/' . ltrim($path, '/'));
-        $httpData = @file_get_contents($abs);
-        if ($httpData !== false) {
-            $ext = strtolower(pathinfo(parse_url($abs, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
-            $map = [
-                'jpg' => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'png' => 'image/png',
-                'gif' => 'image/gif',
-                'webp' => 'image/webp',
-                'svg' => 'image/svg+xml',
-            ];
-            $mime = $map[$ext] ?? 'image/jpeg';
-            return 'data:' . $mime . ';base64,' . base64_encode($httpData);
-        }
-        
-        return $abs;
+        // Запускаем джобу для генерации ZIP с заданием
+        GenerateTaskBundle::dispatch(
+            $task->id,
+            [$task->id],
+            $zipFileName,
+            null, // variantUuid - null для старого пути exports/tasks/{id}
+            null  // variantsTaskIds - null для одного варианта
+        );
     }
 }
