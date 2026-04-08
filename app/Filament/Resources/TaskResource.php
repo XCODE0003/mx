@@ -226,8 +226,7 @@ class TaskResource extends Resource
         $html = view('pdf.task', [
             'tasks' => collect([$task]),
             'subject' => $task->subject,
-            'showAnswers' => true,
-            'embedConstructorPreview' => false,
+            'withAnswers' => true,
         ])->render();
 
         $pdf = Pdf::loadHTML($html)
