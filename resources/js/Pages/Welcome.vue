@@ -344,9 +344,9 @@ init();
 
 .video_modal_content {
     position: relative;
-    width: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh;
 }
 
 .video_modal_close {
